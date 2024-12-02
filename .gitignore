@@ -1,0 +1,5 @@
+# Ignore all CSV files in the data/raw_data/ directory
+data/raw_data/*.csv
+
+# Ignore compressed project files (e.g., .zip)
+*.zip
