@@ -1,0 +1,9 @@
+dataField,dataType,minValue,maxValue,exampleValues,remarks
+analysis_id,String,15,15,0a1yei0604s8275,Unique 15 character string containing alphanumerical values for each analysis
+gene_accession_id,String,9,11,MGI:2679336,Unique alphanumeric character string that is used to unambiguously identify a particular record in the Mouse Genome Informatics database
+gene_symbol,String,1,13,Satb2,Official mouse gene symbol in title format
+mouse_strain,String,3,5,C57BL,Name of mouse strain. Values are C57BL; B6J; C3H; 129SV
+mouse_life_stage,String,4,17,E15.5,Developmental stage of mice being analysed. Values are E12.5; E15.5; E18.5; E9.5; Early adult; Late adult; Middle aged adult
+parameter_id,String,15,18,IMPC_GRS_009_001,ID of phenotyping parameter
+parameter_name,String,2,74,Forelimb and hindlimb grip strength measurement mean,Name of phenotyping parameter
+pvalue,Float,0,1,0.8004226,Statistical output of the analysis
