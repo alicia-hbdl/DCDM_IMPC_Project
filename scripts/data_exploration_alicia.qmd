@@ -142,13 +142,12 @@ print_invalid_indices_and_values <- function(x, variable_name, invalid_indices) 
 Now that we have defined these functions, we can loop through the data table fields, extract the corresponding constraints from the SOP, and validate them using the functions.
 
 ```{r}
-# Process the data table based on SOP constraints
-process_data <- function(data_table, SOP) {
-  # Extract field names from the data table
-  field_names <- colnames(data_table)
+# Extract field names from the data table
+field_names <- colnames(data_table)
+print(field_names)
   
-  # Loop through each field name
-  for (field_name in field_names) {
+# Loop through each field name
+for (field_name in field_names) {
     cat("Processing field:", field_name, "\n")
     
     # Extract the corresponding row in the SOP
@@ -157,37 +156,34 @@ process_data <- function(data_table, SOP) {
     # Access the column by name
     column <- data_table[[field_name]]
     
-    # Initialize a variable for checking valid values
-    field_specific_check <- integer(0) # Default to an empty vector
-    
     # Validate the column based on SOP constraints
     SOP_constraints <- validate_type_minmax(column, sop_row$dataType, sop_row$minValue, sop_row$maxValue)
     
-    # Check field specific constraints
-    if (field_name == "mouse_strain") {
-      valid_mouse_strains <- c("C57BL", "B6J", "C3H", "129SV")
-      field_specific_check <- check_allowed_values(column, valid_mouse_strains)
-    } else if (field_name == "mouse_life_stage") {
-      valid_mouse_life_stages <- c(
-        "E12.5", "E15.5", "E18.5", "E9.5", 
-        "Early adult", "Late adult", "Middle aged adult"
-      )
-      field_specific_check <- check_allowed_values(column, valid_mouse_life_stages)
-    }
-    else if (field_name == "analysis_id"){
-      # Check if unique 
-      field_specific_check <- which(duplicated(column))
-    }
-    else if (field_name == "gene_symbol"){
-        #Check if in title format
-      field_specific_check <- which(!grepl("^[A-Z][a-z]*$", column))
-    } 
+  # Check field-specific constraints
+  # Initialize a variable for checking valid values
+  field_specific_check <- integer(0) # Default to an empty vector
+
+  if (field_name == "mouse_strain") {
+    valid_mouse_strains <- c("C57BL", "B6J", "C3H", "129SV")
+    field_specific_check <- check_allowed_values(column, valid_mouse_strains)
+  } else if (field_name == "mouse_life_stage") {
+    valid_mouse_life_stages <- c(
+      "E12.5", "E15.5", "E18.5", "E9.5", 
+      "Early adult", "Late adult", "Middle aged adult"
+    )
+    field_specific_check <- check_allowed_values(column, valid_mouse_life_stages)
+  } else if (field_name == "analysis_id") {
+    # Check if unique
+    field_specific_check <- which(duplicated(column))
+  } else if (field_name == "gene_symbol") {
+    # Check if in title format
+    field_specific_check <- which(!grepl("^[A-Z][a-zA-Z0-9]*$", column))
+  }
     
     # Combine all indices of invalid values
     indices <- combine_unique_indices(SOP_constraints, field_specific_check)
     
     # Print the invalid indices and their corresponding values
     print_invalid_indices_and_values(column, field_name, indices)
-  }
 }
 ```
