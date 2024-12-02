@@ -1,5 +1,14 @@
-# Ignore all CSV files in the data/raw_data/ directory
-data/raw_data/*.csv
+# Ignore R specifics
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
 
-# Ignore compressed project files (e.g., .zip)
+# Ignore CSVs
+*.csv
+
+# Ignore compressed files 
 *.zip
+
+# Ignore unknown file 
+.DS_Store
