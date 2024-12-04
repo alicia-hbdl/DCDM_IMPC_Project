@@ -5,7 +5,7 @@
 .Ruserdata
 
 # Ignore CSVs
-*.csv
+
 !data_table.csv
 
 # Ignore compressed files 
