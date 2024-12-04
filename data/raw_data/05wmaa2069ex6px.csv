@@ -1,0 +1,8 @@
+mouse_life_stage,Early adult
+parameter_id,MGP_IMM_013_001
+parameter_name,Total CD8+ T cells - % of ab T cells
+mouse_strain,C57BL
+analysis_id,05wmaa2069ex6px
+gene_accession_id,MGI:2444631
+pvalue,0.8972444
+gene_symbol,Bltp1

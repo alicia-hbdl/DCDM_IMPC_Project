@@ -1,0 +1,8 @@
+parameter_id,IMPC_CSD_079_001
+parameter_name,Aggression
+analysis_id,117h881m1r0dy3m
+mouse_strain,C57BL
+mouse_life_stage,Early adult
+pvalue,0.8430131
+gene_accession_id,MGI:109424
+gene_symbol,Abca4

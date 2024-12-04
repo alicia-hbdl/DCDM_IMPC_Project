@@ -1,0 +1,8 @@
+gene_symbol,Bfsp1
+parameter_name,CD5+ gd T cells - % of CD45+
+parameter_id,MGP_IMM_086_001
+analysis_id,1c2ivo104491edm
+mouse_life_stage,Early adult
+pvalue,0.6600564
+mouse_strain,C57BL
+gene_accession_id,MGI:101770

@@ -1,0 +1,8 @@
+gene_accession_id,MGI:102519
+gene_symbol,Cst3
+mouse_strain,C57BL
+mouse_life_stage,E12.5
+parameter_id,IMPC_ECG_010_001
+pvalue,0.6113617
+parameter_name,HRV
+analysis_id,17d44m64v5mvs1x

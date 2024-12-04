@@ -1,0 +1,8 @@
+mouse_life_stage,E9.5
+parameter_name,Effector CD4+ NKT cells - % of live leukocytes (Panel A)
+parameter_id,IMPC_IMM_040_002
+gene_accession_id,MGI:2140050
+analysis_id,01mu1hc5jp1385a
+mouse_strain,C57BL
+pvalue,0.7013873
+gene_symbol,Ints3

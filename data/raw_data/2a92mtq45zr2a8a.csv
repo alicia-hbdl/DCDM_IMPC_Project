@@ -1,0 +1,8 @@
+parameter_name,CD4+ NKT cells - % of live leukocytes (Panel A)
+parameter_id,IMPC_IMM_011_002
+mouse_strain,C57BL
+gene_symbol,Pgm1
+analysis_id,2a92mtq45zr2a8a
+gene_accession_id,MGI:97565
+mouse_life_stage,Early adult
+pvalue,0.7689158

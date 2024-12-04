@@ -1,0 +1,8 @@
+parameter_id,IMPC_IMM_032_002
+mouse_strain,C57BL
+parameter_name,Effector CD8+ T cells - % of live leukocytes (Panel A)
+pvalue,0.6271366
+mouse_life_stage,Early adult
+analysis_id,1722io7cx5g380m
+gene_accession_id,MGI:1924486
+gene_symbol,Sccpdh

@@ -1,0 +1,8 @@
+parameter_name,Resting CD4- NKT cells - % of CD45+
+parameter_id,MGP_IMM_093_001
+mouse_strain,C57BL
+gene_accession_id,MGI:1918142
+analysis_id,239108l0e7t613a
+gene_symbol,Ttll7
+pvalue,0.8435739
+mouse_life_stage,Early adult

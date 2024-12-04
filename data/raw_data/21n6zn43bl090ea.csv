@@ -1,0 +1,8 @@
+gene_symbol,Tox2
+gene_accession_id,MGI:3611233
+mouse_strain,C57BL
+mouse_life_stage,Early adult
+parameter_name,Time mobile light side
+pvalue,0.3938269
+analysis_id,21n6zn43bl090ea
+parameter_id,JAX_LDT_003_001

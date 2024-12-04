@@ -1,0 +1,8 @@
+mouse_strain,C57BL
+analysis_id,0ga4w75f1310zka
+parameter_id,JAX_LDT_008_001
+pvalue,0.9273454
+gene_symbol,Ect2
+parameter_name,Percent time in dark
+mouse_life_stage,Early adult
+gene_accession_id,MGI:95281

@@ -1,0 +1,8 @@
+parameter_id,MGP_IMM_077_001
+gene_accession_id,MGI:1927753
+gene_symbol,Inpp5e
+analysis_id,0z70z7m407jdu4m
+parameter_name,Effector Treg cells - % of CD45+
+mouse_life_stage,E15.5
+pvalue,0.7347005
+mouse_strain,C57BL

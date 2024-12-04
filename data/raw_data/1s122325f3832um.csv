@@ -1,0 +1,8 @@
+gene_accession_id,MGI:95777
+gene_symbol,Gnas
+mouse_strain,129SV
+mouse_life_stage,Early adult
+parameter_id,JAX_LDT_009_001
+pvalue,0.188334
+parameter_name,Percent time in light
+analysis_id,1s122325f3832um

@@ -1,0 +1,8 @@
+gene_accession_id,MGI:98960
+parameter_id,JAX_LDT_003_001
+gene_symbol,Wnt6
+analysis_id,1cc20310lh2pc5x
+pvalue,0.214748
+parameter_name,Time mobile light side
+mouse_strain,C57BL
+mouse_life_stage,E12.5

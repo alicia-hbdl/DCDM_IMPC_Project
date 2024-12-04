@@ -1,0 +1,8 @@
+parameter_name,CD11b-low cDC - % of CD45+
+mouse_life_stage,Early adult
+mouse_strain,C57BL
+parameter_id,MGP_IMM_130_001
+gene_accession_id,MGI:2444508
+analysis_id,21h9k1u7p7cf38a
+pvalue,0.7403462
+gene_symbol,Fitm2

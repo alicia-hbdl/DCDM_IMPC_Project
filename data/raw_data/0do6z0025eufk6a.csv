@@ -1,0 +1,8 @@
+gene_accession_id,MGI:108429
+gene_symbol,Lpar1
+mouse_strain,C57BL
+mouse_life_stage,E18.5
+parameter_id,MGP_IMM_006_001
+pvalue,0.1050325
+parameter_name,Effector CD4+ T helper cells - % of CD4+ T helper cells
+analysis_id,0do6z0025eufk6a

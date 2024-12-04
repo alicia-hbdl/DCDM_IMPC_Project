@@ -1,0 +1,8 @@
+gene_accession_id,MGI:95777
+gene_symbol,Gnas
+mouse_strain,129SV
+mouse_life_stage,Early adult
+parameter_id,IMPC_HEM_027_001
+pvalue,0.1283134
+parameter_name,Red blood cell distribution width
+analysis_id,1ciwfrc00b521va
