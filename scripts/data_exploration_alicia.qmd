@@ -22,23 +22,7 @@ path = "/Users/aliciahobdell/Desktop/7BBG1003_data/DCDM_group3/"
 
 ## Combining the Raw Data in a Table
 
-The dataset comprises thousands of CSV files, each containing information about mouse genetics, behavior, and phenotype analysis. The key fields include:
-
--   **`analysis_id`**: Unique alphanumeric identifier for each analysis.
-
--   **`pvalue`**: Statistical value indicating the likelihood of the observed result under the null hypothesis.
-
--   **`parameter_name`**: Name of the measured parameter or phenotype (e.g., a behavioral or physical trait).
-
--   **`gene_symbol`**: Shorthand notation for the associated gene.
-
--   **`mouse_strain`**: Genetic background of the mouse (e.g., specific inbred strain).
-
--   **`parameter_id`**: Unique identifier for the experimental parameter, possibly referencing a database standard.
-
--   **`gene_accession_id`**: Database-specific identifier for the gene (e.g., from Mouse Genome Informatics).
-
--   **`mouse_life_stage`**: Developmental stage of the mouse (e.g., "Early adult").
+The dataset comprises thousands of CSV files. The key fields include: analysis_id, pvalue, parameter_name, gene_symbol, mouse_strain, parameter_id, gene_accession_id, mouse_life_stage.
 
 To ensure efficient quality checks and facilitate further analysis, it is essential to combine all these files into a single, unified table based on their common fields.
 
@@ -92,11 +76,13 @@ The experiment data comes with an SOP specifying constraints for each field, inc
 First, have a look at the SOP to identify the constraints.
 
 ```{r}
-SOP <- read.csv(paste0(path, "metadata/IMPC_sop.csv"))
+SOP <- read.csv(paste0(path, "data/metadata/IMPC_sop.csv"))
 SOP
 ```
 
 For each column, we need to check similar things, like whether the data is the correct type (e.g., string or number), whether it has the right length (for strings) or size (for floats), and whether it matches allowed values, like for `mouse_strain` and `mouse_life_stage`. We may also need to find missing values. For each issue, we want to print the value and its index. To make this process less repetitive, we can create reusable functions.
+
+*Here, it would be good to check if the functions work as intended on values that should output an error (e.g. fake table containing rows each violating a single constraint for a parameter).*
 
 ```{r}
 # These functions check if values meet specific criteria and return the indices of values that do not meet the criteria.
@@ -188,7 +174,7 @@ for (field_name in field_names) {
 }
 ```
 
-The next step is to handle the issues.
+*The next step is to handle the issues. Do we cap the p-values at 1? Do we remove the data from incorrect strains?*
 
 ## Determining an Appropriate Database Schema
 
