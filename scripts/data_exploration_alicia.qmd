@@ -79,7 +79,7 @@ all_files <- list.files(paste0(path, "data/raw_data"), pattern = "\\.csv$", full
 # Apply the read_and_transform function to each file and combine results into a single data frame
 data_table <- purrr::map_dfr(all_files, read_and_transform)
 # Display the first 6 rows of the data table
-head(data_table)
+View(data_table)
 
 # Save the combined table to a new CSV file
 write.csv(data_table, paste0(path, "/temporary/data_table.csv"), row.names = FALSE)
