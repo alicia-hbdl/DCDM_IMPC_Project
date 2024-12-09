@@ -6,10 +6,12 @@
 
 # Ignore CSVs
 !data_table.csv
-*.csv 
+data/raw_data/*.csv 
 
 # Ignore compressed files 
 *.zip
 
 # Ignore unknown file 
 .DS_Store
+ 
+# Ignore Group1 direcotry 
