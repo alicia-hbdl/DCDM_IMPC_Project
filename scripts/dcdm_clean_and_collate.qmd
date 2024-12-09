@@ -15,9 +15,16 @@ rm(list = ls())
 library(dplyr)
 library(purrr)
 library(readr)
+```
 
-# Define the working directory path 
-path = "/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/"
+```{bash}
+# Define working directory path in bash
+rootDir="/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/"
+```
+
+```{r}
+# Define the working directory path in r
+rootDir = "/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/"
 ```
 
 ## Combining the Raw Data in a Table
@@ -58,7 +65,7 @@ The function can now be applied to all CSV files in the `raw_data` directory to 
 
 ```{r}
 # List all CSV files in the raw_data directory
-all_files <- list.files(paste0(path, "data/raw_data"), pattern = "\\.csv$", full.names = TRUE)
+all_files <- list.files(paste0(rootDir, "data/raw_data"), pattern = "\\.csv$", full.names = TRUE)
 
 # Apply the read_and_transform function to each file and combine results into a single data frame
 data_table <- purrr::map_dfr(all_files, read_and_transform)
@@ -66,7 +73,7 @@ data_table <- purrr::map_dfr(all_files, read_and_transform)
 View(data_table)
 
 # Save the combined table to a new CSV file
-write.csv(data_table, paste0(path, "/temporary/data_table.csv"), row.names = FALSE)
+write.csv(data_table, paste0(rootDir, "/temporary/data_table.csv"), row.names = FALSE)
 ```
 
 ## Quality Control Using the SOP
@@ -76,7 +83,7 @@ The experiment data comes with an SOP specifying constraints for each field, inc
 First, have a look at the SOP to identify the constraints.
 
 ```{r}
-SOP <- read.csv(paste0(path, "data/metadata/IMPC_sop.csv"))
+SOP <- read.csv(paste0(rootDir, "data/metadata/IMPC_sop.csv"))
 SOP
 ```
 
@@ -180,15 +187,12 @@ for (field_name in field_names) {
 
 Load the extra files
 
-```{r}
-rootDir <- "/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/"
-```
-
 ```{bash}
-rootDir="/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/metadata/"
+# Define working directory path in bash
+rootDir="/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/"
 # Step 1: Replace semicolons (;) with commas (,)
 # Some files may use semicolons as delimiters. This replaces them with commas for consistent formatting.
-sed 's/;/,/g' "${rootDir}IMPC_procedure.txt" | 
+sed 's/;/,/g' "${rootDir}/data/metadata/IMPC_procedure.txt" | 
 
 # Step 2: Remove extra double quotes
 # - `s/^"//`: Removes double quotes at the beginning of a line.
@@ -205,7 +209,7 @@ sed -E 's/^([0-9]+,[^,]+,)(.*)(, (true|TRUE|True|false|FALSE|False), [0-9]{5})$/
 
 # Step 4: Remove the "line_number" column
 # - `s/^line_number,//`: Removes the header "line_number" from the first line and its corresponding data in all other lines.
-sed -E 's/^line_number,//' > "${rootDir}cleaned_IMPC_procedure.txt"
+sed -E 's/^line_number,//' > "${rootDir}/data/metadata/cleaned_IMPC_procedure.txt"
 ```
 
 ```{r}
@@ -224,11 +228,11 @@ View(procedure)
 ```
 
 ```{bash}
-rootDir="/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/metadata/"
-
-sed -E 's/^"//; s/"$//; s/" "/,/g;' "${rootDir}IMPC_parameter_description.txt" |
+# Define working directory path in bash
+rootDir="/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/"
+sed -E 's/^"//; s/"$//; s/" "/,/g;' "${rootDir}/data/metadata/IMPC_parameter_description.txt" |
 sed -E 's/^([0-9]{1,4},[0-9]{5}, )(.*)(,[^,]+, IMPC_[A-Z]{3}_[0-9]{3}_[0-9]{3})$/\1"\2"\3/' |
-sed -E 's/^x//' > "${rootDir}cleaned_IMPC_parameter_description.txt"
+sed -E 's/^x//' > "${rootDir}/data/metadata/cleaned_IMPC_parameter_description.txt"
 
 ```
 
@@ -247,7 +251,9 @@ View(parameter_description)
 ```
 
 ```{bash}
-
+# Define working directory path in bash
+rootDir="/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3"
+"${rootDir}/data/metadata/disease_information.txt" > "${rootDir}/data/metadata/cleaned_disease_information.txt"
 ```
 
 ```{r}
