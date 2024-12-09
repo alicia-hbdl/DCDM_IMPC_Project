@@ -17,7 +17,7 @@ library(purrr)
 library(readr)
 
 # Define the working directory path 
-path = "/Users/aliciahobdell/Desktop/7BBG1003_data/DCDM_group3/"
+path = "/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/"
 ```
 
 ## Combining the Raw Data in a Table
