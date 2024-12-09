@@ -5,7 +5,11 @@ format: html
 editor: visual
 ---
 
-## DCDM Project Log
+# TRE Egress
+
+Ella - is there anything to write here?
+
+# Data Cleaning
 
 ```{r}
 rm(list = ls())
@@ -27,7 +31,11 @@ rootDir="/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/"
 rootDir = "/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/"
 ```
 
-## Combining the Raw Data in a Table
+## Cleaning the Raw Data Files 
+
+### Combining the Raw Data in a Table (Esta?) 
+
+--\> This step can be done in bash after quality control (collating by Ella).
 
 The dataset comprises thousands of CSV files. The key fields include: analysis_id, pvalue, parameter_name, gene_symbol, mouse_strain, parameter_id, gene_accession_id, mouse_life_stage.
 
@@ -76,7 +84,7 @@ View(data_table)
 write.csv(data_table, paste0(rootDir, "/temporary/data_table.csv"), row.names = FALSE)
 ```
 
-## Quality Control Using the SOP
+### Quality Control/Cleaning Using the SOP (Esta)
 
 The experiment data comes with an SOP specifying constraints for each field, including data type, minimum and maximum values for numerical data, length for strings, and specific values for certain fields. Data quality can be assessed by comparing the raw data to these predefined constraints.
 
@@ -183,9 +191,9 @@ for (field_name in field_names) {
 
 *The next step is to handle the issues. Do we cap the p-values at 1? Do we remove the data from incorrect strains?*
 
-## Determining an Appropriate Database Schema
+## Cleaning the Metadata Files 
 
-Load the extra files
+### `IMPC_procedure.txt (Alicia)`
 
 ```{bash}
 # Define working directory path in bash
@@ -227,6 +235,8 @@ procedure <- read.table(
 View(procedure)
 ```
 
+### `IMPC_parameter_description.txt (Sama)`
+
 ```{bash}
 # Define working directory path in bash
 rootDir="/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/"
@@ -250,6 +260,8 @@ parameter_description <- read.table(
 View(parameter_description)
 ```
 
+### `disease_information.txt (Sanj)`
+
 ```{bash}
 # Define working directory path in bash
 rootDir="/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3"
@@ -272,3 +284,9 @@ disease_information <- read.table(
 View(disease_information)
 
 ```
+
+# Collating (Ella) 
+
+# MySQL Database
+
+# R/Shiny 
