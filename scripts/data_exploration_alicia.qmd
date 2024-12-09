@@ -178,6 +178,91 @@ for (field_name in field_names) {
 
 ## Determining an Appropriate Database Schema
 
+Load the extra files
+
 ```{r}
+rootDir <- "/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/"
+```
+
+```{bash}
+rootDir="/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/metadata/"
+# Step 1: Replace semicolons (;) with commas (,)
+# Some files may use semicolons as delimiters. This replaces them with commas for consistent formatting.
+sed 's/;/,/g' "${rootDir}IMPC_procedure.txt" | 
+
+# Step 2: Remove extra double quotes
+# - `s/^"//`: Removes double quotes at the beginning of a line.
+# - `s/"$//`: Removes double quotes at the end of a line.
+# - `s/" "/,/g`: Replaces any double quote followed by a space and another double quote (" ") with a comma.
+sed 's/^"//;s/"$//;s/" "/,/g' |
+
+# Step 3: Enclose the 3rd column (description) in double quotes
+# - `^([0-9]+,[^,]+,)`: Matches the first two columns (line number and procedure ID).
+# - `(.*)`: Matches the 3rd column (description), which may include commas or spaces.
+# - `(, (true|TRUE|True|false|FALSE|False), [0-9]{5})$`: Matches the last two columns (boolean and 5-digit number).
+# - Replacement `\1"\2"\3`: Reconstructs the line with the 3rd column enclosed in double quotes.
+sed -E 's/^([0-9]+,[^,]+,)(.*)(, (true|TRUE|True|false|FALSE|False), [0-9]{5})$/\1"\2"\3/' |
+
+# Step 4: Remove the "line_number" column
+# - `s/^line_number,//`: Removes the header "line_number" from the first line and its corresponding data in all other lines.
+sed -E 's/^line_number,//' > "${rootDir}cleaned_IMPC_procedure.txt"
+```
+
+```{r}
+# Load the cleaned procedure data
+procedure <- read.table(
+  file = paste0(rootDir, "data/metadata/cleaned_IMPC_procedure.txt"), # File path
+  header = TRUE,                 # First row contains column names
+  sep = ",",                     # Fields are separated by commas
+  quote = '"',                   # Handle quoted fields
+  stringsAsFactors = FALSE,      # Prevent character columns from converting to factors
+  check.names = FALSE            # Keep column names as-is, even if they contain spaces or special characters
+)
+
+# Display the loaded data in a tabular format
+View(procedure)
+```
+
+```{bash}
+rootDir="/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/metadata/"
+
+sed -E 's/^"//; s/"$//; s/" "/,/g;' "${rootDir}IMPC_parameter_description.txt" |
+sed -E 's/^([0-9]{1,4},[0-9]{5}, )(.*)(,[^,]+, IMPC_[A-Z]{3}_[0-9]{3}_[0-9]{3})$/\1"\2"\3/' |
+sed -E 's/^x//' > "${rootDir}cleaned_IMPC_parameter_description.txt"
+
+```
+
+```{r}
+# Load the cleaned parameter data
+parameter_description <- read.table(
+  file = paste0(rootDir, "data/metadata/cleaned_IMPC_parameter_description.txt"), # File path
+  header = TRUE,                 # First row contains column names
+  sep = ",",                     # Fields are separated by commas
+  stringsAsFactors = FALSE,      # Prevent character columns from converting to factors
+  check.names = FALSE            # Keep column names as-is, even if they contain spaces or special characters
+)
+
+# Display the loaded data in a tabular format
+View(parameter_description)
+```
+
+```{bash}
+
+```
+
+```{r}
+
+# Load the cleaned parameter data
+disease_information <- read.table(
+  file = paste0(rootDir, "data/metadata/disease_information.txt"), # File path
+  header = TRUE,                 # First row contains column names
+  sep = ",",                     # Fields are separated by commas
+  quote = '"',                   # Handle quoted fields
+  stringsAsFactors = FALSE,      # Prevent character columns from converting to factors
+  check.names = FALSE            # Keep column names as-is, even if they contain spaces or special characters
+)
+
+# Display the loaded data in a tabular format
+View(disease_information)
 
 ```
