@@ -195,45 +195,60 @@ for (field_name in field_names) {
 
 ### `IMPC_procedure.txt (Alicia)`
 
+The `IMPC_procedure.txt` file links each IMPC parameter to a procedure, such as Electrocardiogram (ECG), Histopathology, Insulin Blood Level, Fear Conditioning, and others. Each row in the table contains:
+
+1.  A line number or unique procedure ID;
+2.  A name;
+3.  A description;
+4.  A boolean indicating whether the procedure is mandatory;
+5.  The corresponding IMPC parameter tested.
+
+First, the line number column and the rest of the columns are surrounded by unnecessary double quotes (e.g., `"1""2,3,4,5"`). These can be removed, and a comma can be used to separate column 1 and column 2 (e.g., `1,2,3,4,5`).
+
+Next, the description column contains commas, which are mistakenly interpreted as separators when reading the file, leading to errors (e.g., `1,2, 2, 2,3,4,5`). This issue can be resolved by identifying the description using a regular expression and enclosing it in double quotes (e.g., `1,"2, 2, 2",3,4,5`).
+
+Finally, in the original file, the procedure ID variable is defined but does not exist in the data columns. Since the line numbers are also unique, the `line_number` and `procedureId` represent the same information. Therefore, the `line_number` variable can be removed and replaced with `procedureId`.
+
 ```{bash}
+# Clean the IMPC_procedure.txt file.
+
 # Define working directory path in bash
 rootDir="/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/"
-# Step 1: Replace semicolons (;) with commas (,)
-# Some files may use semicolons as delimiters. This replaces them with commas for consistent formatting.
-sed 's/;/,/g' "${rootDir}/data/metadata/IMPC_procedure.txt" | 
 
-# Step 2: Remove extra double quotes
-# - `s/^"//`: Removes double quotes at the beginning of a line.
-# - `s/"$//`: Removes double quotes at the end of a line.
-# - `s/" "/,/g`: Replaces any double quote followed by a space and another double quote (" ") with a comma.
-sed 's/^"//;s/"$//;s/" "/,/g' |
+# Step 1: Remove extra double quotes
+# - Removes double quotes at the beginning and end of lines.
+# - Replaces sequences of double quotes separated by spaces (`" "`) with commas.
+sed 's/^"//;s/"$//;s/" "/,/g' "${rootDir}/data/metadata/IMPC_procedure.txt" | 
 
-# Step 3: Enclose the 3rd column (description) in double quotes
-# - `^([0-9]+,[^,]+,)`: Matches the first two columns (line number and procedure ID).
-# - `(.*)`: Matches the 3rd column (description), which may include commas or spaces.
-# - `(, (true|TRUE|True|false|FALSE|False), [0-9]{5})$`: Matches the last two columns (boolean and 5-digit number).
-# - Replacement `\1"\2"\3`: Reconstructs the line with the 3rd column enclosed in double quotes.
-sed -E 's/^([0-9]+,[^,]+,)(.*)(, (true|TRUE|True|false|FALSE|False), [0-9]{5})$/\1"\2"\3/' |
+# Step 2: Enclose the 3rd column (description) in double quotes
+# - The first group `([0-9]+,[^,]+,)` matches the line number and procedure name:
+#   - `[0-9]+` matches the line number (a sequence of digits).
+#   - `[^,]+` matches the procedure name (a sequence of characters not including commas).
+# - The second group `(.*)` matches the description, which may contain commas or spaces.
+# - The third group `(, (TRUE|FALSE), [0-9]{5})` matches:
+#   - `(TRUE|FALSE)` for the boolean column (mandatory or not).
+#   - `[0-9]{5}` for the IMPC parameter original ID (a 5-digit number).
+sed -E 's/^([0-9]+,[^,]+,)(.*)(, (TRUE|FALSE), [0-9]{5})$/\1"\2"\3/' |
 
-# Step 4: Remove the "line_number" column
-# - `s/^line_number,//`: Removes the header "line_number" from the first line and its corresponding data in all other lines.
+# Step 3: Remove the "line_number" column
 sed -E 's/^line_number,//' > "${rootDir}/data/metadata/cleaned_IMPC_procedure.txt"
 ```
 
 ```{r}
-# Load the cleaned procedure data
+# Load the cleaned procedure data, setting procedureId as row names
 procedure <- read.table(
-  file = paste0(rootDir, "data/metadata/cleaned_IMPC_procedure.txt"), # File path
-  header = TRUE,                 # First row contains column names
-  sep = ",",                     # Fields are separated by commas
-  quote = '"',                   # Handle quoted fields
-  stringsAsFactors = FALSE,      # Prevent character columns from converting to factors
-  check.names = FALSE            # Keep column names as-is, even if they contain spaces or special characters
+  file = paste0(rootDir, "data/metadata/cleaned_IMPC_procedure.txt"),
+  header = TRUE,                
+  sep = ",",                    
+  quote = '"',                  
+  row.names = "procedureId"     
 )
 
-# Display the loaded data in a tabular format
-View(procedure)
+# Display the first few rows of the data
+head(procedure)
 ```
+
+Since the file loads correctly in R, we can confirm that the regular expression (REGEX) accurately matched the columns when enclosing the description. This ensures that each column is in the correct format, so there is no need to further check the column formatting.
 
 ### `IMPC_parameter_description.txt (Sama)`
 
