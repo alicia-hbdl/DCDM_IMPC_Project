@@ -31,9 +31,9 @@ rootDir="/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/"
 rootDir = "/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/"
 ```
 
-## Cleaning the Raw Data Files 
+## Cleaning the Raw Data Files
 
-### Combining the Raw Data in a Table (Esta?) 
+### Combining the Raw Data in a Table (Esta?)
 
 --\> This step can be done in bash after quality control (collating by Ella).
 
@@ -191,7 +191,7 @@ for (field_name in field_names) {
 
 *The next step is to handle the issues. Do we cap the p-values at 1? Do we remove the data from incorrect strains?*
 
-## Cleaning the Metadata Files 
+## Cleaning the Metadata Files
 
 ### `IMPC_procedure.txt (Alicia)`
 
@@ -241,14 +241,13 @@ procedure <- read.table(
   header = TRUE,                
   sep = ",",                    
   quote = '"',                  
-  row.names = "procedureId"     
 )
 
 # Display the first few rows of the data
 head(procedure)
 ```
 
-Since the file loads correctly in R, we can confirm that the regular expression (REGEX) accurately matched the columns when enclosing the description. This ensures that each column is in the correct format, so there is no need to further check the column formatting.
+Since the file loads correctly in R, we can confirm that the regular expression (REGEX) accurately matched the columns when enclosing the description. This ensures that each column is in the correct format, so there is no need to further check the column formatting. Additionally, the **procedureId** and **impcParameterOrigId** columns don't contain duplicated values.
 
 ### `IMPC_parameter_description.txt (Sama)`
 
@@ -300,8 +299,8 @@ View(disease_information)
 
 ```
 
-# Collating (Ella) 
+# Collating (Ella)
 
 # MySQL Database
 
-# R/Shiny 
+# R/Shiny
