@@ -3,6 +3,8 @@
 .Rhistory
 .RData
 .Ruserdata
+.Rproj
+.swp
 
 # Ignore CSVs
 !data_table.csv
