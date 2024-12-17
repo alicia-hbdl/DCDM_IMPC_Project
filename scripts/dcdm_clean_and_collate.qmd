@@ -419,21 +419,9 @@ DESCRIBE Disease;
 DESCRIBE GeneDisease;
 ```
 
-## Create Database and Schemas
+## Populate Database
 
 To populate the database, the schema should first be examined to identify which attributes correspond to each table. Data should then be organized into separate CSV or TSV files, with each file representing a single table. Each file is expected to include a header row (optional but recommended) that matches the column names defined in the database schema.
-
-### Procedure Table
-
-```{r}
-# Subset the table to include only the required columns in the correct order
-procedure <- procedure[, c("impcParameterOrigId", "name", "description", "isMandatory")]
-# Rename the columns to match the SQL table schema
-colnames(procedure) <- c("procedure_id", "procedure_name", "procedure_description", "procedure_isMandatory")
-
-# Save the table as CSV 
-write.csv(procedure, file = paste0(rootDir, "/data/metadata/ProcedureTable.csv"), row.names = FALSE, quote = TRUE)
-```
 
 Once a CSV file has been created for each table, the data can be loaded directly into MySQL using the `LOAD DATA INFILE` command.
 
@@ -443,12 +431,49 @@ Once a CSV file has been created for each table, the data can be loaded directly
 
 -   **`IGNORE 1 LINES`**: Skips the header row in the CSV, if present.
 
+### Procedure Table
+
+```{r}
+# Subset, rename columns, and select unique rows
+procedures <- procedure %>%
+  select(impcParameterOrigId, name, description, isMandatory) %>%  # Select specific columns
+  distinct() %>%                                                   # Keep only unique rows
+  rename(procedure_id = impcParameterOrigId,                       # Rename columns
+         procedure_name = name,
+         procedure_description = description,
+         procedure_isMandatory = isMandatory)
+
+# Save the table as CSV 
+write.csv(procedures, file = paste0(rootDir, "/data/metadata/Procedures.csv"), row.names = FALSE, quote = TRUE)
+```
+
 ```{sql}
 #| eval: false
-
 -- Path to tables 
-LOAD DATA LOCAL INFILE '/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/metadata/ProcedureTable.csv'
+LOAD DATA LOCAL INFILE '/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/metadata/Procedures.csv'
 INTO TABLE Procedures
+FIELDS TERMINATED BY ',' 
+OPTIONALLY ENCLOSED BY '"'
+IGNORE 1 LINES;
+```
+
+### Genes Table
+
+```{r}
+# Subset the table, ensure unique rows, convert gene symbols to title case, and rename
+genes <- data_table %>%
+  mutate(gene_symbol = str_to_title(gene_symbol)) %>%  # Convert gene_symbol to title case
+  select(gene_accession_id, gene_symbol) %>%          # Select specific columns
+  distinct() %>%                                      # Keep only unique rows
+  rename(gene_id = gene_accession_id)                 # Rename columns
+
+# Save the table as CSV 
+write.csv(genes, file = paste0(rootDir, "/data/metadata/Genes.csv"), row.names = FALSE, quote = TRUE)
+```
+
+```{sql}
+LOAD DATA LOCAL INFILE '/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/metadata/Genes.csv'
+INTO TABLE Genes
 FIELDS TERMINATED BY ',' 
 OPTIONALLY ENCLOSED BY '"'
 IGNORE 1 LINES;
