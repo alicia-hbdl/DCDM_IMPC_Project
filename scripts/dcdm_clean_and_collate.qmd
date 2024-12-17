@@ -1,8 +1,8 @@
 ---
 title: "DCDM Project Log"
 author: "Alicia"
-format: html
 editor: visual
+format: html
 ---
 
 # TRE Egress
@@ -14,16 +14,9 @@ Ella - is there anything to write here?
 ```{r}
 rm(list = ls())
 
-# Install and load necessary packages
-# install.packages(c("dplyr", "purrr", "readr")) # only do this once
-library(dplyr)
-library(purrr)
-library(readr)
-```
-
-```{bash}
-# Define working directory path in bash
-rootDir="/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/"
+# Install and load Tidyverse packages
+# install.packages("tidyverse")
+library(tidyverse)
 ```
 
 ```{r}
@@ -78,7 +71,7 @@ all_files <- list.files(paste0(rootDir, "data/raw_data"), pattern = "\\.csv$", f
 # Apply the read_and_transform function to each file and combine results into a single data frame
 data_table <- purrr::map_dfr(all_files, read_and_transform)
 # Display the first 6 rows of the data table
-View(data_table)
+head(data_table)
 
 # Save the combined table to a new CSV file
 write.csv(data_table, paste0(rootDir, "/temporary/data_table.csv"), row.names = FALSE)
@@ -195,43 +188,32 @@ for (field_name in field_names) {
 
 ### `IMPC_procedure.txt (Alicia)`
 
-The `IMPC_procedure.txt` file links each IMPC parameter to a procedure, such as Electrocardiogram (ECG), Histopathology, Insulin Blood Level, Fear Conditioning, and others. Each row in the table contains:
+Each row includes: 1) a line number 2) a name 3) a description 4) a boolean indicating if the procedure is mandatory 5) the original IMPC ID.
 
-1.  A line number or unique procedure ID;
-2.  A name;
-3.  A description;
-4.  A boolean indicating whether the procedure is mandatory;
-5.  The corresponding IMPC parameter tested.
+**Issues**:
 
-First, the line number column and the rest of the columns are surrounded by unnecessary double quotes (e.g., `"1""2,3,4,5"`). These can be removed, and a comma can be used to separate column 1 and column 2 (e.g., `1,2,3,4,5`).
+-   Unnecessary double quotes surrounding columns –\> Remove unnecessary quotes and fix column separators.
 
-Next, the description column contains commas, which are mistakenly interpreted as separators when reading the file, leading to errors (e.g., `1,2, 2, 2,3,4,5`). This issue can be resolved by identifying the description using a regular expression and enclosing it in double quotes (e.g., `1,"2, 2, 2",3,4,5`).
+-   Commas in the description column misinterpreted as separators –\>Enclose the description column in double quotes.
 
-Finally, in the original file, the procedure ID variable is defined but does not exist in the data columns. Since the line numbers are also unique, the `line_number` and `procedureId` represent the same information. Therefore, the `line_number` variable can be removed and replaced with `procedureId`.
+-   `line_number` and `procedureId` duplicate the same unique information –\> Replace `line_number` with `procedureId`.
+
+-   HTML symbols appear incorrectly encoded but will be ignored for simplicity –\> Clean file encoding and ignore invalid characters.
 
 ```{bash}
-# Clean the IMPC_procedure.txt file.
-
 # Define working directory path in bash
 rootDir="/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/"
 
-# Step 1: Remove extra double quotes
-# - Removes double quotes at the beginning and end of lines.
-# - Replaces sequences of double quotes separated by spaces (`" "`) with commas.
+# Clean the IMPC_procedure.txt file
 sed 's/^"//;s/"$//;s/" "/,/g' "${rootDir}/data/metadata/IMPC_procedure.txt" | 
-
-# Step 2: Enclose the 3rd column (description) in double quotes
-# - The first group `([0-9]+,[^,]+,)` matches the line number and procedure name:
-#   - `[0-9]+` matches the line number (a sequence of digits).
-#   - `[^,]+` matches the procedure name (a sequence of characters not including commas).
-# - The second group `(.*)` matches the description, which may contain commas or spaces.
-# - The third group `(, (TRUE|FALSE), [0-9]{5})` matches:
-#   - `(TRUE|FALSE)` for the boolean column (mandatory or not).
-#   - `[0-9]{5}` for the IMPC parameter original ID (a 5-digit number).
 sed -E 's/^([0-9]+,[^,]+,)(.*)(, (TRUE|FALSE), [0-9]{5})$/\1"\2"\3/' |
+sed -E 's/^line_number,//' |
+iconv -f UTF-8 -t UTF-8//IGNORE > "${rootDir}/data/metadata/cleaned_IMPC_procedure.txt"
 
-# Step 3: Remove the "line_number" column
-sed -E 's/^line_number,//' > "${rootDir}/data/metadata/cleaned_IMPC_procedure.txt"
+# Completion message
+echo "IMPC_procedure.txt successfully cleaned and saved."
+
+# perl -MHTML::Entities -pe 'decode_entities($_);'> "${rootDir}/data/metadata/cleaned_IMPC_procedure.txt"
 ```
 
 ```{r}
@@ -245,6 +227,15 @@ procedure <- read.table(
 
 # Display the first few rows of the data
 head(procedure)
+
+# Find the maximum string length in the 'name' column
+max(nchar(procedure$name))
+# Find the maximum string length in the 'description' column
+max(nchar(procedure$description))
+# Count the number of duplicated values in the 'impcParameterOrigId' column
+sum(duplicated(procedure$impcParameterOrigId))
+# Count the number of missing (NA) values in the 'isMandatory' column
+sum(is.na(procedure$isMandatory))
 ```
 
 Since the file loads correctly in R, we can confirm that the regular expression (REGEX) accurately matched the columns when enclosing the description. This ensures that each column is in the correct format, so there is no need to further check the column formatting. Additionally, the **procedureId** and **impcParameterOrigId** columns don't contain duplicated values.
@@ -252,6 +243,8 @@ Since the file loads correctly in R, we can confirm that the regular expression 
 ### `IMPC_parameter_description.txt (Sama)`
 
 ```{bash}
+#| eval: false
+
 # Define working directory path in bash
 rootDir="/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/"
 sed -E 's/^"//; s/"$//; s/" "/,/g;' "${rootDir}/data/metadata/IMPC_parameter_description.txt" |
@@ -261,6 +254,8 @@ sed -E 's/^x//' > "${rootDir}/data/metadata/cleaned_IMPC_parameter_description.t
 ```
 
 ```{r}
+#| eval: false
+
 # Load the cleaned parameter data
 parameter_description <- read.table(
   file = paste0(rootDir, "data/metadata/cleaned_IMPC_parameter_description.txt"), # File path
@@ -271,18 +266,13 @@ parameter_description <- read.table(
 )
 
 # Display the loaded data in a tabular format
-View(parameter_description)
+head(parameter_description)
 ```
 
 ### `disease_information.txt (Sanj)`
 
-```{bash}
-# Define working directory path in bash
-rootDir="/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3"
-"${rootDir}/data/metadata/disease_information.txt" > "${rootDir}/data/metadata/cleaned_disease_information.txt"
-```
-
 ```{r}
+#| eval: false
 
 # Load the cleaned parameter data
 disease_information <- read.table(
@@ -295,7 +285,7 @@ disease_information <- read.table(
 )
 
 # Display the loaded data in a tabular format
-View(disease_information)
+head(disease_information)
 
 ```
 
@@ -303,4 +293,201 @@ View(disease_information)
 
 # MySQL Database
 
+```{sql}
+#| eval: false
+
+-- Check if MySQL is running
+ps -ef | grep mysql
+
+-- Connect to MySQL (use the password created at the start of the course)
+mysql -u root -p --local-infile=1
+
+```
+
+## Create Database and Schemas
+
+```{sql}
+#| eval: false
+
+-- Create the database in MySQL 
+CREATE DATABASE IMPCDb;
+-- Use the newly created database in subsequent operatoins
+USE IMPCDb;
+```
+
+```{sql}
+#| eval: false
+-- Create tables without foreign keys first
+
+-- Table: Gene
+CREATE TABLE Genes (
+    gene_id VARCHAR(11) PRIMARY KEY,           -- SOP: 9 to 11 alphanumeric characters
+    gene_symbol VARCHAR(13)                    -- SOP: 1 to 13 alphanumeric characters
+) COMMENT = 'Stores gene identifiers and symbols. Referenced by Analyses and PhenodigmScores (one-to-many).';
+
+
+-- Table: ProcedureTable (Procedure is a reserved keyword in SQL)
+CREATE TABLE Procedures (
+    procedure_id INT PRIMARY KEY,              -- Unique identifier for each procedure (impcParameterOrigId)
+    procedure_name VARCHAR(47),                -- Max length: 47 characters
+    procedure_description VARCHAR(1090),       -- Max length: 1090 characters
+    procedure_isMandatory BOOLEAN NOT NULL     -- No missing values; TRUE/FALSE
+        DEFAULT FALSE
+) COMMENT = 'Stores procedure details (name, description, mandatory). Linked to Parameters via a many-to-many join.';
+
+
+-- Table: Disease
+CREATE TABLE Diseases (
+    disease_id VARCHAR(50) PRIMARY KEY,        -- Unique identifier for each disease
+    disease_term VARCHAR(150)                  -- Descriptive term for the disease
+) COMMENT = 'Stores disease identifiers and terms. Linked to Genes in PhenodigmScores (many-to-many).';
+
+
+-- Table: ParameterGroupings
+CREATE TABLE ParameterGroupings (
+    grouping_id INT PRIMARY KEY AUTO_INCREMENT,   -- Automatically increments for each new row
+    grouping_name VARCHAR(50)                     -- Name of the parameter group
+) COMMENT = 'Defines groups of parameters. Linked to Parameters via a many-to-many join.';
+
+
+-- Table: Parameter
+CREATE TABLE Parameters (
+    parameter_id VARCHAR(18) PRIMARY KEY,          -- SOP: 15 to 18 characters
+    parameter_name VARCHAR(74),                    -- SOP: 2 to 74 characters
+    parameter_description VARCHAR(1000)            -- Descriptive field for the parameter
+) COMMENT = 'Stores parameter metadata. Linked to Procedures and ParameterGroupings (many-to-many) and referenced by Analyses (one-to-many).';
+
+-- Create tables with foreign keys
+
+-- Table: Analysis
+CREATE TABLE Analyses (
+    analysis_id VARCHAR(15) PRIMARY KEY,           -- SOP: 15 alphanumeric character string
+    gene_id VARCHAR(11),                           -- SOP: 9 to 11 alphanumeric characters
+    mouse_life_stage VARCHAR(17),                  -- SOP: 4 to 17 characters
+    mouse_strain VARCHAR(5),                       -- SOP: 3 to 5 alphanumeric characters
+    parameter_id VARCHAR(18),                      -- Foreign key to Parameter table
+    p_value FLOAT,                                 -- SOP: Float from 0 to 1
+    FOREIGN KEY (gene_id) REFERENCES Genes(gene_id),
+    FOREIGN KEY (parameter_id) REFERENCES Parameters(parameter_id)
+) COMMENT = 'Stores analysis results linking Genes and Parameters (many-to-one), including p-values and strain info.';
+
+
+-- Table: GeneDisease
+CREATE TABLE PhenodigmScores (
+    phenodigm_id INT AUTO_INCREMENT PRIMARY KEY,
+
+    disease_id VARCHAR(50),                        -- Foreign key to Disease table
+    gene_id VARCHAR(11),                           -- Foreign key to Gene table
+    phenodigm_score FLOAT,                         -- Phenodigm association score
+    FOREIGN KEY (disease_id) REFERENCES Diseases(disease_id),
+    FOREIGN KEY (gene_id) REFERENCES Genes(gene_id)
+) COMMENT = 'Stores gene-disease association scores (many-to-many) linking Genes and Diseases.';
+
+
+-- Create join tables
+
+-- Table: ParameterProcedure
+CREATE TABLE parameterXprocedure (
+    parameter_id VARCHAR(18),                      -- Foreign key to Parameter table
+    procedure_id INT,                              -- Foreign key to ProcedureTable
+    PRIMARY KEY (parameter_id, procedure_id),      -- Composite primary key to ensure uniqueness
+    FOREIGN KEY (parameter_id) REFERENCES Parameters(parameter_id),
+    FOREIGN KEY (procedure_id) REFERENCES Procedures(procedure_id)
+) COMMENT = 'Join table linking Parameters to Procedures (many-to-many).';
+
+
+-- Table: ParameterGroup
+CREATE TABLE parameterXgroup (
+    grouping_id INT,                               -- Foreign key to ParameterGroupings table
+    parameter_id VARCHAR(18),                      -- Foreign key to Parameter table
+    PRIMARY KEY (grouping_id, parameter_id),       -- Composite primary key to ensure uniqueness
+    FOREIGN KEY (grouping_id) REFERENCES ParameterGroupings(grouping_id),
+    FOREIGN KEY (parameter_id) REFERENCES Parameters(parameter_id)
+) COMMENT = 'Join table linking Parameters to ParameterGroupings (many-to-many).';
+```
+
+```{sql}
+#| eval: false
+-- To explore the database
+SHOW TABLES;
+DESCRIBE Gene;
+DESCRIBE ProcedureTable;
+DESCRIBE Analysis;
+DESCRIBE Parameter;
+DESCRIBE ParameterGrouping;
+DESCRIBE Disease;
+DESCRIBE GeneDisease;
+```
+
+## Create Database and Schemas
+
+To populate the database, the schema should first be examined to identify which attributes correspond to each table. Data should then be organized into separate CSV or TSV files, with each file representing a single table. Each file is expected to include a header row (optional but recommended) that matches the column names defined in the database schema.
+
+### Procedure Table
+
+```{r}
+# Subset the table to include only the required columns in the correct order
+procedure <- procedure[, c("impcParameterOrigId", "name", "description", "isMandatory")]
+# Rename the columns to match the SQL table schema
+colnames(procedure) <- c("procedure_id", "procedure_name", "procedure_description", "procedure_isMandatory")
+
+# Save the table as CSV 
+write.csv(procedure, file = paste0(rootDir, "/data/metadata/ProcedureTable.csv"), row.names = FALSE, quote = TRUE)
+```
+
+Once a CSV file has been created for each table, the data can be loaded directly into MySQL using the `LOAD DATA INFILE` command.
+
+-   **`FIELDS TERMINATED BY ','`**: Indicates that fields are separated by commas.
+
+-   **`OPTIONALLY ENCLOSED BY '"'`**: Handles strings enclosed in double quotes.
+
+-   **`IGNORE 1 LINES`**: Skips the header row in the CSV, if present.
+
+```{sql}
+#| eval: false
+
+-- Path to tables 
+LOAD DATA LOCAL INFILE '/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/metadata/ProcedureTable.csv'
+INTO TABLE Procedures
+FIELDS TERMINATED BY ',' 
+OPTIONALLY ENCLOSED BY '"'
+IGNORE 1 LINES;
+```
+
 # R/Shiny
+
+**Test R/Shiny 1:** They want the ability to select a particular knockout mouse and visualise the statistical scores of all phenotypes tested.
+
+```{sql}
+#| eval: false
+
+SELECT Analyses.p_value, Parameters.parameter_name 
+FROM Analyses 
+JOIN Parameters ON Analyses.parameter_id = Parameters.parameter_id 
+WHERE Analyses.gene_id IN (
+SELECT gene_id 
+FROM Genes 
+WHERE gene_symbol = 'x')
+ORDER BY Analyses.p_value ASC;
+```
+
+**Test R/Shiny 2:** The collaborator also wishes to visualise the statistical scores of all knockout mice for a selected phenotype.
+
+```{sql}
+#| eval: false
+
+SELECT Analyses.p_value, Genes.gene_symbol 
+FROM Analyses 
+JOIN Parameters ON Analyses.parameter_id = Parameters.parameter_id 
+JOIN Genes ON Analyses.gene_id = Genes.gene_id 
+WHERE Parameters.parameter_name = 'x'
+ORDER BY Analyses.p_value ASC;
+```
+
+**Test R/Shiny 3:** The collaborator would like to visualise clusters of genes with similar phenotype scores.  
+
+```{sql}
+#| eval: false
+
+SELECT Genes.gene_symbol, Parameters.parameter_name, Analyses.p_value FROM Analyses JOIN Parameters ON Analyses.parameter_id = Parameters.parameter_id JOIN Genes ON Analyses.gene_id = Genes.gene_id; 
+```
