@@ -275,15 +275,15 @@ The Disease_information.txt file contains metadata with four key columns: diseas
 
 Issues:
 
-Unecessary rows and formatting (redundant "x" row at the top, row numbers and surrounding double quotes embedded within data) –> Remove unnecessary rows, row numbers and extraneous quotes
+- Unecessary rows and formatting (redundant "x" row at the top, row numbers and surrounding double quotes embedded within data) –> Remove unnecessary rows, row numbers and extraneous quotes
 
-The disease_term column contains commas misinterpreted as separators -> Combine split fields to ensure disease_term remains intact
+- The disease_term column contains commas misinterpreted as separators -> Combine split fields to ensure disease_term remains intact
 
-phenodigm_score contains non-numeric characters and extra spaces -> Clean non-numeric values and safely convert to numeric format
+- phenodigm_score contains non-numeric characters and extra spaces -> Clean non-numeric values and safely convert to numeric format
 
-Row numbers and quotes appear in the disease_id column -> Clean disease_id to remove row numbers and quotes
+- Row numbers and quotes appear in the disease_id column -> Clean disease_id to remove row numbers and quotes
 
-Duplicate disease_id values exist –> We need to decide if they are meaningful (they have unique phenodigm scores for reference)
+- Duplicate disease_id values exist –> We need to decide if they are meaningful (they have unique phenodigm scores for reference)
 
 Let's review what the data looks like.
 
