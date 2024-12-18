@@ -1,0 +1,454 @@
+---
+title: "Exploring_data"
+format: html
+---
+
+DATA REVIEW 
+
+#Loading required packages
+```{r}
+install.packages("tidyverse")
+install.packages("janitor")
+install.packages("readr")
+install.packages("purrr")
+
+library(tidyverse)
+library(janitor)
+library(readr)
+library(purrr)
+```
+
+
+#Loading one raw data file to understand csv file structure
+```{r}
+#define path to the dataset
+file_path <- "data/raw_data/001rv0ok4b8uy6x.csv"
+
+#load the dataset
+raw_data <- read_csv(file_path)
+
+#display the first few rows
+head(raw_data)
+```
+
+#Combining the Raw Data in a Table
+
+The dataset comprises thousands of CSV files. The key fields include: parameter_id, mouse_strain, gene_accession_id, gene_symbol, pvalue, analysis_id, and mouse_life_stage.
+
+To enable further analysis, the first step is to combine all these files into a single, unified table based on their common fields.
+
+Reading data from a file and transforming it into a row for a larger table:
+```{r}
+# Function to read a file and transform its contents into a single row
+read_and_transform <- function(file) {
+  
+  #Read the file
+  data <- read.csv(file, header = FALSE, col.names = c("field", "value"))
+  # - header = FALSE: Tells R to treat the first row as regular data, not column names.
+  # - col.names = c("field", "value"): Assigns consistent column names to facilitate clear and reliable subsetting in subsequent processing.
+  
+  #Convert all field names to lowercase for uniformity
+  data$field <- tolower(data$field)
+  
+  #transpose the 'value' column so that fields become column names
+  transformed_data <- t(data$value) %>%
+    as.data.frame() %>%
+    setNames(data$field)
+  
+  #rearrange columns to place 'analysis_id' as the first column
+  transformed_data <- transformed_data %>%
+    relocate(analysis_id, .before = everything())
+  
+  #return the transformed data as a single-row dataframe
+  return(transformed_data)
+}
+
+```
+
+
+The function can now be applied to all CSV files in the `raw_data` directory to combine them into a single table using the `map_dfr()` function from the **`purrr`** package.
+
+```{r}
+library(tidyverse)
+#define working directory path
+path <- "/Users/sanjanasrinivasan/Desktop/DCDM_IMPC_Project/"
+
+#list all csv files in the raw_data directory
+all_files <- list.files(paste0(path, "data/raw_data"), pattern = "\\.csv$", full.names = TRUE)
+
+#apply the read_and_transform function to each file and combine results into a single data frame
+data_table <- purrr::map_dfr(all_files, read_and_transform)
+
+#display the first 6 rows od the data table
+View(data_table)
+
+#save the annotated table to a new csv file
+write.csv(data_table, paste0(path, "/temporary/data_table_sanj.csv"), row.names = FALSE)
+
+```
+
+##Quality Control Using the SOP
+
+The experiment data comes with an SOP specifying constraints for each field, including data type, minimum and maximum values for numerical data, length for strings, and specific values for certain fields. Data quality can be assessed by comparing the raw data to these predefined constraints.
+
+First, have a look at the SOP to identify the constraints.
+```{r}
+SOP <- read.csv(paste0(path, "data/metadata/IMPC_SOP.csv"))
+
+SOP
+```
+
+
+For each column, we need to check similar things, like whether the data is the correct type (e.g., string or number), whether it has the right length (for strings) or size (for floats), and whether it matches allowed values, like for `mouse_strain` and `mouse_life_stage`. We may also need to find missing values. For each issue, we want to print the value and its index. To make this process less repetitive, we can create reusable functions.
+
+*Here, it would be good to check if the functions work as intended on values that should output an error (e.g. fake table containing rows each violating a single constraint for a parameter).*
+```{r}
+# These functions check if values meet specific criteria and return the indices of values that do not meet the criteria.
+
+# Function to validate values based on the SOP type ("String" or "Float")
+# For strings, it checks the string length; for numeric values, it checks the value directly.
+validate_type_minmax <- function(x, dataType, min_val, max_val) {
+  if (tolower(dataType) == "string") {
+    which(sapply(x, nchar) < min_val | sapply(x, nchar) > max_val)
+  } else if (tolower(dataType) == "float") {
+    which(as.numeric(x) < min_val | as.numeric(x) > max_val)
+  } 
+}
+
+# Check if values in a list are within the allowed values of a given vector
+check_allowed_values <- function(values, allowed_values) {
+  which(!values %in% allowed_values) # Find indices of invalid values
+}
+
+# Function to combine multiple lists of indices and return unique indices
+combine_unique_indices <- function(...) {
+  sort(unique(unlist(list(...))))
+}
+
+# Function to print the indices and values where issues were identified
+print_invalid_indices_and_values <- function(x, variable_name, invalid_indices) {
+  # Count the number of issues
+  num_issues <- length(invalid_indices)
+  
+  # Print the contextual message
+  cat("The '", variable_name, "' column has ", num_issues, " issue(s).\n", sep = "")
+  
+  # Print indices and values if there are any issues
+  if (num_issues > 0) {
+    cat("Indices:\n")
+    print(invalid_indices)
+    cat("Values:\n")
+    print(x[invalid_indices])
+  }
+}
+```
+
+Now that we have defined these functions, we can loop through the data table fields, extract the corresponding constraints from the SOP, and validate them using the functions.
+
+```{r}
+# Extract field names from the data table
+field_names <- colnames(data_table)
+print(field_names)
+  
+# Loop through each field name
+for (field_name in field_names) {
+    cat("Processing field:", field_name, "\n")
+    
+    # Extract the corresponding row in the SOP
+    sop_row <- SOP[SOP$dataField == field_name, ]
+    
+    # Access the column by name
+    column <- data_table[[field_name]]
+    
+    # Validate the column based on SOP constraints
+    SOP_constraints <- validate_type_minmax(column, sop_row$dataType, sop_row$minValue, sop_row$maxValue)
+    
+  # Check field-specific constraints
+  # Initialize a variable for checking valid values
+  field_specific_check <- integer(0) # Default to an empty vector
+
+  if (field_name == "mouse_strain") {
+    valid_mouse_strains <- c("C57BL", "B6J", "C3H", "129SV")
+    field_specific_check <- check_allowed_values(column, valid_mouse_strains)
+  } else if (field_name == "mouse_life_stage") {
+    valid_mouse_life_stages <- c(
+      "E12.5", "E15.5", "E18.5", "E9.5", 
+      "Early adult", "Late adult", "Middle aged adult"
+    )
+    field_specific_check <- check_allowed_values(column, valid_mouse_life_stages)
+  } else if (field_name == "analysis_id") {
+    # Check if unique
+    field_specific_check <- which(duplicated(column))
+  } else if (field_name == "gene_symbol") {
+    # Check if in title format
+    field_specific_check <- which(!grepl("^[A-Z][a-zA-Z0-9]*$", column))
+  }
+    
+    # Combine all indices of invalid values
+    indices <- combine_unique_indices(SOP_constraints, field_specific_check)
+    
+    # Print the invalid indices and their corresponding values
+    print_invalid_indices_and_values(column, field_name, indices)
+}
+```
+
+
+#Cleaning the metadata
+
+Cleaning Disease_information.txt Metadata
+
+Loading required libraries
+```{r}
+install.packages(c("tidyverse", "janitor", "stringr"))
+library(tidyverse)
+library(janitor)
+library(stringr)
+```
+
+Loading the Disease Information Data
+
+The Disease_information.txt file contains metadata with four key columns: disease_id, disease_term, gene_accession_id, and phenodigm_score. 
+
+Let's review what the data looks like.
+
+```{r}
+
+# Load raw file
+raw_lines <- readLines("/Users/sanjanasrinivasan/Desktop/DCDM_IMPC_Project/data/metadata/Disease_information.txt")
+
+# Inspect the first few rows
+head(raw_lines, 13)
+
+
+```
+Key Observations:
+
+An unnecessary x row exists at the top.
+Row numbers and extra quotes are embedded in the data.
+disease_term fields contain commas causing extra splits.
+
+
+To prepare the data for further processing:1) Remove the first "x" row 2) Strip row numbers and surrounding quotes.
+```{r}
+# Remove the "x" row
+cleaned_lines <- raw_lines[-1]  # Remove the first row ("x")
+
+# Remove row numbers and surrounding quotes
+cleaned_lines <- cleaned_lines %>%
+  str_remove_all('^\\d+\\"\\s') %>%  # Remove row numbers (e.g., "1") and following quote-space
+  str_remove_all('^"|"$')           # Remove any remaining outer quotes
+
+
+# Inspect the cleaned lines
+head(cleaned_lines, 14)
+
+```
+
+Split and Recombine Disease Term Columns
+Some disease_term fields contain commas, splitting the data into extra columns. Here, we fix that issue by combining split fields. 
+```{r}
+# Function to process and clean split rows
+process_split_row <- function(row) {
+  # Split the row by commas outside quotes
+  split_row <- str_split(row, ",\\s*(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)")[[1]]
+  
+  # Check if the split_row has more than 4 fields (indicating a split disease term)
+  if (length(split_row) > 4) {
+    # Combine extra fields in the disease_term column
+    disease_term <- paste(split_row[2:(length(split_row) - 2)], collapse = ", ")
+    return(c(split_row[1], disease_term, split_row[length(split_row) - 1], split_row[length(split_row)]))
+  } else {
+    # Return the row as is if it's already properly split
+    return(split_row)
+  }
+}
+
+# Apply the function to all cleaned lines
+split_data <- map(cleaned_lines, process_split_row)
+
+#Inspect split_data
+str(split_data)
+
+# Inspect a sample of split_data
+head(split_data, 20)
+
+# Find problematic rows (e.g., empty or improperly split rows)
+problematic_rows <- which(map_int(split_data, length) != 4)
+print("Indices of problematic rows:")
+print(problematic_rows)
+
+```
+
+Clean and Convert Phenodigm Scores
+The phenodigm_score column contains non-numeric characters and spaces. We clean and convert it safely to numeric.
+```{r}
+# Identify non-numeric values in phenodigm_score
+problematic_scores <- data_frame %>%
+  filter(!str_detect(phenodigm_score, "^\\d+(\\.\\d+)?$"))  # Matches valid numeric values
+
+# View problematic rows
+print("Problematic phenodigm_score rows:")
+print(problematic_scores)
+
+# Clean the phenodigm_score column
+data_frame <- data_frame %>%
+  mutate(
+    phenodigm_score = str_trim(phenodigm_score),  # Remove leading/trailing spaces
+    phenodigm_score = str_replace_all(phenodigm_score, "[^0-9\\.]", "")  # Remove non-numeric characters except "."
+  )
+
+#After cleaning, convert the column to numeric.
+data_frame <- data_frame %>%
+  mutate(
+    phenodigm_score = as.numeric(phenodigm_score)
+  )
+
+#After cleaning, check for any remaining NAs
+remaining_na <- data_frame %>%
+  filter(is.na(phenodigm_score))
+
+print("Rows with remaining NA values in phenodigm_score:")
+print(remaining_na)
+
+#Inspect the data to verify changes
+str(data_frame)
+summary(data_frame)
+```
+
+We have now successfully converted the phenodigm scores into numeric values!
+
+Final Cleanup: Fix Rows and Disease IDs
+1) Drop the extra header row.
+2) Clean disease_id to remove row numbers and quotes.
+
+```{r}
+# Remove the first row
+data_frame <- data_frame[-1, ]  # Drop the first row
+head(data_frame)
+
+# Clean disease_id column
+data_frame <- data_frame %>%
+  mutate(
+    disease_id = str_remove(disease_id, '^\\d+\\"\\s'), # Remove row numbers and quotes
+    disease_id = str_remove_all(disease_id, '^"|"$')    # Remove any remaining outer quotes
+  )
+
+#Verify changes
+head(data_frame)
+
+
+```
+
+
+Final Quality Checks
+
+Verify the dataset for: correct data types, missing values, duplicates, proper formatting
+```{r}
+# Verify data types
+str(data_frame)
+
+# Confirm numeric values for phenodigm_score
+summary(data_frame$phenodigm_score)
+
+# Count missing values in each column
+colSums(is.na(data_frame)) #shows there are no missing values in any of the columns
+
+# Find duplicate rows
+duplicates <- data_frame[duplicated(data_frame), ]
+
+# View duplicates
+print("Duplicate rows:")
+print(duplicates)  #there are no duplicate rows
+
+# Remove duplicates if any
+data_frame <- data_frame %>% distinct()
+
+# Verify uniqueness of disease_id
+unique_disease_ids <- nrow(data_frame) == length(unique(data_frame$disease_id))
+
+if (unique_disease_ids) {
+  print("All disease_id values are unique!")
+} else {
+  print("Warning: Duplicate disease_id values found.")
+} #Duplicate disease_id values found!!!
+
+# Check disease_id format (e.g., OMIM:xxxx or ORPHA:xxxx)
+invalid_disease_ids <- data_frame %>%
+  filter(!str_detect(disease_id, "^(OMIM|ORPHA):\\d+$"))
+
+print("Invalid disease_id values:")
+print(invalid_disease_ids) #none
+
+# Check gene_accession_id format (e.g., MGI:xxxxx)
+invalid_gene_ids <- data_frame %>%
+  filter(!str_detect(gene_accession_id, "^MGI:\\d+$"))
+
+print("Invalid gene_accession_id values:")
+print(invalid_gene_ids) #none
+
+
+```
+
+Visualise the phenodigm score distribution
+```{r}
+library(ggplot2)
+
+# Plot histogram of phenodigm_score
+ggplot(data_frame, aes(x = phenodigm_score)) +
+  geom_histogram(bins = 30, fill = "blue", color = "black") +
+  labs(title = "Distribution of Phenodigm Scores", x = "Phenodigm Score", y = "Frequency")
+```
+
+Rename and Save the Final Data Frame
+```{r}
+# Rename the cleaned data frame
+disease_information <- data_frame
+
+# Save as CSV
+write_csv(disease_information, "disease_information.csv")
+
+# Verify the saved file
+print("The cleaned data frame has been saved as 'disease_information.csv'.")
+```
+
+
+Since the disease_id column contains duplicates, let’s:
+
+Identify the rows with duplicate disease_id values.
+Decide on an action: either remove duplicates, aggregate them, or retain them after reviewing.
+```{r}
+# Find duplicate disease_id values
+duplicate_ids <- data_frame %>%
+  group_by(disease_id) %>%
+  filter(n() > 1) %>%
+  arrange(disease_id)
+
+# View duplicate entries
+print("Rows with duplicate disease_id values:")
+View(duplicate_ids)
+
+# Check for exact duplicate rows
+exact_duplicates <- data_frame %>%
+  filter(duplicated(.))
+
+print("Exact duplicate rows:")
+print(exact_duplicates)
+
+# Add a flag for duplicates
+data_frame <- data_frame %>%
+  mutate(is_duplicate = duplicated(disease_id) | duplicated(disease_id, fromLast = TRUE))
+
+```
+
+There are 213 rows with duplicate values. Are the duplicates meaningful?
+Should we leave them as is or should we aggregate them into one by taking a mean of the phenodigm score?
+
+
+
+
+
+
+
+
+
+
