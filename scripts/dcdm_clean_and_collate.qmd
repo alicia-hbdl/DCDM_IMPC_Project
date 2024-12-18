@@ -208,18 +208,18 @@ rootDir="/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/"
 sed 's/^"//;s/"$//;s/" "/,/g' "${rootDir}/data/metadata/IMPC_procedure.txt" | 
 sed -E 's/^([0-9]+,[^,]+,)(.*)(, (TRUE|FALSE), [0-9]{5})$/\1"\2"\3/' |
 sed -E 's/^line_number,//' |
-iconv -f UTF-8 -t UTF-8//IGNORE > "${rootDir}/data/metadata/cleaned_IMPC_procedure.txt"
+iconv -f UTF-8 -t UTF-8//IGNORE > "${rootDir}/data/cleaned/cleaned_IMPC_procedure.txt"
 
 # Completion message
 echo "IMPC_procedure.txt successfully cleaned and saved."
 
-# perl -MHTML::Entities -pe 'decode_entities($_);'> "${rootDir}/data/metadata/cleaned_IMPC_procedure.txt"
+# perl -MHTML::Entities -pe 'decode_entities($_);'> "${rootDir}/data/cleaned/cleaned_IMPC_procedure.txt"
 ```
 
 ```{r}
 # Load the cleaned procedure data, setting procedureId as row names
 procedure <- read.table(
-  file = paste0(rootDir, "data/metadata/cleaned_IMPC_procedure.txt"),
+  file = paste0(rootDir, "data/cleaned/cleaned_IMPC_procedure.txt"),
   header = TRUE,                
   sep = ",",                    
   quote = '"',                  
@@ -249,7 +249,7 @@ Since the file loads correctly in R, we can confirm that the regular expression 
 rootDir="/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/"
 sed -E 's/^"//; s/"$//; s/" "/,/g;' "${rootDir}/data/metadata/IMPC_parameter_description.txt" |
 sed -E 's/^([0-9]{1,4},[0-9]{5}, )(.*)(,[^,]+, IMPC_[A-Z]{3}_[0-9]{3}_[0-9]{3})$/\1"\2"\3/' |
-sed -E 's/^x//' > "${rootDir}/data/metadata/cleaned_IMPC_parameter_description.txt"
+sed -E 's/^x//' > "${rootDir}/data/cleaned/cleaned_IMPC_parameter_description.txt"
 
 ```
 
@@ -258,7 +258,7 @@ sed -E 's/^x//' > "${rootDir}/data/metadata/cleaned_IMPC_parameter_description.t
 
 # Load the cleaned parameter data
 parameter_description <- read.table(
-  file = paste0(rootDir, "data/metadata/cleaned_IMPC_parameter_description.txt"), # File path
+  file = paste0(rootDir, "data/cleaned/cleaned_IMPC_parameter_description.txt"), # File path
   header = TRUE,                 # First row contains column names
   sep = ",",                     # Fields are separated by commas
   stringsAsFactors = FALSE,      # Prevent character columns from converting to factors
@@ -299,9 +299,9 @@ head(disease_information)
 -- Check if MySQL is running
 ps -ef | grep mysql
 
--- Connect to MySQL (use the password created at the start of the course)
+-- Connect to MySQL
 mysql -u root -p --local-infile=1
-
+-- local-infile=1 enables data import from local files using LOAD DATA LOCAL INFILE.
 ```
 
 ## Create Database and Schemas
@@ -309,14 +309,16 @@ mysql -u root -p --local-infile=1
 ```{sql}
 #| eval: false
 
--- Create the database in MySQL 
+-- Create the database
 CREATE DATABASE IMPCDb;
--- Use the newly created database in subsequent operatoins
+
+-- Select the database
 USE IMPCDb;
 ```
 
 ```{sql}
 #| eval: false
+
 -- Create tables without foreign keys first
 
 -- Table: Gene
@@ -406,19 +408,6 @@ CREATE TABLE parameterXgroup (
 ) COMMENT = 'Join table linking Parameters to ParameterGroupings (many-to-many).';
 ```
 
-```{sql}
-#| eval: false
--- To explore the database
-SHOW TABLES;
-DESCRIBE Gene;
-DESCRIBE ProcedureTable;
-DESCRIBE Analysis;
-DESCRIBE Parameter;
-DESCRIBE ParameterGrouping;
-DESCRIBE Disease;
-DESCRIBE GeneDisease;
-```
-
 ## Populate Database
 
 To populate the database, the schema should first be examined to identify which attributes correspond to each table. Data should then be organized into separate CSV or TSV files, with each file representing a single table. Each file is expected to include a header row (optional but recommended) that matches the column names defined in the database schema.
@@ -444,13 +433,13 @@ procedures <- procedure %>%
          procedure_isMandatory = isMandatory)
 
 # Save the table as CSV 
-write.csv(procedures, file = paste0(rootDir, "/data/metadata/Procedures.csv"), row.names = FALSE, quote = TRUE)
+write.csv(procedures, file = paste0(rootDir, "/data/cleaned/Procedures.csv"), row.names = FALSE, quote = TRUE)
 ```
 
 ```{sql}
 #| eval: false
 -- Path to tables 
-LOAD DATA LOCAL INFILE '/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/metadata/Procedures.csv'
+LOAD DATA LOCAL INFILE '/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/cleaned/Procedures.csv'
 INTO TABLE Procedures
 FIELDS TERMINATED BY ',' 
 OPTIONALLY ENCLOSED BY '"'
@@ -462,17 +451,17 @@ IGNORE 1 LINES;
 ```{r}
 # Subset the table, ensure unique rows, convert gene symbols to title case, and rename
 genes <- data_table %>%
-  mutate(gene_symbol = str_to_title(gene_symbol)) %>%  # Convert gene_symbol to title case
+  mutate(gene_symbol = str_to_title(gene_symbol)) %>%  # Convert gene_symbol to title case 
   select(gene_accession_id, gene_symbol) %>%          # Select specific columns
   distinct() %>%                                      # Keep only unique rows
   rename(gene_id = gene_accession_id)                 # Rename columns
 
 # Save the table as CSV 
-write.csv(genes, file = paste0(rootDir, "/data/metadata/Genes.csv"), row.names = FALSE, quote = TRUE)
+write.csv(genes, file = paste0(rootDir, "/data/cleaned/Genes.csv"), row.names = FALSE, quote = TRUE)
 ```
 
 ```{sql}
-LOAD DATA LOCAL INFILE '/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/metadata/Genes.csv'
+LOAD DATA LOCAL INFILE '/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/cleaned/Genes.csv'
 INTO TABLE Genes
 FIELDS TERMINATED BY ',' 
 OPTIONALLY ENCLOSED BY '"'
@@ -485,7 +474,6 @@ IGNORE 1 LINES;
 
 ```{sql}
 #| eval: false
-
 SELECT Analyses.p_value, Parameters.parameter_name 
 FROM Analyses 
 JOIN Parameters ON Analyses.parameter_id = Parameters.parameter_id 
@@ -500,7 +488,6 @@ ORDER BY Analyses.p_value ASC;
 
 ```{sql}
 #| eval: false
-
 SELECT Analyses.p_value, Genes.gene_symbol 
 FROM Analyses 
 JOIN Parameters ON Analyses.parameter_id = Parameters.parameter_id 
