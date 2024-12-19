@@ -1,6 +1,7 @@
 ---
 title: "Exploring_data"
 format: html
+author: "Sanjana"
 ---
 
 DATA REVIEW 
@@ -235,7 +236,7 @@ cleaned_lines <- raw_lines[-1]  # Remove the first row ("x")
 
 # Remove row numbers and surrounding quotes
 cleaned_lines <- cleaned_lines %>%
-  str_remove_all('^\\d+\\"\\s') %>%  # Remove row numbers (e.g., "1") and following quote-space
+  str_remove_all('^\\d+\\"\\s*\\"') %>%  # Remove row numbers (e.g., "1") and following quote-space
   str_remove_all('^"|"$')           # Remove any remaining outer quotes
 
 

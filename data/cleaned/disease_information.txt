@@ -1,4 +1,5 @@
 disease_id	disease_term	gene_accession_id	phenodigm_score
+OMIM:200150	Choreoacanthocytosis	MGI:98967	36.02
 OMIM:209850	Autism	MGI:98967	45.88
 ORPHA:139399	Adrenomyeloneuropathy	MGI:98967	13.69
 ORPHA:66624	Pandas	MGI:98967	44.83
@@ -544,6 +545,7 @@ OMIM:193230	Vitreoretinal Degeneration, Snowflake Type	MGI:98266	40.67
 OMIM:300752	Protoporphyria, Erythropoietic, X-Linked	MGI:1928271	39.78
 OMIM:312910	Spastic Paraparesis And Deafness	MGI:98266	37.81
 OMIM:264800	Pseudoxanthoma Elasticum	MGI:1351634	7.35
+OMIM:264800	Pseudoxanthoma Elasticum	MGI:1351634	7.35
 OMIM:266510	Peroxisome Biogenesis Disorder 3B	MGI:1928271	20.65
 OMIM:268100	Enhanced S-Cone Syndrome	MGI:98266	25.66
 OMIM:256450	Hyperinsulinemic Hypoglycemia, Familial, 1	MGI:109279	49.21
@@ -641,6 +643,7 @@ ORPHA:79480	Pemphigus Erythematosus	MGI:1345961	37.31
 ORPHA:81	Antisynthetase Syndrome	MGI:1345961	30.9
 ORPHA:818	Smith-Lemli-Opitz Syndrome	MGI:1928271	2.18
 ORPHA:758	Pseudoxanthoma Elasticum	MGI:1351634	5.83
+ORPHA:758	Pseudoxanthoma Elasticum	MGI:1351634	5.83
 ORPHA:786	Generalized Glucocorticoid Resistance Syndrome	MGI:109279	32.77
 ORPHA:79324	Alg12-Cdg	MGI:87868	3.72
 ORPHA:309263	Metachromatic Leukodystrophy, Juvenile Form	MGI:1928271	8.25
@@ -663,6 +666,7 @@ ORPHA:91495	Persistent Hyperplastic Primary Vitreous	MGI:98266	26.56
 ORPHA:99827	Crimean-Congo Hemorrhagic Fever	MGI:1928271	6.44
 OMIM:246700	Chylomicron Retention Disease	MGI:87868	33.29
 OMIM:233420	46, Xy Sex Reversal 7	MGI:3665157	50.7
+OMIM:234700	Heart Block, Congenital	MGI:1351634	33.44
 OMIM:234700	Heart Block, Congenital	MGI:1351634	33.44
 OMIM:136800	Corneal Dystrophy, Fuchs Endothelial, 1	MGI:98266	63.64
 OMIM:147610	Iris Pigment Layer, Cleavage Of	MGI:98266	57.62
@@ -778,6 +782,7 @@ OMIM:300062	Intellectual Developmental Disorder, X-Linked 14	MGI:96090	52.31
 OMIM:300143	Intellectual Developmental Disorder, X-Linked 21	MGI:96090	14.68
 OMIM:300428	Intellectual Developmental Disorder, X-Linked 2	MGI:96090	35.14
 OMIM:177850	Pseudoxanthoma Elasticum, Forme Fruste	MGI:1351634	3.94
+OMIM:177850	Pseudoxanthoma Elasticum, Forme Fruste	MGI:1351634	3.94
 OMIM:212065	Congenital Disorder Of Glycosylation, Type Ia	MGI:1928271	9.57
 OMIM:217000	Complement Component 2 Deficiency	MGI:1345961	34.99
 OMIM:619338	Cataracts, Spastic Paraparesis, And Speech Delay	MGI:98266	25.04
@@ -860,6 +865,7 @@ OMIM:614292	Myopia, High, With Cataract And Vitreoretinal Degeneration	MGI:98266
 OMIM:614470	Ras-Associated Autoimmune Leukoproliferative Disorder	MGI:1345961	41.8
 OMIM:615559	Autoimmune Lymphoproliferative Syndrome, Type Iii	MGI:1345961	45.58
 OMIM:618912	Neuronopathy, Distal Hereditary Motor, Autosomal Recessive 8	MGI:98266	0
+OMIM:618912	Neuronopathy, Distal Hereditary Motor, Autosomal Recessive 8	MGI:98266	0
 OMIM:618999	Autoinflammation, Immune Dysregulation, And Eosinophilia	MGI:1345961	37.32
 OMIM:619183	Proteasome-Associated Autoinflammatory Syndrome 4	MGI:1345961	36.91
 ORPHA:1067	Aniridia-Ptosis-Intellectual Disability-Familial Obesity Syndrome	MGI:98266	38.96
@@ -869,6 +875,7 @@ ORPHA:1373	Cataract-Aberrant Oral Frenula-Growth Delay Syndrome	MGI:98266	23.55
 OMIM:619950	Tessadori-Bicknell-Van Haaften Neurodevelopmental Syndrome 3	MGI:96090	2.79
 ORPHA:567548	Idiopathic Steroid-Resistant Nephrotic Syndrome	MGI:1345961	28.57
 ORPHA:449432	Igg4-Related Submandibular Gland Disease	MGI:1345961	24.91
+ORPHA:51608	Generalized Arterial Calcification Of Infancy	MGI:1351634	5.61
 ORPHA:51608	Generalized Arterial Calcification Of Infancy	MGI:1351634	5.61
 ORPHA:375	Anti-Glomerular Basement Membrane Disease	MGI:1345961	30.47
 ORPHA:393	46, Xx Testicular Difference Of Sex Development	MGI:96090	51.05
@@ -911,6 +918,7 @@ OMIM:610508	Maturity-Onset Diabetes Of The Young, Type 7	MGI:109279	69.15
 OMIM:610539	Gaucher Disease, Atypical, Due To Saposin C Deficiency	MGI:1928271	17.8
 OMIM:600496	Maturity-Onset Diabetes Of The Young, Type 3	MGI:109279	60.36
 OMIM:615412	Cortical Dysplasia, Complex, With Other Brain Malformations 4	MGI:98266	28.38
+OMIM:614473	Arterial Calcification, Generalized, Of Infancy, 2	MGI:1351634	10.04
 OMIM:614473	Arterial Calcification, Generalized, Of Infancy, 2	MGI:1351634	10.04
 OMIM:613779	Complement Component 3 Deficiency, Autosomal Recessive	MGI:1345961	64.17
 OMIM:617006	Autoimmune Disease, Multisystem, Infantile-Onset, 2	MGI:1345961	58.6
@@ -1054,7 +1062,9 @@ OMIM:618156	Squalene Synthase Deficiency	MGI:104511	10.95
 OMIM:618463	Hypoalphalipoproteinemia, Primary, 2	MGI:104511	47.49
 ORPHA:2047	Flynn-Aird Syndrome	MGI:104511	9.28
 ORPHA:536	Systemic Lupus Erythematosus	MGI:104511	0
+ORPHA:536	Systemic Lupus Erythematosus	MGI:104511	0
 ORPHA:391665	Homozygous Familial Hypercholesterolemia	MGI:104511	39.37
+ORPHA:2073	Narcolepsy Type 1	MGI:104511	0
 ORPHA:2073	Narcolepsy Type 1	MGI:104511	0
 ORPHA:79474	Atypical Werner Syndrome	MGI:104511	7.71
 ORPHA:785	Estrogen Resistance Syndrome	MGI:104511	9.21
@@ -1088,6 +1098,7 @@ ORPHA:425	Apolipoprotein A-I Deficiency	MGI:104511	45.62
 OMIM:144300	Hyperlipoproteinemia, Type Ii, And Deafness	MGI:104511	59.52
 OMIM:151660	Lipodystrophy, Familial Partial, Type 2	MGI:104511	18.14
 OMIM:132900	Aortic Aneurysm, Familial Thoracic 4	MGI:104511	47.03
+OMIM:264800	Pseudoxanthoma Elasticum	MGI:1351634	7.35
 OMIM:257200	Niemann-Pick Disease, Type A	MGI:104511	11.08
 OMIM:257220	Niemann-Pick Disease, Type C1	MGI:104511	17.61
 ORPHA:220295	Xeroderma Pigmentosum-Cockayne Syndrome Complex	MGI:104511	8.42
@@ -1104,13 +1115,16 @@ OMIM:618620	Abdominal Obesity-Metabolic Syndrome 4	MGI:104511	48.57
 ORPHA:646	Niemann-Pick Disease Type C	MGI:104511	5.05
 ORPHA:2348	Familial Partial Lipodystrophy, Dunnigan Type	MGI:104511	13.53
 ORPHA:79506	Cholesterol-Ester Transfer Protein Deficiency	MGI:104511	55.41
+ORPHA:758	Pseudoxanthoma Elasticum	MGI:1351634	5.83
 ORPHA:77293	Chronic Visceral Acid Sphingomyelinase Deficiency	MGI:104511	15.85
 ORPHA:79083	Pparg-Related Familial Partial Lipodystrophy	MGI:104511	15.56
 ORPHA:79084	Familial Partial Lipodystrophy, Köbberling Type	MGI:104511	14.23
 ORPHA:412	Dysbetalipoproteinemia	MGI:104511	15.87
 ORPHA:363618	Lmna-Related Cardiocutaneous Progeria Syndrome	MGI:104511	22.34
 OMIM:249310	Neuhauser Syndrome	MGI:104511	5.33
+OMIM:234700	Heart Block, Congenital	MGI:1351634	33.44
 OMIM:300972	Immunodeficiency 47	MGI:104511	5.76
+OMIM:264800	Pseudoxanthoma Elasticum	MGI:1351634	7.35
 ORPHA:263501	Cog4-Cdg	MGI:104511	7.71
 OMIM:210250	Sitosterolemia 1	MGI:104511	16.23
 OMIM:212065	Congenital Disorder Of Glycosylation, Type Ia	MGI:104511	6.39
@@ -1127,10 +1141,12 @@ ORPHA:1192	Atherosclerosis-Deafness-Diabetes-Epilepsy-Nephropathy Syndrome	MGI:1
 OMIM:620058	Familial Apolipoprotein Gene Cluster Deletion Syndrome	MGI:104511	72.39
 ORPHA:633	Laron Syndrome	MGI:104511	9.16
 ORPHA:2457	Mandibuloacral Dysplasia	MGI:104511	10.1
+ORPHA:758	Pseudoxanthoma Elasticum	MGI:1351634	5.83
 ORPHA:96180	Maternal Uniparental Disomy Of Chromosome 4	MGI:104511	10.85
 ORPHA:79237	Galactokinase Deficiency	MGI:104511	13.9
 ORPHA:86816	Congenital Analbuminemia	MGI:104511	20.67
 ORPHA:90041	Gaisböck Syndrome	MGI:104511	11.68
+OMIM:234700	Heart Block, Congenital	MGI:1351634	33.44
 OMIM:144010	Hypercholesterolemia, Familial, 2	MGI:104511	43.26
 OMIM:238600	Hyperlipoproteinemia, Type I	MGI:104511	27.14
 OMIM:118450	Alagille Syndrome 1	MGI:104511	4.93
@@ -1138,6 +1154,7 @@ OMIM:182290	Smith-Magenis Syndrome	MGI:104511	4.78
 OMIM:309000	Lowe Oculocerebrorenal Syndrome	MGI:104511	6.53
 OMIM:602247	Xanthomatosis, Susceptibility To	MGI:104511	72.9
 OMIM:176270	Prader-Willi Syndrome	MGI:104511	4.49
+OMIM:177850	Pseudoxanthoma Elasticum, Forme Fruste	MGI:1351634	3.94
 OMIM:603776	Hypercholesterolemia, Familial, 3	MGI:104511	45.24
 OMIM:603813	Hypercholesterolemia, Familial, 4	MGI:104511	53.69
 ORPHA:273	Steinert Myotonic Dystrophy	MGI:104511	2.28
@@ -1149,8 +1166,10 @@ ORPHA:199354	Cerebral Autosomal Recessive Arteriopathy-Subcortical Infarcts-Leuk
 ORPHA:140905	Hyperlipidemia Due To Hepatic Triacylglycerol Lipase Deficiency	MGI:104511	51.94
 ORPHA:470	Lysinuric Protein Intolerance	MGI:104511	10.78
 ORPHA:528	Congenital Generalized Lipodystrophy	MGI:104511	9.17
+ORPHA:536	Systemic Lupus Erythematosus	MGI:104511	0
 ORPHA:391665	Homozygous Familial Hypercholesterolemia	MGI:104511	10.07
 ORPHA:401923	9Q31.1Q31.3 Microdeletion Syndrome	MGI:104511	10.14
+ORPHA:2073	Narcolepsy Type 1	MGI:104511	0
 ORPHA:209902	Hypercholesterolemia Due To Cholesterol 7Alpha-Hydroxylase Deficiency	MGI:104511	37.19
 ORPHA:247585	Citrullinemia Type Ii	MGI:104511	14.47
 ORPHA:230839	Classical-Like Ehlers-Danlos Syndrome Type 1	MGI:104511	14.23
@@ -1163,6 +1182,7 @@ OMIM:306000	Glycogen Storage Disease Ixa1	MGI:104511	25.58
 OMIM:301033	Hypothyroidism, Congenital, Nongoitrous, 8	MGI:104511	22.12
 OMIM:256300	Nephrotic Syndrome, Type 1	MGI:104511	15
 OMIM:278000	Cholesteryl Ester Storage Disease	MGI:104511	11.67
+OMIM:177850	Pseudoxanthoma Elasticum, Forme Fruste	MGI:1351634	3.94
 OMIM:619471	Bardet-Biedl Syndrome 20	MGI:104511	9.08
 ORPHA:275761	Lysosomal Acid Lipase Deficiency	MGI:104511	8.42
 OMIM:610539	Gaucher Disease, Atypical, Due To Saposin C Deficiency	MGI:104511	10.41
@@ -1171,6 +1191,7 @@ OMIM:616267	Ataxia-Oculomotor Apraxia 4	MGI:104511	20.5
 OMIM:618348	Galloway-Mowat Syndrome 7	MGI:104511	7.26
 OMIM:620211	Hyperinsulinemic Hypoglycemia, Familial, 8	MGI:104511	21.74
 ORPHA:488650	Distal Myopathy, Tateyama Type	MGI:104511	17.07
+ORPHA:51608	Generalized Arterial Calcification Of Infancy	MGI:1351634	5.61
 ORPHA:534	Oculocerebrorenal Syndrome Of Lowe	MGI:104511	3.92
 ORPHA:2479	Megalocornea-Intellectual Disability Syndrome	MGI:104511	5.85
 ORPHA:75234	Cholesteryl Ester Storage Disease	MGI:104511	19.02
@@ -1185,6 +1206,7 @@ OMIM:606721	Lipodystrophy, Familial Partial, Type 7	MGI:104511	5.24
 ORPHA:280679	Moyamoya Angiopathy-Short Stature-Facial Dysmorphism-Hypergonadotropic Hypogonadism Syndrome	MGI:104511	14.78
 OMIM:612526	Lipodystrophy, Congenital Generalized, Type 3	MGI:104511	18.16
 OMIM:610842	Pseudoxanthoma Elasticum-Like Disorder With Multiple Coagulation Factor Deficiency	MGI:104511	19.18
+OMIM:614473	Arterial Calcification, Generalized, Of Infancy, 2	MGI:1351634	10.04
 OMIM:615703	Morbid Obesity And Spermatogenic Failure	MGI:104511	24.02
 OMIM:615812	Abdominal Obesity-Metabolic Syndrome 3	MGI:104511	26.69
 OMIM:618810	Pontocerebellar Hypoplasia, Hypotonia, And Respiratory Insufficiency Syndrome, Neonatal Lethal	MGI:104511	8.73
@@ -1192,11 +1214,13 @@ OMIM:619662	Cholestasis, Progressive Familial Intrahepatic, 8	MGI:104511	15.38
 OMIM:619855	Thyroid Hormone Metabolism, Abnormal, 2	MGI:104511	55.99
 OMIM:619868	Cholestasis, Progressive Familial Intrahepatic, 10	MGI:104511	23.87
 ORPHA:567548	Idiopathic Steroid-Resistant Nephrotic Syndrome	MGI:104511	15.87
+ORPHA:51608	Generalized Arterial Calcification Of Infancy	MGI:1351634	5.61
 ORPHA:79506	Cholesterol-Ester Transfer Protein Deficiency	MGI:104511	72.35
 ORPHA:363618	Lmna-Related Cardiocutaneous Progeria Syndrome	MGI:104511	9.06
 ORPHA:90674	Isolated Thyroid-Stimulating Hormone Deficiency	MGI:104511	8.56
 OMIM:248370	Mandibuloacral Dysplasia With Type A Lipodystrophy	MGI:104511	7.46
 OMIM:608320	Coronary Artery Disease, Autosomal Dominant, 1	MGI:104511	28.58
+OMIM:614473	Arterial Calcification, Generalized, Of Infancy, 2	MGI:1351634	10.04
 OMIM:616828	Congenital Disorder Of Glycosylation, Type Iio	MGI:104511	15.78
 OMIM:616829	Congenital Disorder Of Glycosylation, Type Iip	MGI:104511	19.97
 OMIM:615863	Diarrhea 7, Protein-Losing Enteropathy Type	MGI:104511	31.7

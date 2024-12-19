@@ -288,6 +288,12 @@ Let's review what the data looks like.
 
 ```{r}
 
+# Loading required libraries
+install.packages(c("tidyverse", "janitor", "stringr"))
+library(tidyverse)
+library(janitor)
+library(stringr)
+
 # Load raw file
 raw_lines <- readLines("/Users/sanjanasrinivasan/Desktop/DCDM_IMPC_Project/data/metadata/Disease_information.txt")
 
@@ -305,8 +311,8 @@ cleaned_lines <- raw_lines[-1]  # Remove the first row ("x")
 
 # Remove row numbers and surrounding quotes
 cleaned_lines <- cleaned_lines %>%
-  str_remove_all('^\\d+\\"\\s') %>%  # Remove row numbers (e.g., "1") and following quote-space
-  str_remove_all('^"|"$')           # Remove any remaining outer quotes
+  str_remove_all('^\\d+\\"\\s') %>%   #
+  str_remove_all('^"|"$')           # Remove the outer pair of quotes
 
 
 # Inspect the cleaned lines
@@ -344,20 +350,18 @@ head(split_data, 20)
 # Find problematic rows (e.g., empty or improperly split rows)
 problematic_rows <- which(map_int(split_data, length) != 4)
 print("Indices of problematic rows:")
-print(problematic_rows)
+print(problematic_rows) #Shows that all the rows have been split well
+
+# Create data_frame from split_data 
+data_frame <- split_data %>%
+  map(~ set_names(as.list(.), c("disease_id", "disease_term", "gene_accession_id", "phenodigm_score"))) %>%
+  bind_rows()
 
 ```
 
 The phenodigm_score column contains non-numeric characters and spaces. We clean and convert it safely to numeric.
 
 ```{r}
-# Identify non-numeric values in phenodigm_score
-problematic_scores <- data_frame %>%
-  filter(!str_detect(phenodigm_score, "^\\d+(\\.\\d+)?$"))  # Matches valid numeric values
-
-# View problematic rows
-print("Problematic phenodigm_score rows:")
-print(problematic_scores)
 
 # Clean the phenodigm_score column
 data_frame <- data_frame %>%
@@ -415,16 +419,6 @@ summary(data_frame$phenodigm_score)
 # Count missing values in each column
 colSums(is.na(data_frame)) #shows there are no missing values in any of the columns
 
-# Find duplicate rows
-duplicates <- data_frame[duplicated(data_frame), ]
-
-# View duplicates
-print("Duplicate rows:")
-print(duplicates)  #there are no duplicate rows
-
-# Remove duplicates if any
-data_frame <- data_frame %>% distinct()
-
 # Verify uniqueness of disease_id
 unique_disease_ids <- nrow(data_frame) == length(unique(data_frame$disease_id))
 
@@ -455,12 +449,16 @@ Are duplicate disease_ids meaningful? Should we leave them as is or should we ag
 Saving and Loading the Final Data
 
 ```{r}
+
+# Specify the path to the cleaned directory
+output_path <- "/Users/sanjanasrinivasan/Desktop/DCDM_IMPC_Project/data/cleaned/disease_information.txt"
+
 # Save data_frame as a tab-delimited text file
-write.table(data_frame, file = "disease_information.txt", sep = "\t", row.names = FALSE, quote = FALSE)
+write.table(data_frame, file = output_path, sep = "\t", row.names = FALSE, quote = FALSE)
 
 # Load the final cleaned data
 disease_information <- read.table(
-  "disease_information.txt", 
+  file = output_path, 
   header = TRUE,          # Use the first row as column names 
   sep = "\t",             # Tab-delimited
   stringsAsFactors = FALSE) # Avoid character columns from converting to factors
