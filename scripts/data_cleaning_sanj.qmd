@@ -275,20 +275,19 @@ head(split_data, 20)
 # Find problematic rows (e.g., empty or improperly split rows)
 problematic_rows <- which(map_int(split_data, length) != 4)
 print("Indices of problematic rows:")
-print(problematic_rows)
+print(problematic_rows) #All rows have been successfully split into 4 columns
+
+# Create data_frame from split_data 
+data_frame <- split_data %>%
+  map(~ set_names(as.list(.), c("disease_id", "disease_term", "gene_accession_id", "phenodigm_score"))) %>%
+  bind_rows()
+
 
 ```
 
 Clean and Convert Phenodigm Scores
 The phenodigm_score column contains non-numeric characters and spaces. We clean and convert it safely to numeric.
 ```{r}
-# Identify non-numeric values in phenodigm_score
-problematic_scores <- data_frame %>%
-  filter(!str_detect(phenodigm_score, "^\\d+(\\.\\d+)?$"))  # Matches valid numeric values
-
-# View problematic rows
-print("Problematic phenodigm_score rows:")
-print(problematic_scores)
 
 # Clean the phenodigm_score column
 data_frame <- data_frame %>%
