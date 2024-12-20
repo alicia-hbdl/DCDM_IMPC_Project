@@ -1,0 +1,113 @@
+---
+title: "sama_procedure_clean_R"
+format: html
+editor: visual
+---
+
+```{r}
+# Load necessary libraries
+library(dplyr)
+library(readr)
+library(stringr)
+
+```
+
+```{r}
+# Define the working directory path in r
+rootDir = "/Users/sama/Desktop/DCDM_proj2/"
+outputFile = "/Users/sama/Desktop/DCDM_Proj2/data/cleaned/IMPC_Procedure.txt"
+
+# SOP Reading
+SOP <- read.csv(paste0(rootDir, "data/metadata/IMPC_sop.csv"))
+
+# Define file path
+file_path <- "/Users/sama/Desktop/DCDM_proj2/data/metadata/IMPC_procedure.txt"
+
+```
+
+```{r}
+# Read the file
+procedure <- readLines(file_path, encoding = "UTF-8")
+
+head(procedure)
+```
+
+Initial Observation:
+
+-   Contains column names enclosed in double quotes and separated by commas
+-   "line_number" "procedureId, name, description, isMandatory, impcParameterOrigId".
+-   The data is structured as a single string with multiple fields, separated by a mix of , (commas) and " " (quoted spaces).
+-   Fields like description can contain commas, making simple comma-based splitting unreliable.
+-   Metadata fields include a description with detailed text, Boolean (TRUE/FALSE) values, and numeric IDs at the end.
+-   line_number and procedureId duplicate the same unique information.
+
+```{r}
+# Replace double quotes between fields with commas
+procedure <- gsub('" "', ',', procedure)
+
+# Remove leading and trailing double quotes
+procedure <- gsub('^"|"$', '', procedure)
+
+# Wrap specific fields in quotes (based on regex logic)
+procedure <- gsub(
+  '^([0-9]+,[^,]+,)(.*)(, (TRUE|FALSE), [0-9]{5})$',
+  '\\1"\\2"\\3',
+  procedure,
+  perl = TRUE
+)
+
+# Remove the line_number if it exists
+procedure <- gsub('^line_number,', '', procedure)
+
+view(procedure)
+```
+
+-   The regex pattern `^([0-9]+,[^,]+,)(.*)(, (TRUE|FALSE), [0-9]{5})$` divides the line into three parts:
+
+    -   `([0-9]+,[^,]+,)`: Matches the `line_number` and `procedureId` fields, which are numeric and followed by commas.
+
+    -   `(.*)`: Matches the `description` field (potentially long text), which can contain commas and needs to be wrapped in quotes.
+
+    -   `, (TRUE|FALSE), [0-9]{5}`: Matches the last part of the line, consisting of the Boolean value (`TRUE` or `FALSE`) and a 5-digit number.
+
+-   The replacement `\\1"\\2"\\3` keeps the first and last parts unchanged, but wraps the `description` (middle part) in double quotes.
+
+-   **`perl = TRUE`** enables advanced regular expressions, allowing the use of more sophisticated matching.
+
+```{r}
+# Handle UTF-8 encoding issues if any
+procedure <- iconv(procedure, from = "UTF-8", to = "UTF-8//IGNORE")
+
+# Save the cleaned data
+writeLines(procedure, outputFile)
+
+```
+
+```{r}
+
+# Load the cleaned procedure data
+proc <- read.table(
+  file = "/Users/sama/Desktop/DCDM_Proj2/temporary/IMPC_procedure.txt",
+  header = TRUE,                # Indicates that the first line contains column names
+  sep = ",",                    # Specifies that fields are separated by commas
+  quote = '"',                  # Ensures that quoted fields are handled properly
+  stringsAsFactors = FALSE      # Prevents automatic conversion of character columns to factors
+) 
+
+# Display the first few rows of the data
+head(proc)
+
+
+# Find the maximum string length in the 'name' column
+max(nchar(proc$name))
+# Find the maximum string length in the 'description' column
+max(nchar(proc$description))
+# Count the number of duplicated values in the 'impcParameterOrigId' column
+sum(duplicated(proc$impcParameterOrigId))
+# Count the number of missing (NA) values in the 'isMandatory' column
+sum(is.na(proc$isMandatory))
+
+
+```
+
+There are no further issues.

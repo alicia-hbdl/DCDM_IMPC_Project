@@ -279,10 +279,10 @@ pd <- pd %>%
 
 Does the parameter_name needs to be standardised?
 
-The problematic areas the script found: \
+The problematic areas the script found:\
 \[1\] " Difference in Conditioning Post-shock and Conditioning Baseline % Freezing"\
 \[2\] " Nutrition - do you know the composition of the diet (average based on mass)"\
-\[3\] " Nutrition - do you know the composition of the diet (average based on calorific content)" \
+\[3\] " Nutrition - do you know the composition of the diet (average based on calorific content)"\
 \[4\] " Nutrition - average composition (based on calorific content) - Carbohydrate"\
 \[5\] " Microbiological status - is your unit positive for any of the pathogens tested"
 
