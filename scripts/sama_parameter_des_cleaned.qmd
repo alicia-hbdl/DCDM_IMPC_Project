@@ -145,6 +145,11 @@ pd <- pd %>%
     description = description,
     parameter_id = parameterId
   )
+
+# Remove the 'line_number' column
+pd <- pd %>%
+  select(-line_number)
+
 ```
 
 Using separate(), it will split the single 'x' column into different columns based on commas.
@@ -158,7 +163,6 @@ Each columns are then renamed to correspond to SOP.
 # Convert the first two columns line_number and IMPC_parameter_orig_id to integers
 pd <- pd %>%
   mutate(
-    line_number = as.numeric(line_number),
     IMPC_parameter_orig_id = as.numeric(IMPC_parameter_orig_id)
   )
 
