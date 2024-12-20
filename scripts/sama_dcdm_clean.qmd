@@ -1,0 +1,280 @@
+---
+title: "sama_dcdm_cleaning"
+format: html
+editor: visual
+---
+
+```{r}
+# Load required libraries
+library(tidyverse)
+library(dplyr)
+library(stringr)
+```
+
+Define all the pathways; directory, SOP and the metadata to be cleaned. SOPs provide standardized descriptions and guidelines for parameters, measurements, or methodologies.
+
+```{r}
+
+# Define the working directory path in R
+rootDir = "/Users/sama/Desktop/DCDM_proj2/"
+
+# Define file paths
+file_path <- "/Users/sama/Desktop/DCDM_proj2/data/metadata/IMPC_parameter_description.txt"
+
+# SOP Reading
+SOP <- read.csv(paste0(rootDir, "data/metadata/IMPC_sop.csv"))
+
+# Read in the raw data lines
+raw_lines <- readLines(file_path)
+
+head(raw_lines,10)
+
+```
+
+Initital observation:
+
+-   The metadata contains five columns; line_number, impcParameterOrigId, name, description, parameterId.
+
+-   The entire metadata is being read as a single column where all the rows are stored as strings.
+
+-   They all are under a label 'x'. First two columns are merged as one and is not separated by comma.
+
+-   There may be a redundancy between name and description, as they often describe the same parameter but in different styles.
+
+-   They are all presented as characters, although some columns contains numeric values.
+
+To confirm/check if there are any missing commas or even check for extra commas inside parentheses. The commas inside parentheses should be preserved but we don't want them to cause unnecessary splits amongst columns.
+
+```{r}
+# Function to identify issues
+identify_issues <- function(lines) {
+  issue_report <- data.frame(
+    line_number = integer(0),
+    issue_type = character(0),
+    problematic_content = character(0),
+    stringsAsFactors = FALSE
+  )
+  
+  for (i in 1:length(lines)) {
+    line <- lines[i]
+    
+    # Check for missing commas between column names
+    if (str_count(line, ",") < 4) {
+      issue_report <- rbind(issue_report, data.frame(
+        line_number = i,
+        issue_type = "Missing Comma",
+        problematic_content = line
+      ))
+    }
+    
+    # Check for extra commas inside parentheses (commas inside parentheses should be preserved)
+    if (grepl("\\(.*\\)", line) && str_count(line, ",") > 1) {
+      issue_report <- rbind(issue_report, data.frame(
+        line_number = i,
+        issue_type = "Extra Comma Inside Parentheses",
+        problematic_content = line
+      ))
+    }
+  }
+  
+  return(issue_report)
+}
+
+# Call the function to identify issues in the dataset
+issue_report <- identify_issues(raw_lines)
+
+# Output the issue report in R console
+print(issue_report)
+
+```
+
+According to the report, there are missing commas between first and second column, if its not removed they will be read as a single column. There are multiple commas inside parenthesis.
+
+To deal with them appropriately, we first remove unnecessary leading and trailing quotes, embedded quotes etc.
+
+```{r}
+
+# Remove the "x" label
+raw_lines <- raw_lines[-1]
+
+# Remove leading and trailing quotes from each line
+raw_lines <- gsub('^"|"$', '', raw_lines)
+
+# Remove remaining embedded quotes
+raw_lines <- gsub('"', '', raw_lines)
+
+
+```
+
+The missing comma needs to be added in order to separate the two merged columns.
+
+```{r}
+
+# Use gsub() to replace the space in the first column with a comma, separating the merged values 
+raw_lines <- gsub("^(\\S+)\\s+(\\S+)", "\\1,\\2", raw_lines)
+
+
+```
+
+gsub() fixes improperly merged columns by replacing the first space in each row with a comma. This prepares the data for separation into multiple columns.
+
+-   \^(\\S+)\\s+(\\S+): Captures two groups of non-whitespace characters separated by whitespace.
+
+-   \\1,\\2: Replaces the whitespace between them with a comma.
+
+Secondly, we keep the commas between the parenthesis as they are needed.
+
+```{r}
+
+# Replace commas inside parentheses with a placeholder (__COMMA__)
+raw_lines <- str_replace_all(raw_lines, "(\\([^)]*\\))", function(x) str_replace_all(x, ",", "__COMMA__"))
+
+# Replace commas inside quotes with a placeholder (__COMMA__)
+raw_lines <- str_replace_all(raw_lines, "\"([^\"]*)\"", function(x) str_replace_all(x, ",", "__COMMA__"))
+
+# Split the lines by commas
+split_lines <- str_split(raw_lines, ",", simplify = TRUE)
+
+for (i in 1:nrow(split_lines)) {
+  # Replace __COMMA__ with commas in name and description columns
+  split_lines[i, 3] <- str_replace_all(split_lines[i, 3], "__COMMA__", ",")  # 3rd column = name
+  split_lines[i, 4] <- str_replace_all(split_lines[i, 4], "__COMMA__", ",")  # 4th column = description
+}
+
+head(split_lines)
+
+
+```
+
+The last columnm parameterId has been split into three different column. Merging them to be in one.
+
+```{r}
+
+# Merge columns 5, 6, and 7 into a new column (V5)
+split_lines[, 5] <- paste(split_lines[, 5], split_lines[, 6], split_lines[, 7], sep = " ")
+
+# Remove the now redundant columns (6 and 7)
+split_lines <- split_lines[, -c(6, 7)]
+
+# Inspect the result
+head(split_lines)
+
+```
+In order for the dataset to align with SOP, the colnames needs to correspond with colnames stated in SOP. Here, we are assigning colnames. 
+
+```{r}
+# Assign column names
+colnames(split_lines) <- split_lines[1, ]  # First row as column names
+split_lines <- split_lines[-1, ]  # Remove the first row (now the header)
+```
+
+Colnames contains extra spaces or inconsistencies in column name, having leading/trailing spaces. 
+```{r}
+
+# Clean column names to remove any leading/trailing spaces
+colnames(split_lines) <- trimws(colnames(split_lines))
+
+# Clean the entire matrix by removing leading/trailing spaces from each element
+split_lines <- apply(split_lines, 2, function(x) trimws(x))
+
+# Convert split_lines from matrix to data frame
+split_lines_df <- as.data.frame(split_lines, stringsAsFactors = FALSE)
+
+# Renaming columns in the dataframe to match the desired format
+split_lines_df <- split_lines_df %>%
+  rename(
+    line_number = line_number,
+    IMPC_Parameter_Orig_Id = impcParameterOrigId,
+    parameter_name = name,
+    description = description,
+    parameter_id = parameterId
+  )
+
+split_lines_df
+
+```
+
+
+```{r}
+# Function to validate values based on the SOP type ("String" or "Float")
+validate_type_minmax <- function(x, dataType, min_val, max_val) {
+  # Check for missing values (NA)
+  na_indices <- which(is.na(x))
+  if (tolower(dataType) == "string") {
+    which(sapply(x, nchar) < min_val | sapply(x, nchar) > max_val)
+  } else if (tolower(dataType) == "float") {
+    which(as.numeric(x) < min_val | as.numeric(x) > max_val)
+  } 
+}
+
+# Check if values in a list are within the allowed values of a given vector
+check_allowed_values <- function(values, allowed_values) {
+  which(!values %in% allowed_values) # Find indices of invalid values
+}
+
+# Function to combine multiple lists of indices and return unique indices
+combine_unique_indices <- function(...) {
+  sort(unique(unlist(list(...))))
+}
+
+# Function to print the indices and values where issues were identified
+print_invalid_indices_and_values <- function(x, variable_name, invalid_indices) {
+  # Count the number of issues
+  num_issues <- length(invalid_indices)
+  
+  # Print the contextual message
+  cat("The '", variable_name, "' column has ", num_issues, " issue(s).\n", sep = "")
+  
+  # Print indices and values if there are any issues
+  if (num_issues > 0) {
+    cat("Indices:\n")
+    print(invalid_indices)
+    cat("Values:\n")
+    print(x[invalid_indices])
+  }
+}
+
+# Extract field names from the data table (split_line_df)
+field_names <- colnames(split_lines_df)
+print(field_names)
+
+# Loop through each field name to apply SOP checks
+for (field_name in field_names) {
+  cat("Processing field:", field_name, "\n")
+  
+  # Extract the corresponding row in the SOP for each field
+  sop_row <- SOP[SOP$dataField == field_name, ]
+  
+  if (nrow(sop_row) == 0) {
+    next  # Skip if no SOP rule exists for the field
+  }
+
+# Access the column by name from the split_line_df
+  column <- split_lines_df[[field_name]]
+  
+  # Validate the column based on SOP constraints (Type, Min, Max)
+  SOP_constraints <- validate_type_minmax(column, sop_row$dataType, sop_row$minValue, sop_row$maxValue)
+  
+  # Initialize a variable for field-specific checks
+  field_specific_check <- integer(0)  # Default to an empty vector
+  
+  # Combine all indices of invalid values from SOP and field-specific checks
+  invalid_indices <- combine_unique_indices(SOP_constraints, field_specific_check)
+  
+  # Print the invalid indices and their corresponding values (if any issues)
+  print_invalid_indices_and_values(column, field_name, invalid_indices)
+}
+
+
+```
+
+Five issues have been found in parameter_name column. Some of them are in question format, that may need to be standerdaise.
+
+There are 39 issues with the parameter_id column. They contain parts of description column, alongside of the parameter_id. For example, "housing_cage_dimensions_lxwxh, IMPC_HOU_076_001" should only be "IMPC_HOU_076_001"
+
+There are some empty spaces in some parts of the dataset. For instance, some parts of the description column has no information.
+
+```{r}
+
+```
+
