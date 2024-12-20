@@ -6,6 +6,7 @@ editor: visual
 
 ```{r}
 # Load necessary libraries
+library(tidyverse)
 library(dplyr)
 library(readr)
 library(stringr)
