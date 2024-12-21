@@ -80,12 +80,15 @@ The function can now be applied to all CSV files in the `raw_data` directory to 
 all_files <- list.files(paste0(rootDir, "data/raw_data"), pattern = "\\.csv$", full.names = TRUE)
 
 # Apply the read_and_transform function to each file and combine results into a single data frame
-data_table <- purrr::map_dfr(all_files, read_and_transform)
+analysis_table <- purrr::map_dfr(all_files, read_and_transform)
 # Display the first 6 rows of the data table
-head(data_table)
+head(analysis_table)
 
-# Save the combined table to a new CSV file
-write.csv(data_table, paste0(rootDir, "/temporary/data_table.csv"), row.names = FALSE)
+# Specify the path to the cleaned directory
+output_path <- paste0(rootDir, "data/cleaned/analysis_table.txt")
+
+# Save the combined table to a new txt file
+write.table(analysis_table, file = output_path, sep = ",", quote = FALSE, row.names = FALSE)
 ```
 
 ### Quality Control/Cleaning Using the SOP (Esta)
@@ -148,7 +151,7 @@ Now that we have defined these functions, we can loop through the data table fie
 
 ```{r}
 # Extract field names from the data table
-field_names <- colnames(data_table)
+field_names <- colnames(analysis_table)
 print(field_names)
   
 # Loop through each field name
@@ -159,7 +162,7 @@ for (field_name in field_names) {
     sop_row <- SOP[SOP$dataField == field_name, ]
     
     # Access the column by name
-    column <- data_table[[field_name]]
+    column <- analysis_table[[field_name]]
     
     # Validate the column based on SOP constraints
     SOP_constraints <- validate_type_minmax(column, sop_row$dataType, sop_row$minValue, sop_row$maxValue)
@@ -456,7 +459,7 @@ Saving and Loading the Final Data
 ```{r}
 
 # Specify the path to the cleaned directory
-output_path <- paste0(rootDir, "data/cleaned/cleaned_disease_information.txt")
+output_path <- paste0(rootDir, "data/cleaned/cleaned_Disease_information.txt")
 
 # Save data_frame as a tab-delimited text file
 write.table(data_frame, file = output_path, sep = "\t", row.names = FALSE, quote = FALSE)
@@ -611,19 +614,21 @@ Once a CSV file has been created for each table, the data can be loaded directly
 
 ```{r}
 # Load procedure table 
-procedure <- read_delim(paste0(rootDir, "data/cleaned/cleaned_IMPC_procedure.txt"), delim = ",", quote = "\"", col_names = TRUE)
+procedure <- read_delim(paste0(rootDir, "data/cleaned/cleaned_IMPC_procedure.txt"), delim = ",", quote = "\"")
 
 # Subset, rename columns, and select unique rows
 procedures <- procedure %>%
-  select(impcParameterOrigId, name, description, isMandatory) %>%  # Select specific columns
+  clean_names() %>% 
+  select(impc_parameter_orig_id, name, description, is_mandatory) %>%  # Select specific columns
   distinct() %>%                                                   # Keep only unique rows
-  rename(procedure_id = impcParameterOrigId,                       # Rename columns
+  rename(procedure_id = impc_parameter_orig_id,                       # Rename columns
          procedure_name = name,
          procedure_description = description,
-         procedure_isMandatory = isMandatory)
+         procedure_isMandatory = is_mandatory)
 
+head(procedures)
 # Save the table as CSV 
-write.csv(procedures, file = paste0(rootDir, "/data/cleaned/Procedures.csv"), row.names = FALSE, quote = TRUE)
+write.csv(procedures, file = paste0(rootDir, "/data/collated/Procedures.csv"), row.names = FALSE, quote = TRUE)
 ```
 
 ```{sql}
@@ -639,15 +644,21 @@ IGNORE 1 LINES;
 ### Genes Table
 
 ```{r}
+# Load analysis table 
+analysis <- read_delim(paste0(rootDir, "data/cleaned/analysis_table.txt"), delim = ",")
+
 # Subset the table, ensure unique rows, convert gene symbols to title case, and rename
-genes <- data_table %>%
+genes <- analysis %>%
+  clean_names() %>% 
   mutate(gene_symbol = str_to_title(gene_symbol)) %>%  # Convert gene_symbol to title case 
   select(gene_accession_id, gene_symbol) %>%          # Select specific columns
   distinct() %>%                                      # Keep only unique rows
   rename(gene_id = gene_accession_id)                 # Rename columns
 
+head(genes)
+
 # Save the table as CSV 
-write.csv(genes, file = paste0(rootDir, "/data/cleaned/Genes.csv"), row.names = FALSE, quote = TRUE)
+write.csv(genes, file = paste0(rootDir, "/data/collated/Genes.csv"), row.names = FALSE)
 ```
 
 ```{sql}
@@ -662,12 +673,17 @@ IGNORE 1 LINES;
 ### Parameters Table
 
 ```{r}
+# Load analysis table 
+parameter <- read_delim(paste0(rootDir, "data/cleaned/cleaned_IMPC_parameter_description.txt"), delim = ",")
+
+
 # Select the subset of columns required for the Parameters table
-parameters <- parameter_description %>%
+parameters <- parameter %>%
+  clean_names() %>% 
   mutate_all(~ str_trim(.)) %>%                       # Trim leading/trailing whitespace
   mutate_all(~ ifelse(. %in% c("", "NA"), NA, .)) %>% # Replace empty strings or "NA" with actual NA
-  select(parameterId, name, description) %>%          # Select only the specific columns needed
-  rename(parameter_id = parameterId,                  # Rename the columns
+  select(parameter_id, name, description) %>%          # Select only the specific columns needed
+  rename(parameter_id = parameter_id,                  # Rename the columns
          parameter_name = name,                      
          parameter_description = description) %>%
   group_by(parameter_id) %>%                          # Group by parameter_id
@@ -693,6 +709,14 @@ INTO TABLE Parameters
 FIELDS TERMINATED BY ',' 
 OPTIONALLY ENCLOSED BY '"'
 IGNORE 1 LINES;
+```
+
+### Disease Table
+
+```{r}
+# Load disease table 
+parameter <- read_delim(paste0(rootDir, "data/cleaned/cleaned_Disease_information.txt"), delim = ",")
+
 ```
 
 ## Determining Groupings
