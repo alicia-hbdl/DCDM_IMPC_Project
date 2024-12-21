@@ -339,6 +339,7 @@ pd <- read_delim(parameter_outputFile, delim = ",")
 
 pd
 ```
+
 Observations:
 
 -   There may be a redundancy between name and description, as they often describe the same parameter but in different styles.
@@ -518,7 +519,6 @@ for (field_name in field_names) {
 
 ```
 
-
 -   Five issues have been found in parameter_name column. Some of them are in question format, which may need to be standerdaised..
 
 -   There are 31 issues with the parameter_id column. They contain parts of description column, alongside of the parameter_id. For example, "in English, IMPC_HOU_076_001" should only be "IMPC_HOU_076_001". This is caused by extra commas present within "description" column.
@@ -571,7 +571,7 @@ cat("Cleaned metadata has been saved to:", output_file_parameter, "\n")
 
 ```
 
-Load the cleaned parameter data. 
+Load the cleaned parameter data.
 
 ```{r}
 #| eval: false
