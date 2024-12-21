@@ -15,13 +15,24 @@ Ella - is there anything to write here?
 rm(list = ls())
 
 # Install and load Tidyverse packages
-# install.packages("tidyverse")
+#install.packages(c("tidyverse", "janitor", "stringr"))
 library(tidyverse)
+library(janitor)
+library(stringr)
 ```
 
 ```{r}
 # Define the working directory path in r
+# Alicia
 rootDir = "/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/"
+# Sanj 
+#rootDir = "/Users/sanjanasrinivasan/Desktop/DCDM_IMPC_Project/"
+# Ella
+#rootDir = ""
+# Sama
+#rootDir = ""
+# Esta
+#rootDir = ""
 ```
 
 ## Cleaning the Raw Data Files
@@ -288,14 +299,8 @@ Let's review what the data looks like.
 
 ```{r}
 
-# Loading required libraries
-install.packages(c("tidyverse", "janitor", "stringr"))
-library(tidyverse)
-library(janitor)
-library(stringr)
-
 # Load raw file
-raw_lines <- readLines("/Users/sanjanasrinivasan/Desktop/DCDM_IMPC_Project/data/metadata/Disease_information.txt")
+raw_lines <- readLines(paste0(rootDir, "data/metadata/Disease_information.txt"))
 
 # Inspect the first few rows
 head(raw_lines, 13)
@@ -451,7 +456,7 @@ Saving and Loading the Final Data
 ```{r}
 
 # Specify the path to the cleaned directory
-output_path <- "/Users/sanjanasrinivasan/Desktop/DCDM_IMPC_Project/data/cleaned/disease_information.txt"
+output_path <- paste0(rootDir, "data/cleaned/cleaned_disease_information.txt")
 
 # Save data_frame as a tab-delimited text file
 write.table(data_frame, file = output_path, sep = "\t", row.names = FALSE, quote = FALSE)
@@ -605,6 +610,9 @@ Once a CSV file has been created for each table, the data can be loaded directly
 ### Procedure Table
 
 ```{r}
+# Load procedure table 
+procedure <- read_delim(paste0(rootDir, "data/cleaned/cleaned_IMPC_procedure.txt"), delim = ",", quote = "\"", col_names = TRUE)
+
 # Subset, rename columns, and select unique rows
 procedures <- procedure %>%
   select(impcParameterOrigId, name, description, isMandatory) %>%  # Select specific columns
