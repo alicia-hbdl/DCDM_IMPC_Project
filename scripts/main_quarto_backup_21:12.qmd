@@ -15,13 +15,24 @@ Ella - is there anything to write here?
 rm(list = ls())
 
 # Install and load Tidyverse packages
-# install.packages("tidyverse")
+#install.packages(c("tidyverse", "janitor", "stringr"))
 library(tidyverse)
+library(janitor)
+library(stringr)
 ```
 
 ```{r}
 # Define the working directory path in r
+# Alicia
 rootDir = "/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/"
+# Sanj 
+#rootDir = "/Users/sanjanasrinivasan/Desktop/DCDM_IMPC_Project/"
+# Ella
+#rootDir = ""
+# Sama
+#rootDir = ""
+# Esta
+#rootDir = ""
 ```
 
 ## Cleaning the Raw Data Files
@@ -69,12 +80,15 @@ The function can now be applied to all CSV files in the `raw_data` directory to 
 all_files <- list.files(paste0(rootDir, "data/raw_data"), pattern = "\\.csv$", full.names = TRUE)
 
 # Apply the read_and_transform function to each file and combine results into a single data frame
-data_table <- purrr::map_dfr(all_files, read_and_transform)
+analysis_table <- purrr::map_dfr(all_files, read_and_transform)
 # Display the first 6 rows of the data table
-head(data_table)
+head(analysis_table)
 
-# Save the combined table to a new CSV file
-write.csv(data_table, paste0(rootDir, "/temporary/data_table.csv"), row.names = FALSE)
+# Specify the path to the cleaned directory
+output_path <- paste0(rootDir, "data/cleaned/analysis_table.txt")
+
+# Save the combined table to a new txt file
+write.table(analysis_table, file = output_path, sep = ",", quote = FALSE, row.names = FALSE)
 ```
 
 ### Quality Control/Cleaning Using the SOP (Esta)
@@ -137,7 +151,7 @@ Now that we have defined these functions, we can loop through the data table fie
 
 ```{r}
 # Extract field names from the data table
-field_names <- colnames(data_table)
+field_names <- colnames(analysis_table)
 print(field_names)
   
 # Loop through each field name
@@ -148,7 +162,7 @@ for (field_name in field_names) {
     sop_row <- SOP[SOP$dataField == field_name, ]
     
     # Access the column by name
-    column <- data_table[[field_name]]
+    column <- analysis_table[[field_name]]
     
     # Validate the column based on SOP constraints
     SOP_constraints <- validate_type_minmax(column, sop_row$dataType, sop_row$minValue, sop_row$maxValue)
@@ -192,13 +206,13 @@ Each row includes: 1) a line number 2) a name 3) a description 4) a boolean indi
 
 **Issues**:
 
--   Remove unnecessary quotes surrounding columns and add a comma instead.
+-   Unnecessary double quotes surrounding columns –\> Remove unnecessary quotes and fix column separators.
 
--   Enclose the description column in double quotes to avoid commas in the description column to be misinterpreted as separators.
+-   Commas in the description column misinterpreted as separators –\>Enclose the description column in double quotes.
 
--   Remove the `line_number` variable as it is emppty, and equivalent to `procedure_id` duplicate the same unique information.
+-   `line_number` and `procedureId` duplicate the same unique information –\> Replace `line_number` with `procedureId`.
 
--   HTML symbols are incorrectly encoded, which can be corrected by HTML::Entities but will be ignored for simplicity.
+-   HTML symbols appear incorrectly encoded but will be ignored for simplicity –\> Clean file encoding and ignore invalid characters.
 
 ```{bash}
 # Define working directory path in bash
@@ -243,26 +257,18 @@ Since the file loads correctly in R, we can confirm that the regular expression 
 ### `IMPC_parameter_description.txt (Sama)`
 
 ```{bash}
+#| eval: false
+
 # Define working directory path in bash
 rootDir="/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/"
-
-# Line 2425-2427, 3872, 3873 had unnecessary enters removed manually 
-# Remove leading and trailing quotes
 sed -E 's/^"//; s/"$//; s/" "/,/g;' "${rootDir}/data/metadata/IMPC_parameter_description.txt" |
-# Remove the line_number prefix
-sed -E 's/^line_number,//' |
-# Remove the corresponding line number
-sed -E 's/^[0-9]{1,4},(.*)$/\1/' |
-# Join lines where the next line doesn't start with a number
-sed -E 'N; s/\n([^0-9])/\1/; P; D' |
-sed -E 'N; s/\n([^0-9])/\1/; P; D' |
-# Format selected fields with double quotes
-sed -E 's/^([0-9]{4,5},)([^,]+),(.*),( IMPC_[A-Z]{3}_[0-9]{3}_[0-9]{3})$/\1"\2","\3",\4/' |
+sed -E 's/^([0-9]{1,4},[0-9]{5}, )(.*)(,[^,]+, IMPC_[A-Z]{3}_[0-9]{3}_[0-9]{3})$/\1"\2"\3/' |
 sed -E 's/^x//' > "${rootDir}/data/cleaned/cleaned_IMPC_parameter_description.txt"
-
 ```
 
 ```{r}
+#| eval: false
+
 # Load the cleaned parameter data
 parameter_description <- read.table(
   file = paste0(rootDir, "data/cleaned/cleaned_IMPC_parameter_description.txt"), # File path
@@ -278,20 +284,197 @@ head(parameter_description)
 
 ### `disease_information.txt (Sanj)`
 
+The Disease_information.txt file contains metadata with four key columns: disease_id, disease_term, gene_accession_id, and phenodigm_score.
+
+Issues:
+
+-   Unecessary rows and formatting (redundant "x" row at the top, row numbers and surrounding double quotes embedded within data) –\> Remove unnecessary rows, row numbers and extraneous quotes
+
+-   The disease_term column contains commas misinterpreted as separators -\> Combine split fields to ensure disease_term remains intact
+
+-   phenodigm_score contains non-numeric characters and extra spaces -\> Clean non-numeric values and safely convert to numeric format
+
+-   Row numbers and quotes appear in the disease_id column -\> Clean disease_id to remove row numbers and quotes
+
+-   Duplicate disease_id values exist –\> We need to decide if they are meaningful (they have unique phenodigm scores for reference)
+
+Let's review what the data looks like.
+
 ```{r}
-#| eval: false
 
-# Load the cleaned parameter data
+# Load raw file
+raw_lines <- readLines(paste0(rootDir, "data/metadata/Disease_information.txt"))
+
+# Inspect the first few rows
+head(raw_lines, 13)
+```
+
+Key Observations: 1)An unnecessary x row exists at the top. 2) Row numbers and extra quotes are embedded in the data. disease_term fields contain commas causing extra splits.
+
+To prepare the data for further processing:1) Remove the first "x" row. 2) Strip row numbers and surrounding quotes.
+
+```{r}
+# Remove the "x" row
+cleaned_lines <- raw_lines[-1]  # Remove the first row ("x")
+
+# Remove row numbers and surrounding quotes
+cleaned_lines <- cleaned_lines %>%
+  str_remove_all('^\\d+\\"\\s') %>%   #
+  str_remove_all('^"|"$')           # Remove the outer pair of quotes
+
+
+# Inspect the cleaned lines
+head(cleaned_lines, 14)
+```
+
+Some disease_term fields contain commas, splitting the data into extra columns. Here, we fix that issue by combining split fields.
+
+```{r}
+# Function to process and clean split rows
+process_split_row <- function(row) {
+  # Split the row by commas outside quotes
+  split_row <- str_split(row, ",\\s*(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)")[[1]]
+  
+  # Check if the split_row has more than 4 fields (indicating a split disease term)
+  if (length(split_row) > 4) {
+    # Combine extra fields in the disease_term column
+    disease_term <- paste(split_row[2:(length(split_row) - 2)], collapse = ", ")
+    return(c(split_row[1], disease_term, split_row[length(split_row) - 1], split_row[length(split_row)]))
+  } else {
+    # Return the row as is if it's already properly split
+    return(split_row)
+  }
+}
+
+# Apply the function to all cleaned lines
+split_data <- map(cleaned_lines, process_split_row)
+
+#Inspect split_data
+str(split_data) #This revealed that the phenodigm scores are character values
+
+# Inspect a sample of split_data
+head(split_data, 20)
+
+# Find problematic rows (e.g., empty or improperly split rows)
+problematic_rows <- which(map_int(split_data, length) != 4)
+print("Indices of problematic rows:")
+print(problematic_rows) #Shows that all the rows have been split well
+
+# Create data_frame from split_data 
+data_frame <- split_data %>%
+  map(~ set_names(as.list(.), c("disease_id", "disease_term", "gene_accession_id", "phenodigm_score"))) %>%
+  bind_rows()
+
+```
+
+The phenodigm_score column contains non-numeric characters and spaces. We clean and convert it safely to numeric.
+
+```{r}
+
+# Clean the phenodigm_score column
+data_frame <- data_frame %>%
+  mutate(
+    phenodigm_score = str_trim(phenodigm_score),  # Remove leading/trailing spaces
+    phenodigm_score = str_replace_all(phenodigm_score, "[^0-9\\.]", "")  # Remove non-numeric characters except "."
+  )
+
+#After cleaning, convert the column to numeric.
+data_frame <- data_frame %>%
+  mutate(
+    phenodigm_score = as.numeric(phenodigm_score)
+  )
+
+#After cleaning, check for any remaining NAs
+remaining_na <- data_frame %>%
+  filter(is.na(phenodigm_score))
+
+print("Rows with remaining NA values in phenodigm_score:")
+print(remaining_na)
+
+#Inspect the data to verify changes
+str(data_frame)
+summary(data_frame)
+```
+
+Final Cleanup: Fix Rows and Disease IDs 1) Drop the extra header row. 2) Clean disease_id to remove row numbers and quotes.
+
+```{r}
+# Remove the first row
+data_frame <- data_frame[-1, ]  # Drop the first row
+head(data_frame)
+
+# Clean disease_id column
+data_frame <- data_frame %>%
+  mutate(
+    disease_id = str_remove(disease_id, '^\\d+\\"\\s'), # Remove row numbers and quotes
+    disease_id = str_remove_all(disease_id, '^"|"$')    # Remove any remaining outer quotes
+  )
+
+#Verify changes
+head(data_frame)
+
+```
+
+Final Quality Checks: Verify the dataset for: correct data types, missing values, duplicates, proper formatting
+
+```{r}
+# Verify data types
+str(data_frame)
+
+# Confirm numeric values for phenodigm_score
+summary(data_frame$phenodigm_score)
+
+# Count missing values in each column
+colSums(is.na(data_frame)) #shows there are no missing values in any of the columns
+
+# Verify uniqueness of disease_id
+unique_disease_ids <- nrow(data_frame) == length(unique(data_frame$disease_id))
+
+if (unique_disease_ids) {
+  print("All disease_id values are unique!")
+} else {
+  print("Warning: Duplicate disease_id values found.")
+} #Duplicate disease_id values found!!!
+
+# Check disease_id format (e.g., OMIM:xxxx or ORPHA:xxxx)
+invalid_disease_ids <- data_frame %>%
+  filter(!str_detect(disease_id, "^(OMIM|ORPHA):\\d+$"))
+
+print("Invalid disease_id values:")
+print(invalid_disease_ids) #none
+
+# Check gene_accession_id format (e.g., MGI:xxxxx)
+invalid_gene_ids <- data_frame %>%
+  filter(!str_detect(gene_accession_id, "^MGI:\\d+$"))
+
+print("Invalid gene_accession_id values:")
+print(invalid_gene_ids) #none
+
+```
+
+Are duplicate disease_ids meaningful? Should we leave them as is or should we aggregate them into unique rows by taking a mean of the phenodigm score?
+
+Saving and Loading the Final Data
+
+```{r}
+
+# Specify the path to the cleaned directory
+output_path <- paste0(rootDir, "data/cleaned/cleaned_Disease_information.txt")
+
+# Save data_frame as a tab-delimited text file
+write.table(data_frame, file = output_path, sep = "\t", row.names = FALSE, quote = FALSE)
+
+# Load the final cleaned data
 disease_information <- read.table(
-  file = paste0(rootDir, "data/metadata/disease_information.txt"), # File path
-  header = TRUE,                 # First row contains column names
-  sep = ",",                     # Fields are separated by commas
-  quote = '"',                   # Handle quoted fields
-  stringsAsFactors = FALSE,      # Prevent character columns from converting to factors
-  check.names = FALSE            # Keep column names as-is, even if they contain spaces or special characters
-)
+  file = output_path, 
+  header = TRUE,          # Use the first row as column names 
+  sep = "\t",             # Tab-delimited
+  stringsAsFactors = FALSE) # Avoid character columns from converting to factors
 
-# Display the loaded data in a tabular format
+# Verify the loaded data
+str(disease_information)
+
+#Display the cleaned and loaded data in tabular format
 head(disease_information)
 
 ```
@@ -430,17 +613,22 @@ Once a CSV file has been created for each table, the data can be loaded directly
 ### Procedure Table
 
 ```{r}
+# Load procedure table 
+procedure <- read_delim(paste0(rootDir, "data/cleaned/cleaned_IMPC_procedure.txt"), delim = ",", quote = "\"")
+
 # Subset, rename columns, and select unique rows
 procedures <- procedure %>%
-  select(impcParameterOrigId, name, description, isMandatory) %>%  # Select specific columns
+  clean_names() %>% 
+  select(impc_parameter_orig_id, name, description, is_mandatory) %>%  # Select specific columns
   distinct() %>%                                                   # Keep only unique rows
-  rename(procedure_id = impcParameterOrigId,                       # Rename columns
+  rename(procedure_id = impc_parameter_orig_id,                       # Rename columns
          procedure_name = name,
          procedure_description = description,
-         procedure_isMandatory = isMandatory)
+         procedure_isMandatory = is_mandatory)
 
+head(procedures)
 # Save the table as CSV 
-write.csv(procedures, file = paste0(rootDir, "/data/cleaned/Procedures.csv"), row.names = FALSE, quote = TRUE)
+write.csv(procedures, file = paste0(rootDir, "/data/collated/Procedures.csv"), row.names = FALSE, quote = TRUE)
 ```
 
 ```{sql}
@@ -456,20 +644,41 @@ IGNORE 1 LINES;
 ### Genes Table
 
 ```{r}
+# Load analysis table 
+analysis <- read_delim(paste0(rootDir, "data/cleaned/analysis_table.txt"), delim = ",")
+disease <- read_delim(paste0(rootDir, "data/cleaned/cleaned_Disease_information.txt"), delim = "\t")
+head(disease)
+
 # Subset the table, ensure unique rows, convert gene symbols to title case, and rename
-genes <- data_table %>%
+genes <- analysis %>%
+  clean_names() %>% 
   mutate(gene_symbol = str_to_title(gene_symbol)) %>%  # Convert gene_symbol to title case 
   select(gene_accession_id, gene_symbol) %>%          # Select specific columns
   distinct() %>%                                      # Keep only unique rows
   rename(gene_id = gene_accession_id)                 # Rename columns
 
+# Find `gene_id`s in `disease` table that are not in `genes`
+missing_genes <- disease %>%
+  select(gene_accession_id) %>%                # Extract gene IDs from `disease`
+  rename(gene_id = gene_accession_id) %>%
+  distinct() %>%                               # Ensure unique rows
+  filter(!gene_id %in% genes$gene_id)          # Find those not in `genes`
+
+# Add missing `gene_id`s to `genes` with `gene_symbol` as NULL; here we could manually search them and add them! 
+genes <- genes %>%
+  bind_rows(missing_genes %>% 
+  mutate(gene_symbol = NA)) %>% # Add missing genes with NA for gene_symbol
+  distinct()                    # Ensure no duplicates
+
+head(genes)
+
 # Save the table as CSV 
-write.csv(genes, file = paste0(rootDir, "/data/cleaned/Genes.csv"), row.names = FALSE, quote = TRUE)
+write.csv(genes, file = paste0(rootDir, "/data/collated/Genes.csv"), row.names = FALSE)
 ```
 
 ```{sql}
 #| eval: false
-LOAD DATA LOCAL INFILE '/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/cleaned/Genes.csv'
+LOAD DATA LOCAL INFILE '/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/collated/Genes.csv'
 INTO TABLE Genes
 FIELDS TERMINATED BY ',' 
 OPTIONALLY ENCLOSED BY '"'
@@ -479,12 +688,17 @@ IGNORE 1 LINES;
 ### Parameters Table
 
 ```{r}
+# Load analysis table 
+parameter <- read_delim(paste0(rootDir, "data/cleaned/cleaned_IMPC_parameter_description.txt"), delim = ",")
+
+
 # Select the subset of columns required for the Parameters table
-parameters <- parameter_description %>%
+parameters <- parameter %>%
+  clean_names() %>% 
   mutate_all(~ str_trim(.)) %>%                       # Trim leading/trailing whitespace
   mutate_all(~ ifelse(. %in% c("", "NA"), NA, .)) %>% # Replace empty strings or "NA" with actual NA
-  select(parameterId, name, description) %>%          # Select only the specific columns needed
-  rename(parameter_id = parameterId,                  # Rename the columns
+  select(parameter_id, name, description) %>%          # Select only the specific columns needed
+  rename(parameter_id = parameter_id,                  # Rename the columns
          parameter_name = name,                      
          parameter_description = description) %>%
   group_by(parameter_id) %>%                          # Group by parameter_id
@@ -493,7 +707,7 @@ parameters <- parameter_description %>%
 
 parameters[(nchar(parameters$parameter_name))> 74, ]
 # Save the table as CSV 
-write.csv(parameters, file = paste0(rootDir, "/data/cleaned/Parameters.csv"), row.names = FALSE, quote = TRUE)
+write.csv(parameters, file = paste0(rootDir, "/data/collated/Parameters.csv"), row.names = FALSE, quote = TRUE)
 ```
 
 *\*Some of the IDs appeared to be duplicated, but upon inspection, the rows contained equivalent values (e.g., for IMPC_HIS_010_001: "Eye with optic nerve - Severity score" and "Eye - Severity score"). Given the same identifier and the similarity of these terms, it is reasonable to assume that they refer to the same parameter, and only one of the duplicates was uploaded to the database.*
@@ -505,11 +719,116 @@ write.csv(parameters, file = paste0(rootDir, "/data/cleaned/Parameters.csv"), ro
 ![](images/Screenshot%202024-12-18%20at%2015.26.12.png)
 
 ```{sql}
-LOAD DATA LOCAL INFILE '/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/cleaned/Parameters.csv'
+#| eval: false
+LOAD DATA LOCAL INFILE '/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/collated/Parameters.csv'
 INTO TABLE Parameters
 FIELDS TERMINATED BY ',' 
 OPTIONALLY ENCLOSED BY '"'
 IGNORE 1 LINES;
+```
+
+### Disease Table
+
+```{r}
+# Select the subset of columns required for the Parameters table
+diseases <- disease %>%
+  clean_names() %>% 
+  select(disease_id, disease_term) %>%          # Select only the specific columns needed
+  distinct()
+
+head(diseases)
+
+write.csv(diseases, file = paste0(rootDir, "/data/collated/Diseases.csv"), row.names = FALSE, quote = TRUE) 
+```
+
+```{sql}
+#| eval: false
+LOAD DATA LOCAL INFILE '/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/collated/Diseases.csv'
+INTO TABLE Diseases
+FIELDS TERMINATED BY ',' 
+OPTIONALLY ENCLOSED BY '"'
+IGNORE 1 LINES;
+```
+
+### PhenoDigm Score Table
+
+```{r}
+# Select the subset of columns required for the Parameters table
+phenodigm_scores <- disease %>%
+  clean_names() %>% 
+  select(disease_id, gene_accession_id, phenodigm_score) %>%          # Select only the specific columns needed
+  distinct()
+
+write.csv(phenodigm_scores, file = paste0(rootDir, "/data/collated/PhenodigmScores.csv"), row.names = FALSE, quote = TRUE) 
+```
+
+```{sql}
+#| eval: false
+LOAD DATA LOCAL INFILE '/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/collated/PhenodigmScores.csv'
+INTO TABLE PhenodigmScores
+FIELDS TERMINATED BY ',' 
+OPTIONALLY ENCLOSED BY '"' 
+LINES TERMINATED BY '\n' 
+IGNORE 1 LINES
+(disease_id, gene_id, phenodigm_score); -- so that the phenodigm_id is created dynamically
+```
+
+## parameterXprocedure
+
+```{r}
+parameterXprocedure <- parameter %>%
+  clean_names() %>% 
+  mutate_all(~ str_trim(.)) %>%                       # Trim leading/trailing whitespace
+  mutate_all(~ ifelse(. %in% c("", "NA"), NA, .)) %>% # Replace empty strings or "NA" with actual NA
+  select(parameter_id, impc_parameter_orig_id)   %>%   
+  rename(# Select only the specific columns needed  rename(parameter_id = parameter_id,                  # Rename the columns
+      parameter_id = parameter_id,                      
+      procedure_id = impc_parameter_orig_id) %>%
+    distinct()
+
+
+head(parameterXprocedure)
+# Save the table as CSV 
+write.csv(parameterXprocedure, file = paste0(rootDir, "/data/collated/parameterXprocedure.csv"), row.names = FALSE, quote = TRUE)
+```
+
+```{sql}
+#| eval: false
+LOAD DATA LOCAL INFILE '/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/collated/parameterXprocedure.csv'
+INTO TABLE parameterXprocedure
+FIELDS TERMINATED BY ',' 
+OPTIONALLY ENCLOSED BY '"' 
+LINES TERMINATED BY '\n'
+IGNORE 1 LINES; -- so that the phenodigm_id is created dynamically
+```
+
+### Analysis Table
+
+```{r}
+# Load analysis table 
+analysis <- read_delim(paste0(rootDir, "data/cleaned/analysis_table.txt"), delim = ",")
+
+head(analysis)
+analyses <- analysis %>%
+  clean_names() %>% 
+  mutate_all(~ str_trim(.)) %>%                       # Trim leading/trailing whitespace
+  mutate_all(~ ifelse(. %in% c("", "NA"), NA, .)) %>% # Replace empty strings or "NA" with actual NA
+  select(analysis_id, gene_accession_id, mouse_strain, mouse_life_stage, parameter_id, pvalue)   %>%  
+    rename(# Select only the specific columns needed  rename(parameter_id = parameter_id,                  # Rename the columns
+      p_value = pvalue)   %>%  
+    distinct()
+head(analyses)
+write.csv(analyses, file = paste0(rootDir, "/data/collated/Analyses.csv"), row.names = FALSE, quote = TRUE)
+```
+
+```{sql}
+#| eval: false
+LOAD DATA LOCAL INFILE '/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/collated/Analyses.csv'
+INTO TABLE Analyses
+FIELDS TERMINATED BY ',' 
+OPTIONALLY ENCLOSED BY '"' 
+LINES TERMINATED BY '\n'
+IGNORE 1 LINES; -- so that the phenodigm_id is created dynamically
 ```
 
 ## Determining Groupings
@@ -556,11 +875,14 @@ SELECT Analyses.p_value, Parameters.parameter_name
 FROM Analyses 
 JOIN Parameters ON Analyses.parameter_id = Parameters.parameter_id 
 WHERE Analyses.gene_id IN (
-SELECT gene_id 
-FROM Genes 
-WHERE gene_symbol = 'x')
+    SELECT gene_id 
+    FROM Genes 
+    WHERE gene_symbol IN ('Ifi204', 'Mettl21c', 'Ier5', 'Abca4')
+)
 ORDER BY Analyses.p_value ASC;
 ```
+
+![](images/Screenshot 2024-12-21 at 16.21.52.png)
 
 **Test R/Shiny 2:** The collaborator also wishes to visualise the statistical scores of all knockout mice for a selected phenotype.
 
@@ -570,9 +892,28 @@ SELECT Analyses.p_value, Genes.gene_symbol
 FROM Analyses 
 JOIN Parameters ON Analyses.parameter_id = Parameters.parameter_id 
 JOIN Genes ON Analyses.gene_id = Genes.gene_id 
-WHERE Parameters.parameter_name = 'x'
+WHERE Parameters.parameter_name IN (
+    'Facial Cleft',
+    'Lens Opacity',
+    'Triglycerides',
+    'Skin color - tail',
+    'Potassium',
+    'HRV',
+    'Hindbrain morphology',
+    'Aspartate aminotransferase',
+    'Tibia length',
+    'Left total retinal thickness',
+    'Embryo Size',
+    'Effector CD4+ T helper cells - % of live leukocytes (Panel A)',
+    'Limb morphology',
+    'Coat - color - back',
+    'Aggression',
+    'Joints'
+)
 ORDER BY Analyses.p_value ASC;
 ```
+
+![](images/Screenshot 2024-12-21 at 16.22.09.png)
 
 **Test R/Shiny 3:** The collaborator would like to visualise clusters of genes with similar phenotype scores.  
 
@@ -581,3 +922,5 @@ ORDER BY Analyses.p_value ASC;
 
 SELECT Genes.gene_symbol, Parameters.parameter_name, Analyses.p_value FROM Analyses JOIN Parameters ON Analyses.parameter_id = Parameters.parameter_id JOIN Genes ON Analyses.gene_id = Genes.gene_id; 
 ```
+
+![](images/Screenshot 2024-12-21 at 16.22.33.png)
