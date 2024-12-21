@@ -217,7 +217,7 @@ Each row includes: 1) a line number 2) a name 3) a description 4) a boolean indi
 ```{r}
 
 procedure_path <- paste0(rootDir, "/data/metadata/IMPC_procedure.txt")
-procedure_outputFile <- paste0(rootDir, "/data/cleaned/cleaned_IMPC_Procedure.txt")
+procedure_outputFile <- paste0(rootDir, "/data/cleaned/cleaned_IMPC_procedure.txt")
 
 # Read the file
 procedure <- readLines(procedure_path, encoding = "UTF-8")
@@ -274,7 +274,7 @@ view(procedure)
 procedure <- iconv(procedure, from = "UTF-8", to = "UTF-8//IGNORE")
 
 # Save the cleaned data
-writeLines(procedure, outputFile)
+writeLines(procedure, procedure_outputFile)
 ```
 
 ```{r}
@@ -307,7 +307,7 @@ Using readLines(), the metadata file is read and formatting lines as per specifi
 
 ```{r}
 parameter_path <- paste0(rootDir, "/data/metadata/IMPC_parameter_description.txt")
-outputFile = paste0(rootDir, "/temporary/IMPC_Parameter_Description.txt")
+parameter_outputFile = paste0(rootDir, "/temporary/IMPC_Parameter_Description.txt")
 
 # Read the file
 lines <- readLines(parameter_path)
@@ -320,7 +320,7 @@ lines_cleaned <- lines %>%
                 '\\1"\\2"\\3"\\4')
 
 # Write the modified lines to a txt file
-writeLines(lines_cleaned, outputFile)
+writeLines(lines_cleaned, parameter_outputFile)
 
 ```
 
@@ -335,7 +335,7 @@ Opening the saved .txt file of the metadata with a specific format using read_de
 
 ```{r}
 # Read the metadata file (assuming tab-delimited, change delimiter if needed)
-pd <- read_delim(outputFile, delim = ",")
+pd <- read_delim(parameter_outputFile, delim = ",")
 
 pd
 ```
@@ -564,7 +564,7 @@ pd <- pd %>%
 output_file_parameter <- paste0(rootDir, "data/cleaned/cleaned_IMPC_parameter_description.txt")
 
 # Save the cleaned metadata
-write.csv(pd, file = output_file_path, row.names = FALSE)
+write.csv(pd, file = output_file_parameter, row.names = FALSE)
 
 # Completion message
 cat("Cleaned metadata has been saved to:", output_file_parameter, "\n")
