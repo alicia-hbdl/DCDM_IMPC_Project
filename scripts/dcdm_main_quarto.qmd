@@ -865,6 +865,12 @@ parameters$parameter_name[is.na(parameters$parameter_group)]
 
 ```
 
+## Create dump
+
+```{bash}
+/opt/homebrew/bin/mysqldump IMPCDb -u root -p > /Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/database/IMPCDb.dump
+```
+
 # R/Shiny
 
 **Test R/Shiny 1:** They want the ability to select a particular knockout mouse and visualise the statistical scores of all phenotypes tested.
