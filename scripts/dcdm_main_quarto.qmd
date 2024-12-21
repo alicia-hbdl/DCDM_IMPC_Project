@@ -37,7 +37,168 @@ rootDir = "/Users/sama/Desktop/DCDM_Proj2/"
 
 ## Cleaning the Raw Data Files
 
-### Combining the Raw Data in a Table (Esta?)
+### Quality Control/Cleaning Using the SOP (Esta)
+
+The experiment data comes with an SOP specifying constraints for each field, including data type, minimum and maximum values for numerical data, length for strings, and specific values for certain fields. Data quality can be assessed by comparing the raw data to these predefined constraints.
+
+Here, we have cleaned all the csv files by modifying the row names to match those specified in the SOP file.
+
+First, we define the directory paths & the log file path.
+
+```{r}
+# Defing directory paths
+data_dir <- "raw_data"
+output_dir <- "updated_data"
+# New log file
+log_file <- "row_name_modification.log"
+
+# Creates output directory if it doesn't already exist & supresses warnings if it does exist
+dir.create(output_dir, showWarnings = FALSE)
+
+# Clear the log file if it exists or creates it if it doesn't
+file.create(log_file)
+```
+
+Then we load the SOP file. Here, I have normalized the row names to lowercase although this isn't strictly necessary for this specific file.
+
+```{r}
+# Load the SOP file and normalize row names to lowercase
+expected_row_names <- tolower(read_csv("metadata/IMPC_SOP.csv", show_col_types = FALSE)$dataField)
+
+```
+
+Now that we have the correct files loaded and the directories specified, we define a function to do three things: 1). Identify spelling mistakes in the existing row names and fix them (in these files, only uppercase to lowercase transformation is needed). 2). Add any missing rows and assign an NA value to the second column for the corresponding row(s) - this is only done after modifying misspelt row names. 3). Reordering the rows to match the SOP layout.
+
+```{r}
+
+# Function to validate, update, and reorder row names
+process_file <- function(file_path) {
+  # Read the file specified by file_path
+  data <- tryCatch(
+    read_csv(file_path, col_names = TRUE, show_col_types = FALSE),
+    error = function(e) {
+      message(paste("Error reading file:", file_path, "-", e))
+      return(NULL)
+    }
+  )
+  if (is.null(data)) return(FALSE)
+  
+  # Normalize row names and identify missing rows
+  data[[1]] <- tolower(data[[1]])
+  missing_rows <- setdiff(expected_row_names, data[[1]])
+  
+  # Add missing rows with NA values in the second column
+  if (length(missing_rows) > 0) {
+    missing_data <- tibble(
+      !!colnames(data)[1] := missing_rows,  # First column: missing row names
+      !!colnames(data)[2] := NA            # Second column: NA values
+    )
+    data <- bind_rows(data, missing_data)
+  }
+  
+  # Reorder rows and save the updated file
+  data <- data %>% arrange(match(data[[1]], expected_row_names))
+  write_csv(data, file.path(output_dir, basename(file_path)))
+  
+  return(TRUE)
+}
+```
+
+We now use this function on all the data files - this will produce an "updated_data" folder and a log file in the main directory.
+
+```{r}
+# Process all files and log results
+files <- list.files(data_dir, pattern = "\\.csv$", full.names = TRUE)
+validation_results <- sapply(files, process_file)
+
+# Write summary to log
+summary_message <- sprintf(
+  "Validation Summary:\nTotal files checked: %d\nTotal updated files: %d\n",
+  length(validation_results), sum(validation_results)
+)
+cat(summary_message, file = log_file)
+message(summary_message)
+```
+
+The summary message displayed the number of files validated out of the total number in the raw_data folder - this will be be displayed on the console and in the log file. The log file has been reduced down to just contain that information but was originally carried out on a subset of 600 files and clearly displayed the row name differences between those files and the SOP.
+
+Once the file modification is done, we run one final validation only script to make sure there are no unexpected row name differences.
+
+```{r}
+data_dir <- "updated_data"  # Directory containing the updated data files
+log_file <- "row_name_validation.log"  # Log file for results
+
+# Load SOP and normalize row names
+expected_row_names <- tolower(read_csv("metadata/IMPC_SOP.csv", show_col_types = FALSE)$dataField)
+
+# Clear the log file
+file.create(log_file)
+
+# Function to validate a file against the SOP layout and column count
+validate_file <- function(file_path, expected_row_names) {
+  # Read the file
+  data <- tryCatch(
+    read_csv(file_path, col_names = TRUE, show_col_types = FALSE),
+    error = function(e) {
+      message(paste("Error reading file:", file_path, "-", e))
+      return(list(valid = FALSE, message = "Error reading file"))
+    }
+  )
+  
+  # Skip files that could not be read
+  if (is.null(data)) return(list(valid = FALSE, message = "File could not be read"))
+  
+  # Check column count
+  if (ncol(data) != 2) {
+    return(list(valid = FALSE, message = paste("Invalid column count:", ncol(data), "(expected: 2)")))
+  }
+  
+  # Normalize row names (first column) and check against SOP
+  row_names <- tolower(data[[1]])
+  missing_rows <- setdiff(expected_row_names, row_names)
+  extra_rows <- setdiff(row_names, expected_row_names)
+  
+  # Validate row names
+  if (length(missing_rows) > 0 || length(extra_rows) > 0) {
+    message <- ""
+    if (length(missing_rows) > 0) {
+      message <- paste(message, "Missing row names:", paste(missing_rows, collapse = ", "), "\n")
+    }
+    if (length(extra_rows) > 0) {
+      message <- paste(message, "Extra row names:", paste(extra_rows, collapse = ", "), "\n")
+    }
+    return(list(valid = FALSE, message = message))
+  }
+  
+  return(list(valid = TRUE, message = "File is valid"))
+}
+
+# Process all files in the data directory
+files <- list.files(data_dir, pattern = "\\.csv$", full.names = TRUE)
+validation_results <- lapply(files, function(file_path) {
+  result <- validate_file(file_path, expected_row_names)
+  message <- paste(basename(file_path), ":", result$message, "\n")
+  cat(message, file = log_file, append = TRUE)
+  return(result$valid)
+})
+
+# Summarize results
+valid_files <- sum(unlist(validation_results))
+total_files <- length(validation_results)
+
+# Write summary to log
+summary_message <- paste(
+  "Validation Summary:\n",
+  "Total files checked:", total_files, "\n",
+  "Total valid files:", valid_files, "\n"
+)
+cat(summary_message, file = log_file, append = TRUE)
+message(summary_message)
+```
+
+These scripts can be run locally & on HPC with a few minimal changes (i.e. loading individual dplyr & readr packages rather than whole tidyverse package).
+
+### Combining the Raw Data in a Table (Ella?)
 
 --\> This step can be done in bash after quality control (collating by Ella).
 
@@ -91,114 +252,9 @@ output_path <- paste0(rootDir, "data/cleaned/analysis_table.txt")
 write.table(analysis_table, file = output_path, sep = ",", quote = FALSE, row.names = FALSE)
 ```
 
-### Quality Control/Cleaning Using the SOP (Esta)
+2nd Column Data Cleaning... (To be done after collating data on HPC??? - Esta)
 
-The experiment data comes with an SOP specifying constraints for each field, including data type, minimum and maximum values for numerical data, length for strings, and specific values for certain fields. Data quality can be assessed by comparing the raw data to these predefined constraints.
-
-First, have a look at the SOP to identify the constraints.
-
-```{r}
-SOP <- read.csv(paste0(rootDir, "data/metadata/IMPC_sop.csv"))
-SOP
-```
-
-For each column, we need to check similar things, like whether the data is the correct type (e.g., string or number), whether it has the right length (for strings) or size (for floats), and whether it matches allowed values, like for `mouse_strain` and `mouse_life_stage`. We may also need to find missing values. For each issue, we want to print the value and its index. To make this process less repetitive, we can create reusable functions.
-
-*Here, it would be good to check if the functions work as intended on values that should output an error (e.g. fake table containing rows each violating a single constraint for a parameter).*
-
-```{r}
-# These functions check if values meet specific criteria and return the indices of values that do not meet the criteria.
-
-# Function to validate values based on the SOP type ("String" or "Float")
-# For strings, it checks the string length; for numeric values, it checks the value directly.
-validate_type_minmax <- function(x, dataType, min_val, max_val) {
-  if (tolower(dataType) == "string") {
-    which(sapply(x, nchar) < min_val | sapply(x, nchar) > max_val)
-  } else if (tolower(dataType) == "float") {
-    which(as.numeric(x) < min_val | as.numeric(x) > max_val)
-  } 
-}
-
-# Check if values in a list are within the allowed values of a given vector
-check_allowed_values <- function(values, allowed_values) {
-  which(!values %in% allowed_values) # Find indices of invalid values
-}
-
-# Function to combine multiple lists of indices and return unique indices
-combine_unique_indices <- function(...) {
-  sort(unique(unlist(list(...))))
-}
-
-# Function to print the indices and values were issues were identified
-print_invalid_indices_and_values <- function(x, variable_name, invalid_indices) {
-  # Count the number of issues
-  num_issues <- length(invalid_indices)
-  
-  # Print the contextual message
-  cat("The '", variable_name, "' column has ", num_issues, " issue(s).\n", sep = "")
-  
-  # Print indices and values if there are any issues
-  if (num_issues > 0) {
-    cat("Indices:\n")
-    print(invalid_indices)
-    cat("Values:\n")
-    print(x[invalid_indices])
-  }
-}
-```
-
-Now that we have defined these functions, we can loop through the data table fields, extract the corresponding constraints from the SOP, and validate them using the functions.
-
-```{r}
-# Extract field names from the data table
-field_names <- colnames(analysis_table)
-print(field_names)
-  
-# Loop through each field name
-for (field_name in field_names) {
-    cat("Processing field:", field_name, "\n")
-    
-    # Extract the corresponding row in the SOP
-    sop_row <- SOP[SOP$dataField == field_name, ]
-    
-    # Access the column by name
-    column <- analysis_table[[field_name]]
-    
-    # Validate the column based on SOP constraints
-    SOP_constraints <- validate_type_minmax(column, sop_row$dataType, sop_row$minValue, sop_row$maxValue)
-    
-  # Check field-specific constraints
-  # Initialize a variable for checking valid values
-  field_specific_check <- integer(0) # Default to an empty vector
-
-  if (field_name == "mouse_strain") {
-    valid_mouse_strains <- c("C57BL", "B6J", "C3H", "129SV")
-    field_specific_check <- check_allowed_values(column, valid_mouse_strains)
-  } else if (field_name == "mouse_life_stage") {
-    valid_mouse_life_stages <- c(
-      "E12.5", "E15.5", "E18.5", "E9.5", 
-      "Early adult", "Late adult", "Middle aged adult"
-    )
-    field_specific_check <- check_allowed_values(column, valid_mouse_life_stages)
-  } else if (field_name == "analysis_id") {
-    # Check if unique
-    field_specific_check <- which(duplicated(column))
-  } else if (field_name == "gene_symbol") {
-    # Check if in title format
-    field_specific_check <- which(!grepl("^[A-Z][a-zA-Z0-9]*$", column))
-  }
-    
-    # Combine all indices of invalid values
-    indices <- combine_unique_indices(SOP_constraints, field_specific_check)
-    
-    # Print the invalid indices and their corresponding values
-    print_invalid_indices_and_values(column, field_name, indices)
-}
-```
-
-*The next step is to handle the issues. Do we cap the p-values at 1? Do we remove the data from incorrect strains?*
-
-## Cleaning the Metadata Files
+For each column, we need to check similar things, like whether the data is the correct type (e.g., string or number), whether it has the right length (for strings) or size (for floats), and whether it matches allowed values, like for `mouse_strain` and `mouse_life_stage`. We may also need to find missing values. For each issue, we want to print the value and its index. To make this process less repetitive, we can create reusable functions.Cleaning the Metadata Files
 
 ### `IMPC_procedure.txt (Alicia)`
 
