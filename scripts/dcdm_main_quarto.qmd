@@ -692,7 +692,7 @@ parameters <- parameter %>%
 
 parameters[(nchar(parameters$parameter_name))> 74, ]
 # Save the table as CSV 
-write.csv(parameters, file = paste0(rootDir, "/data/cleaned/Parameters.csv"), row.names = FALSE, quote = TRUE)
+write.csv(parameters, file = paste0(rootDir, "/data/collated/Parameters.csv"), row.names = FALSE, quote = TRUE)
 ```
 
 *\*Some of the IDs appeared to be duplicated, but upon inspection, the rows contained equivalent values (e.g., for IMPC_HIS_010_001: "Eye with optic nerve - Severity score" and "Eye - Severity score"). Given the same identifier and the similarity of these terms, it is reasonable to assume that they refer to the same parameter, and only one of the duplicates was uploaded to the database.*
@@ -704,6 +704,7 @@ write.csv(parameters, file = paste0(rootDir, "/data/cleaned/Parameters.csv"), ro
 ![](images/Screenshot%202024-12-18%20at%2015.26.12.png)
 
 ```{sql}
+#| eval: false
 LOAD DATA LOCAL INFILE '/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/cleaned/Parameters.csv'
 INTO TABLE Parameters
 FIELDS TERMINATED BY ',' 
@@ -715,8 +716,26 @@ IGNORE 1 LINES;
 
 ```{r}
 # Load disease table 
-parameter <- read_delim(paste0(rootDir, "data/cleaned/cleaned_Disease_information.txt"), delim = ",")
+disease <- read_delim(paste0(rootDir, "data/cleaned/cleaned_Disease_information.txt"), delim = "\t")
 
+# Select the subset of columns required for the Parameters table
+diseases <- disease %>%
+  clean_names() %>% 
+  select(disease_id, disease_term) %>%          # Select only the specific columns needed
+  distinct()
+
+head(diseases)
+
+write.csv(diseases, file = paste0(rootDir, "/data/collated/Diseases.csv"), row.names = FALSE, quote = TRUE) 
+```
+
+```{sql}
+#| eval: false
+LOAD DATA LOCAL INFILE '/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/collated/Diseases.csv'
+INTO TABLE Diseases
+FIELDS TERMINATED BY ',' 
+OPTIONALLY ENCLOSED BY '"'
+IGNORE 1 LINES;
 ```
 
 ## Determining Groupings
