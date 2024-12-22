@@ -272,6 +272,11 @@ diff -yr --suppress-common-line /path/to/raw_directory /path/to/cleaned_director
 
 -   `c`: Lines that differ between the two files, shown as changes.
 
+```{r}
+# Remove unused values
+rm(log_file_mod, log_file_valid, raw_data_dir, updated_data_dir, valid_files, total_files)
+```
+
 ### Combining the Raw Data in a Table
 
 The dataset consists of thousands of CSV files with key fields: `analysis_id`, `gene_accession_id`, `gene_symbol`, `mouse_strain`, `mouse_life_stage`, `parameter_id`, `parameter_name`, and `pvalue`.
@@ -409,9 +414,10 @@ procedure <- read_csv(reformatted_procedure_path, col_names = TRUE) %>%
 # Preview the resulting data
 head(procedure)
 
-cleaned_procedure_path <- paste0(rootDir, "data/cleaned/cleaned_IMPC_procedure.txt")
+cleaned_procedure_path <- paste0(rootDir, "data/cleaned/cleaned_IMPC_procedure.csv")
 # Save the cleaned data to a new CSV file
 write_csv(procedure, cleaned_procedure_path)
+file.remove(reformatted_procedure_path)
 ```
 
 The resulting table retains a row for each parameter tested within a procedure; however, a single procedure consistently shares the same name, description, boolean value, and is assigned a common identifier. This ensures that a simplified, non-redundant procedures table can be created in the database while also allowing for the creation of a clear join table that leverages the original identifiers for accurate mapping.
@@ -555,8 +561,7 @@ Each columns are then renamed to correspond to SOP.
 # Convert the first two columns line_number and IMPC_parameter_orig_id to integers
 pd <- pd %>%
   mutate(
-    IMPC_parameter_orig_id = as.numeric(IMPC_parameter_orig_id)
-  )
+    IMPC_parameter_orig_id = as.numeric(IMPC_parameter_orig_id))
 
 str(pd)
 ```
@@ -1044,22 +1049,13 @@ Once a CSV file has been created for each table, the data can be loaded directly
 ### Procedure Table
 
 ```{r}
-# Load procedure table 
-procedure <- read_delim(paste0(rootDir, "data/cleaned/cleaned_IMPC_procedure.txt"), delim = ",", quote = "\"")
-
-# Subset, rename columns, and select unique rows
 procedures <- procedure %>%
-  clean_names() %>% 
-  select(impc_parameter_orig_id, name, description, is_mandatory) %>%  # Select specific columns
-  distinct() %>%                                                   # Keep only unique rows
-  rename(procedure_id = impc_parameter_orig_id,                       # Rename columns
-         procedure_name = name,
-         procedure_description = description,
-         procedure_isMandatory = is_mandatory)
+  select(procedure_id, procedure_name, procedure_description, is_mandatory) %>%  # Select specific columns
+  distinct() # Keep only unique rows (this shrinks the table from 5311 rows to 50 rows)
 
-head(procedures)
 # Save the table as CSV 
-write.csv(procedures, file = paste0(rootDir, "/data/collated/Procedures.csv"), row.names = FALSE, quote = TRUE)
+write_csv(procedures, paste0(rootDir, "/data/collated/Procedures.csv"))
+rm(procedures)
 ```
 
 ```{sql}
@@ -1076,7 +1072,7 @@ IGNORE 1 LINES;
 
 ```{r}
 # Load analysis table 
-analysis <- read_delim(paste0(rootDir, "data/cleaned/analysis_table.txt"), delim = ",")
+analysis <- read_csv(cleaned_procedure_path)
 disease <- read_delim(paste0(rootDir, "data/cleaned/cleaned_Disease_information.txt"), delim = "\t")
 head(disease)
 
@@ -1167,9 +1163,7 @@ diseases <- disease %>%
   select(disease_id, disease_term) %>%          # Select only the specific columns needed
   distinct()
 
-head(diseases)
-
-write.csv(diseases, file = paste0(rootDir, "/data/collated/Diseases.csv"), row.names = FALSE, quote = TRUE) 
+write_csv(diseases, paste0(rootDir, "/data/collated/Diseases.csv")) 
 ```
 
 ```{sql}
@@ -1190,7 +1184,7 @@ phenodigm_scores <- disease %>%
   select(disease_id, gene_accession_id, phenodigm_score) %>%          # Select only the specific columns needed
   distinct()
 
-write.csv(phenodigm_scores, file = paste0(rootDir, "/data/collated/PhenodigmScores.csv"), row.names = FALSE, quote = TRUE) 
+write_csv(phenodigm_scores, paste0(rootDir, "/data/collated/PhenodigmScores.csv")) 
 ```
 
 ```{sql}
@@ -1207,20 +1201,16 @@ IGNORE 1 LINES
 ## parameterXprocedure
 
 ```{r}
-parameterXprocedure <- parameter %>%
-  clean_names() %>% 
-  mutate_all(~ str_trim(.)) %>%                       # Trim leading/trailing whitespace
-  mutate_all(~ ifelse(. %in% c("", "NA"), NA, .)) %>% # Replace empty strings or "NA" with actual NA
-  select(parameter_id, impc_parameter_orig_id)   %>%   
-  rename(# Select only the specific columns needed  rename(parameter_id = parameter_id,                  # Rename the columns
-      parameter_id = parameter_id,                      
-      procedure_id = impc_parameter_orig_id) %>%
-    distinct()
+# Join the parameters table and the procedure table using "parameter_mapping" and "procedure_id"
+parameterXprocedure <- procedure %>%
+  left_join(parameter, by = c("parameter_mapping" = "procedure_id")) %>%
+  select(procedure_id, parameter_id) %>%  # Retain only the relevant columns
+  distinct() # Ensure no duplicates (this shrinks the table from 5311 rows to 3600 rows)
 
-
-head(parameterXprocedure)
-# Save the table as CSV 
-write.csv(parameterXprocedure, file = paste0(rootDir, "/data/collated/parameterXprocedure.csv"), row.names = FALSE, quote = TRUE)
+# Save the resulting table as a CSV file
+write_csv(parameterXprocedure, paste0(rootDir, "/data/collated/parameterXprocedure.csv"))
+# Remove unused files 
+rm(parameterXprocedure)
 ```
 
 ```{sql}
@@ -1249,7 +1239,8 @@ analyses <- analysis %>%
       p_value = pvalue)   %>%  
     distinct()
 head(analyses)
-write.csv(analyses, file = paste0(rootDir, "/data/collated/Analyses.csv"), row.names = FALSE, quote = TRUE)
+write_csv(analyses, paste0(rootDir, "/data/collated/Analyses.csv"))
+rm(analyses)
 ```
 
 ```{sql}
