@@ -7,9 +7,9 @@
 .swp
 
 # Ignore CSVs
-!data_table.csv
-data/raw_data/*.csv 
-data/updated_data/*.csv
+!data_table.csvv 
+data/raw_data*
+data/updated_data*
 
 # Ignore compressed files 
 *.zip
