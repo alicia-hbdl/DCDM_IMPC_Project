@@ -1073,7 +1073,7 @@ genes <- genes %>%
 head(genes)
 
 # Save the table as CSV 
-write.csv(genes, file = paste0(rootDir, "/data/collated/Genes.csv"), row.names = FALSE)
+write.csv(genes, file = paste0(rootDir, "/data/collated/Genes.csv"), row.names = FALSE, quote = TRUE)
 ```
 
 ```{sql}
