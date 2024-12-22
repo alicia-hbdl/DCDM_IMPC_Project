@@ -332,81 +332,89 @@ Potential workflow:
 
 ### `IMPC_procedure.txt`
 
-Each row in the `IMPC_procedure.txt` file contains: a line number, procedure name, description, a mandatory boolean field (`TRUE/FALSE`), and the original IMPC ID.
+Each row in the `IMPC_procedure.txt` file contains a line number, procedure name, description, a mandatory boolean field (TRUE/FALSE), and the impcParameterOrigId. The raw file has several issues, including unnecessary double quotes, misinterpreted commas, and duplicated field names.
 
-**Key Issues:**
-
--   **Unnecessary double quotes**: These make parsing unreliable.
-
--   **Misinterpreted commas**: Commas in the description field require proper quoting.
-
--   **Incorrectly encoded HTML symbols**: Symbols like `&amp;` and `&lt;` need decoding.
-
--   **Field duplication**: `line_number` and `procedureId` contain redundant information.
-
-To address these issues, the process involves:
-
--   **Formatting Cleanup**: Ensuring the raw text is suitable for conversion into a proper CSV file.
-
--   **Data Cleanup**: Ensuring consistency and clarity within the table.
+A first formatting cleanup step addresses these issues to allow the file to be loaded as a table in R.
 
 ```{r}
-cleaned_procedure_path <- paste0(rootDir, "data/cleaned/cleaned_IMPC_procedure.txt")
+procedure_path <- paste0(rootDir, "data/metadata/IMPC_procedure.txt")
+reformatted_procedure_path <- paste0(rootDir, "data/cleaned/reformatted_IMPC_procedure.txt")
 
-# Read, process, and clean the raw procedure file
-procedure <- read_lines(paste0(rootDir, "data/metadata/IMPC_procedure.txt")) %>%
+# Reformat for proper table loading
+procedure <- read_lines(procedure_path) %>% 
   # Replace double quotes between fields with commas
   str_replace_all('" "', ",") %>%
-  # Remove leading and trailing double quotes
+  # Remove leading and trailing double quotes from each line
   str_remove_all('^"|"$') %>%
-  # Wrap descriptions with commas in quotes for proper CSV formatting
+  # Wrap descriptions containing commas in quotes 
   str_replace('^([0-9]+,[^,]+,)(.*)(, (TRUE|FALSE), [0-9]{5})$', '\\1"\\2"\\3') %>%
-  # Remove the redundant "line_number" field
-  str_remove('^line_number,') %>%
-  # Decode HTML entities to ensure readable and accurate text
-  str_replace_all("&amp;", "&") %>%
-  str_replace_all("&nbsp;", " ")
+  # Remove the "line_number" field name 
+  str_remove('line_number,') 
 
-# Save the cleaned lines to a new file
-write_lines(procedure, cleaned_procedure_path)
+# Save the reformatted lines to a new file
+write_lines(procedure, reformatted_procedure_path)
+```
 
-# Read the cleaned file as a CSV and clean data values
-procedure <- read_csv(
-  paste0(rootDir, "data/cleaned/cleaned_IMPC_procedure.txt"),
-  col_names = TRUE
-) %>%
-  # Trim whitespace, convert to lowercase, and replace empty strings or "NA" with NA
-  mutate(across(everything(), ~ .x %>% tolower() %>% str_trim() %>% na_if("") %>% na_if("na"))) %>%
-  # Rename columns for clarity and consistency
+A second step cleans the table to ensure consistency and reduce redundancy. This includes correcting HTML encoding, trimming spaces, renaming columns for consistency with other tables, and converting empty fields to `NA`.
+
+The table contains over 5,000 rows but only 50 distinct procedures, as each row represents a single parameter tested within a procedure. To reduce redundancy, procedures with identical names, descriptions, and mandatory values were assigned a shared `procedure_id`, while their `impcParameterOrigId` values were stored as a list. This preserves mappings needed for integration with the parameter table.
+
+Some procedures, such as "MicroCT E14.5-E15.5" and "MicroCT E14.5-E15.5 Analysis," were merged as they referred to the same test. For others ("Experimental Design," "Housing and Husbandry," "Electrocardiogram (ECG)," and "Viability Primary Screen,") missing descriptions were filled using existing values, and conflicts were resolved by selecting the most appropriate description. These adjustments were finalized before grouping to ensure accurate consolidation of procedures.
+
+```{r}
+# Clean and standardize the data
+procedure <- read_csv(reformatted_procedure_path, col_names = TRUE) %>%
+  # Apply these transformations to all values in the table
+  mutate(across(everything(), ~ .x %>%
+      str_trim() %>%                   # Trim leading and trailing whitespace
+      str_replace_all(c(               # Replace HTML entities
+        "&amp;" = "&",
+        "&nbsp;" = " ")) %>% 
+      na_if("")                        # Replace empty strings with NA
+  )) %>% 
+  # Rename columns for consistency
   rename(
     procedure_id = procedureId, 
     procedure_name = name,
     procedure_description = description,
     is_mandatory = isMandatory,
     parameter_mapping = impcParameterOrigId
-  ) %>%
-  group_by(procedure_name, is_mandatory) %>%
+  ) %>% 
+  # Manually standardize specific procedure names and descriptions
+  mutate(
+    procedure_name = case_when(
+      procedure_name == "MicroCT E14.5-E15.5 Analysis" ~ "MicroCT E14.5-E15.5",
+      TRUE ~ procedure_name
+    ),
+    procedure_description = case_when(
+      procedure_name == "Experimental design" ~ "experimental_design",
+      procedure_name == "Housing and Husbandry" ~ "housing_and_husbandry",
+      procedure_name == "Viability Primary Screen" ~ "Assess the viability of mutant mice of each sex and zygosity.",
+      procedure_name == "Electrocardiogram (ECG)" ~ "To provide a high throughput method to obtain Electrocardiograms in a conscious mouse.",
+      is.na(procedure_description) ~ tolower(str_replace_all(procedure_name, " ", "_")), # Replace NA descriptions with procedure_name (underscored)
+      TRUE ~ procedure_description
+    )
+  ) %>% 
+  # Group by identical procedure_name, is_mandatory, and procedure_description
+  group_by(procedure_name, is_mandatory, procedure_description) %>%
   summarise(
-    # Assign the same unique ID to all rows within the group
+    # Assign a unique ID to all rows within the group
     procedure_id = cur_group_id(),
     # Store all parameter_mapping values as a list
     parameter_mapping = list(parameter_mapping),
-    procedure_description = list(unique(procedure_description)),
-    # Select the longest procedure_description
-    # procedure_description = procedure_description[which.max(str_length(procedure_description))],
-    .groups = "drop" # Drop grouping after summarization
-  )
+    .groups = "drop" # Remove grouping 
+  )  %>% 
+  unnest(parameter_mapping) # Expand the list column into multiple rows
 
 # Preview the resulting data
 head(procedure)
 
-# Save the cleaned lines to a new file
+cleaned_procedure_path <- paste0(rootDir, "data/cleaned/cleaned_IMPC_procedure.txt")
+# Save the cleaned data to a new CSV file
 write_csv(procedure, cleaned_procedure_path)
-  
-
 ```
 
-Since the file loads correctly in R, we can confirm that the regular expression (REGEX) accurately matched the columns when enclosing the description. This ensures that each column is in the correct format, so there is no need to further check the column formatting. Additionally, the **procedureId** and **impcParameterOrigId** columns don't contain duplicated values.
+The resulting table retains a row for each parameter tested within a procedure; however, a single procedure consistently shares the same name, description, boolean value, and is assigned a common identifier. This ensures that a simplified, non-redundant procedures table can be created in the database while also allowing for the creation of a clear join table that leverages the original identifiers for accurate mapping.
 
 ### `IMPC_parameter_description.txt (Sama)`
 
