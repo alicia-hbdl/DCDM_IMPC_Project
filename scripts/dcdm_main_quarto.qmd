@@ -148,7 +148,7 @@ process_file <- function(file_path) {
   # data <- data %>% arrange(match(data[[1]], expected_row_names))
 
   # Save the updated data to the output directory
-  write.table(data, file.path(updated_data_dir, basename(file_path)), quote = FALSE)
+  write.table(data, file = file.path(updated_data_dir, basename(file_path)), sep = ",", row.names = FALSE, col.names = FALSE)
 
   # Return TRUE if processing is successful
   return(TRUE)
@@ -257,7 +257,7 @@ This code can be run both locally and on an HPC with minimal adjustments, such a
 To check the differences between the raw and cleaned files:
 
 ```{bash}
-diff -r /path/to/raw_directory /path/to/cleaned_directory
+diff -yr --suppress-common-line /path/to/raw_directory /path/to/cleaned_directory
 ```
 
 -   `<`: Lines present in the `raw_data` file but missing in the `updated_data` file.
@@ -266,65 +266,60 @@ diff -r /path/to/raw_directory /path/to/cleaned_directory
 
 -   `c`: Lines that differ between the two files, shown as changes.
 
-### Combining the Raw Data in a Table (Ella)
+### Combining the Raw Data in a Table
 
---\> This step can be done in bash after quality control (collating by Ella).
+The dataset consists of thousands of CSV files with key fields: `analysis_id`, `gene_accession_id`, `gene_symbol`, `mouse_strain`, `mouse_life_stage`, `parameter_id`, `parameter_name`, and `pvalue`.
 
-The dataset comprises thousands of CSV files. The key fields include: analysis_id, pvalue, parameter_name, gene_symbol, mouse_strain, parameter_id, gene_accession_id, mouse_life_stage.
+To streamline data cleaning and enable further analysis, these files must be combined into a single table based on their shared fields.
 
-To ensure efficient quality checks and facilitate further analysis, it is essential to combine all these files into a single, unified table based on their common fields.
-
-Here’s a function that reads data from a file and transforms it into a row for a larger table:
+Below is a function that reads a file and converts its data into a row for the unified table:
 
 ```{r}
-# Function to read a file and transform its contents into a single row
-read_and_transform <- function(file) {
-  
-  # Read the file
-  data <- read.csv(file, header = FALSE, col.names = c("field", "value"))
-  # - header = FALSE: Tells R to treat the first row as regular data, not column names.
-  # - col.names = c("field", "value"): Assigns consistent column names to facilitate clear and reliable subsetting in subsequent processing.
-
-  # Convert all field names to lowercase for uniformity
-  data$field <- tolower(data$field)
-  
-  # Transpose the 'value' column so that fields become column names
-  transformed_data <- t(data$value) %>% 
+# Define a function to process a single file
+process_file <- function(file_path) {
+  read.csv(file_path, header = FALSE, col.names = c("field", "value"), quote = "") %>%
+    # Transpose the data so that fields become column names and values form the row
+    t() %>% 
+    # Convert to dataframe (needed by the map_dfr function)
     as.data.frame() %>% 
-    setNames(data$field)
-  
-  # Rearrange columns to place 'analysis_id' as the first column
-  transformed_data <- transformed_data %>%
-    relocate(analysis_id, .before = everything())
-
-  # Return the transformed data as a single-row data frame
-  return(transformed_data)
+    # Set the first row (after transposing) as the column names
+    setNames(.[1, ]) %>%
+    # Remove the first row since it is now used as column names
+    slice(-1) 
 }
-```
 
-The function can now be applied to all CSV files in the `raw_data` directory to combine them into a single table using the `map_dfr()` function from the **`purrr`** package.
+# List all CSV files in the updated_data directory
+all_files <- list.files(path = updated_data_dir, pattern = "\\.csv$", full.names = TRUE) 
 
-```{r}
-# List all CSV files in the raw_data directory
-all_files <- list.files(paste0(rootDir, "data/updated_data"), pattern = "\\.csv$", full.names = TRUE)
+# Apply the function to each file and combine the results into a single data frame
+analysis_table <- map_dfr(all_files, process_file)
 
-# Apply the read_and_transform function to each file and combine results into a single data frame
-analysis_table <- purrr::map_dfr(all_files, read_and_transform)
-# Display the first 6 rows of the data table
+# Specify the output path
+output_path <- file.path(rootDir, "data/cleaned/analysis_table.txt")
+
+# Save the combined table to a text file
+write.table(analysis_table, file = output_path, sep = ",", quote = TRUE, row.names = FALSE)
+
+# Display the first 6 rows of the combined table
 head(analysis_table)
-
-# Specify the path to the cleaned directory
-output_path <- paste0(rootDir, "data/cleaned/analysis_table.txt")
-
-# Save the combined table to a new txt file
-write.table(analysis_table, file = output_path, sep = ",", quote = FALSE, row.names = FALSE)
 ```
 
-2nd Column Data Cleaning... (To be done after collating data on HPC??? - Esta)
+### 2nd Column Data Cleaning... (To be done after collating data on HPC??? - Esta)
 
 For each column, we need to check similar things, like whether the data is the correct type (e.g., string or number), whether it has the right length (for strings) or size (for floats), and whether it matches allowed values, like for `mouse_strain` and `mouse_life_stage`. We may also need to find missing values. For each issue, we want to print the value and its index. To make this process less repetitive, we can create reusable functions.Cleaning the Metadata Files
 
-### `IMPC_procedure.txt (Alicia)`
+### `IMPC_procedure.txt`
+
+```{r}
+
+procedure_path <- paste0(rootDir, "/data/metadata/IMPC_procedure.txt")
+procedure_outputFile <- paste0(rootDir, "/data/cleaned/cleaned_IMPC_procedure.txt")
+
+# Read the file
+procedure <- readLines(procedure_path, encoding = "UTF-8")
+
+head(procedure)
+```
 
 Each row includes: 1) a line number 2) a name 3) a description 4) a boolean indicating if the procedure is mandatory 5) the original IMPC ID.
 
@@ -337,18 +332,6 @@ Each row includes: 1) a line number 2) a name 3) a description 4) a boolean indi
 -   `line_number` and `procedureId` duplicate the same unique information –\> Replace `line_number` with `procedureId`.
 
 -   HTML symbols appear incorrectly encoded but will be ignored for simplicity –\> Clean file encoding and ignore invalid characters.
-
-```{r}
-
-procedure_path <- paste0(rootDir, "/data/metadata/IMPC_procedure.txt")
-procedure_outputFile <- paste0(rootDir, "/data/cleaned/cleaned_IMPC_procedure.txt")
-
-# Read the file
-procedure <- readLines(procedure_path, encoding = "UTF-8")
-
-head(procedure)
-
-```
 
 Initial Observation:
 
