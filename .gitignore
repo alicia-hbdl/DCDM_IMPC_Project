@@ -9,6 +9,7 @@
 # Ignore CSVs
 !data_table.csv
 data/raw_data/*.csv 
+data/updated_data/*.csv
 
 # Ignore compressed files 
 *.zip
