@@ -17,5 +17,5 @@ data/raw_data/*.csv
 .DS_Store
  
 # Ignore slurm files 
-.out
-.log
+*.out
+*.log
