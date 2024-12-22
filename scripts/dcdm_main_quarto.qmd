@@ -346,9 +346,13 @@ Each row in the `IMPC_procedure.txt` file contains: a line number, procedure nam
 
 To address these issues, the process involves:
 
-##### **Formatting Cleanup**: Ensuring the raw text is suitable for conversion into a proper CSV file.
+-   **Formatting Cleanup**: Ensuring the raw text is suitable for conversion into a proper CSV file.
+
+-   **Data Cleanup**: Ensuring consistency and clarity within the table.
 
 ```{r}
+cleaned_procedure_path <- paste0(rootDir, "data/cleaned/cleaned_IMPC_procedure.txt")
+
 # Read, process, and clean the raw procedure file
 procedure <- read_lines(paste0(rootDir, "data/metadata/IMPC_procedure.txt")) %>%
   # Replace double quotes between fields with commas
@@ -361,38 +365,45 @@ procedure <- read_lines(paste0(rootDir, "data/metadata/IMPC_procedure.txt")) %>%
   str_remove('^line_number,') %>%
   # Decode HTML entities to ensure readable and accurate text
   str_replace_all("&amp;", "&") %>%
-  str_replace_all("&lt;", "<") %>%
-  str_replace_all("&gt;", ">") %>%
-  str_replace_all("&quot;", '"') %>%
   str_replace_all("&nbsp;", " ")
 
 # Save the cleaned lines to a new file
-write_lines(procedure, paste0(rootDir, "data/cleaned/cleaned_IMPC_procedure.txt")
-```
+write_lines(procedure, cleaned_procedure_path)
 
-##### **Data Cleanup**: Ensuring consistency and clarity within the table.
-
-##### Once the code exists for the SOP of analysis, the same constraints can be applied here.  {style="color: red"}
-
-```{r}
 # Read the cleaned file as a CSV and clean data values
 procedure <- read_csv(
   paste0(rootDir, "data/cleaned/cleaned_IMPC_procedure.txt"),
   col_names = TRUE
 ) %>%
-  # Trim whitespace and replace empty strings or "NA" with NA
-  mutate(across(everything(), ~ .x %>% str_trim() %>% na_if("") %>% na_if("NA"))) %>%
+  # Trim whitespace, convert to lowercase, and replace empty strings or "NA" with NA
+  mutate(across(everything(), ~ .x %>% tolower() %>% str_trim() %>% na_if("") %>% na_if("na"))) %>%
   # Rename columns for clarity and consistency
   rename(
-    procedure_id = procedureId,
+    procedure_id = procedureId, 
     procedure_name = name,
     procedure_description = description,
     is_mandatory = isMandatory,
-    parameter_id = impcParameterOrigId
+    parameter_mapping = impcParameterOrigId
+  ) %>%
+  group_by(procedure_name, is_mandatory) %>%
+  summarise(
+    # Assign the same unique ID to all rows within the group
+    procedure_id = cur_group_id(),
+    # Store all parameter_mapping values as a list
+    parameter_mapping = list(parameter_mapping),
+    procedure_description = list(unique(procedure_description)),
+    # Select the longest procedure_description
+    # procedure_description = procedure_description[which.max(str_length(procedure_description))],
+    .groups = "drop" # Drop grouping after summarization
   )
 
-# Preview the first few rows of the cleaned table
+# Preview the resulting data
 head(procedure)
+
+# Save the cleaned lines to a new file
+write_csv(procedure, cleaned_procedure_path)
+  
+
 ```
 
 Since the file loads correctly in R, we can confirm that the regular expression (REGEX) accurately matched the columns when enclosing the description. This ensures that each column is in the correct format, so there is no need to further check the column formatting. Additionally, the **procedureId** and **impcParameterOrigId** columns don't contain duplicated values.
