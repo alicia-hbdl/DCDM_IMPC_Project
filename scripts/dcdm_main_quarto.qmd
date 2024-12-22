@@ -20,8 +20,8 @@ format: html
     -   Logged into Virtual Machine with my KCL login
 2.  From the Desktop, clicked on the "Data_Egress_Request” icon, which lead to the KCL TRE Data Egress Portal
 3.  Clicked on the "Egress request tab", which led to a form to fill out with details about the data requested
-    -   selected "Group3.zip" within the file picker, requesting our specific dataset
-    -   answered questions about the classification, point of origin, end-point destination, purpose for egress, and type of data, specific to our dataset
+    -   Selected "Group3.zip" within the file picker, requesting our specific dataset
+    -   Answered questions about the classification, point of origin, end-point destination, purpose for egress, and type of data, specific to our dataset
 4.  Submitted the Egress Request
 5.  The egress was approved, and the data was made available to us as a zip file (Group3.zip) on the CREATE HPC in the /scratch_tmp/grp/msc_appbio/7BBG1003/CW folder
 
@@ -52,11 +52,11 @@ library(stringr)
 ```{r}
 # Define the working directory path in r
 # Alicia
-#rootDir = "/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/"
+rootDir = "/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/"
 # Sanj 
 #rootDir = "/Users/sanjanasrinivasan/Desktop/DCDM_IMPC_Project/"
 # Ella
-rootDir = "/Users/ellajadealex/Desktop/applied_bioinformatics/DCDM/group_project/DCDM_IMPC_Project/"
+# rootDir = "/Users/ellajadealex/Desktop/applied_bioinformatics/DCDM/group_project/DCDM_IMPC_Project/"
 # Sama
 #rootDir = "/Users/sama/Desktop/DCDM_Proj2/"
 # Esta
@@ -67,97 +67,118 @@ rootDir = "/Users/ellajadealex/Desktop/applied_bioinformatics/DCDM/group_project
 
 ### Quality Control/Cleaning Using the SOP (Esta)
 
-The experiment data comes with an SOP specifying constraints for each field, including data type, minimum and maximum values for numerical data, length for strings, and specific values for certain fields. Data quality can be assessed by comparing the raw data to these predefined constraints.
+The experiment data includes an SOP that defines constraints for each field, such as data type, minimum and maximum values for numerical fields, string lengths, and specific allowable values. Data quality is assessed by comparing the raw data against these constraints.
 
-Here, we have cleaned all the csv files by modifying the row names to match those specified in the SOP file.
+In this step, we have cleaned all CSV files by modifying the row names to match those specified in the SOP.
 
-First, we define the directory paths & the log file path.
+We begin by defining the directory paths and the log file path.
+
+Setting-Up the Environment
 
 ```{r}
 # Defing directory paths
-data_dir <- "raw_data"
-output_dir <- "updated_data"
-# New log file
-log_file <- "row_name_modification.log"
+data_dir <- paste0(rootDir, "data/raw_data") # Input raw data directory
+output_dir <- paste0(rootDir, "data/updated_data") # Ouptut cleaned data directory
+log_file_mod <- paste0(rootDir, "scripts/row_name_modification.log") # Log file for modifications
+SOP_path <- paste0(rootDir, "data/metadata/IMPC_SOP.csv") # SOP path
 
 # Creates output directory if it doesn't already exist & supresses warnings if it does exist
 dir.create(output_dir, showWarnings = FALSE)
 
 # Clear the log file if it exists or creates it if it doesn't
-file.create(log_file)
+file.create(log_file_mod)
 ```
 
-Then we load the SOP file. Here, I have normalized the row names to lowercase although this isn't strictly necessary for this specific file.
+Then we load the SOP file. *Here, I have normalized the row names to lowercase although this isn't strictly necessary for this specific file.*
 
 ```{r}
 # Load the SOP file and normalize row names to lowercase
-expected_row_names <- tolower(read_csv("metadata/IMPC_SOP.csv", show_col_types = FALSE)$dataField)
+expected_row_names <- tolower(read_csv(SOP_path, show_col_types = FALSE)$dataField)
 
+# Check normalized row names
+expected_row_names
 ```
 
-Now that we have the correct files loaded and the directories specified, we define a function to do three things: 1). Identify spelling mistakes in the existing row names and fix them (in these files, only uppercase to lowercase transformation is needed). 2). Add any missing rows and assign an NA value to the second column for the corresponding row(s) - this is only done after modifying misspelt row names. 3). Reordering the rows to match the SOP layout.
+With the correct files loaded and directories specified, we define a function to perform the following tasks:
+
+1.  Identify and correct spelling mistakes in the row names. In this case, only uppercase-to-lowercase transformations are needed;
+
+2.  Add any missing rows, assigning `NA` to the second column for those rows. This step is performed after correcting any misspelled row names;
+
+3.  Reorder the rows to align with the SOP layout.
 
 ```{r}
 
 # Function to validate, update, and reorder row names
 process_file <- function(file_path) {
-  # Read the file specified by file_path
+  # Attempt to read the CSV file specified by file_path
   data <- tryCatch(
     read_csv(file_path, col_names = TRUE, show_col_types = FALSE),
+    # On error, log the issue and set 'data' to NULL
     error = function(e) {
       message(paste("Error reading file:", file_path, "-", e))
-      return(NULL)
+      return(NULL) # Exit with NULL if file reading fails
     }
   )
+  # If data is NULL (file could not be read), return FALSE
   if (is.null(data)) return(FALSE)
   
-  # Normalize row names and identify missing rows
+  # Convert the first column to lowercase for consistency
   data[[1]] <- tolower(data[[1]])
+  
+  # Identify rows that are expected but missing in the current data
   missing_rows <- setdiff(expected_row_names, data[[1]])
   
-  # Add missing rows with NA values in the second column
+  # Add missing rows to the data, assigning NA to the second column
   if (length(missing_rows) > 0) {
     missing_data <- tibble(
-      !!colnames(data)[1] := missing_rows,  # First column: missing row names
-      !!colnames(data)[2] := NA            # Second column: NA values
+      !!colnames(data)[1] := missing_rows, # Use the name of the first column for the row names
+      !!colnames(data)[2] := NA            # Assign NA to the second column for missing rows
     )
     data <- bind_rows(data, missing_data)
   }
   
-  # Reorder rows and save the updated file
+  # Reorder rows to match the order of 'expected_row_names'
   data <- data %>% arrange(match(data[[1]], expected_row_names))
-  write_csv(data, file.path(output_dir, basename(file_path)))
   
+  # Save the updated data to the output directory
+  write_csv(data, file.path(output_dir, basename(file_path)))
+
+  # Return TRUE if processing is successful
   return(TRUE)
 }
 ```
 
-We now use this function on all the data files - this will produce an "updated_data" folder and a log file in the main directory.
+We now apply this function to all data files. This process will generate an `updated_data` folder containing the cleaned files and a log file in the main directory.
 
 ```{r}
-# Process all files and log results
+# List all CSV files in the data directory
 files <- list.files(data_dir, pattern = "\\.csv$", full.names = TRUE)
+
+# Process each file and store success/failure results
 validation_results <- sapply(files, process_file)
 
-# Write summary to log
+# Create a summary message with the total and successfully updated files
 summary_message <- sprintf(
   "Validation Summary:\nTotal files checked: %d\nTotal updated files: %d\n",
   length(validation_results), sum(validation_results)
 )
-cat(summary_message, file = log_file)
+
+# Write the summary to the log file and display it in the console
+cat(summary_message, file = log_file_mod)
 message(summary_message)
 ```
 
-The summary message displayed the number of files validated out of the total number in the raw_data folder - this will be be displayed on the console and in the log file. The log file has been reduced down to just contain that information but was originally carried out on a subset of 600 files and clearly displayed the row name differences between those files and the SOP.
+The summary message displays the number of files validated out of the total number in the `raw_data` folder. This information is shown on the console and saved to the log file. The log file, now streamlined to include only this summary, initially contained detailed row name differences between the files and the SOP, based on a subset of 600 files.
 
-Once the file modification is done, we run one final validation only script to make sure there are no unexpected row name differences.
+After modifying the files, we run a final validation script to confirm that there are no unexpected row name differences remaining. This ensures the data aligns perfectly with the SOP.
 
 ```{r}
-data_dir <- "updated_data"  # Directory containing the updated data files
+data_dir <- "updated_data"  # Input directory containing the cleaned files
 log_file <- "row_name_validation.log"  # Log file for results
 
 # Load SOP and normalize row names
-expected_row_names <- tolower(read_csv("metadata/IMPC_SOP.csv", show_col_types = FALSE)$dataField)
+expected_row_names <- tolower(read_csv("data/metadata/IMPC_SOP.csv", show_col_types = FALSE)$dataField)
 
 # Clear the log file
 file.create(log_file)
