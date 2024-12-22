@@ -16,4 +16,6 @@ data/raw_data/*.csv
 # Ignore unknown file 
 .DS_Store
  
-# Ignore Group1 direcotry 
+# Ignore slurm files 
+.out
+.log
