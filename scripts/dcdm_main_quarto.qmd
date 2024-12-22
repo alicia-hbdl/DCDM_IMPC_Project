@@ -40,13 +40,14 @@ Though we had access to the zip file of our data, we had no permissions on it so
 # Data Cleaning
 
 ```{r}
-rm(list = ls())
+# rm(list = ls())
 
 # Install and load Tidyverse packages
-#install.packages(c("tidyverse", "janitor", "stringr"))
+#install.packages(c("tidyverse", "janitor"))
 library(tidyverse)
 library(janitor)
-library(stringr)
+# library(stringr)
+
 ```
 
 ```{r}
@@ -112,7 +113,6 @@ With the correct files loaded and directories specified, we define a function to
 3.  Reorder the rows to align with the SOP layout.
 
 ```{r}
-
 # Function to correct row names
 process_file <- function(file_path) {
   # Attempt to read the CSV file specified by file_path
@@ -158,6 +158,8 @@ process_file <- function(file_path) {
 We now apply this function to all data files. This process will generate an `updated_data` folder containing the cleaned files and a log file in the main directory.
 
 ```{r}
+#| eval: false
+
 # List all CSV files in the data directory
 files <- list.files(raw_data_dir, pattern = "\\.csv$", full.names = TRUE)
 
@@ -177,7 +179,7 @@ message(summary_message)
 
 The summary message displays the number of files validated out of the total number in the `raw_data` folder. This information is shown on the console and saved to the log file. The log file, now streamlined to include only this summary, initially contained detailed row name differences between the files and the SOP, based on a subset of 600 files.
 
-#### Verify the field names 
+#### Verify the field names
 
 #### This code duplicates the logic used to modify the files, making it somewhat redundant and unable to detect field name issues. To streamline the process, consider enhancing the first code to include the additional checks (e.g., verifying that the file has exactly two columns). {style="color: red"}
 
@@ -227,6 +229,8 @@ validate_file <- function(file_path, expected_row_names) {
 ```
 
 ```{r}
+#| eval: false
+
 # Validate all files in the updated data directory
 files <- list.files(updated_data_dir, pattern = "\\.csv$", full.names = TRUE)
 validation_results <- lapply(files, function(file_path) {
@@ -257,6 +261,8 @@ This code can be run both locally and on an HPC with minimal adjustments, such a
 To check the differences between the raw and cleaned files:
 
 ```{bash}
+#| eval: false
+
 diff -yr --suppress-common-line /path/to/raw_directory /path/to/cleaned_directory
 ```
 
@@ -275,9 +281,11 @@ To streamline data cleaning and enable further analysis, these files must be com
 Below is a function that reads a file and converts its data into a row for the unified table:
 
 ```{r}
+#| eval: false
+
 # Define a function to process a single file
 process_file <- function(file_path) {
-  read.csv(file_path, header = FALSE, col.names = c("field", "value"), quote = "") %>%
+  read.csv(file_path, header = FALSE, col.names = c("field", "value")) %>%
     # Transpose the data so that fields become column names and values form the row
     t() %>% 
     # Convert to dataframe (needed by the map_dfr function)
@@ -306,104 +314,85 @@ head(analysis_table)
 
 ### 2nd Column Data Cleaning... (To be done after collating data on HPC??? - Esta)
 
-For each column, we need to check similar things, like whether the data is the correct type (e.g., string or number), whether it has the right length (for strings) or size (for floats), and whether it matches allowed values, like for `mouse_strain` and `mouse_life_stage`. We may also need to find missing values. For each issue, we want to print the value and its index. To make this process less repetitive, we can create reusable functions.Cleaning the Metadata Files
+For each column, we need to check similar things, like whether the data is the correct type (e.g., string or number), whether it has the right length (for strings) or size (for floats), and whether it matches allowed values, like for `mouse_strain` and `mouse_life_stage`. We may also need to find missing values. For each issue, we want to print the value and its index. To make this process less repetitive, we can create reusable functions.
+
+Potential workflow:
+
+-   Start by selecting a column or field, such as `analysis_id`, and verifying that its values are in the correct format (e.g., strings).
+
+-   Check whether the length of each value falls within the required range (e.g., `min < nchar < max`).
+
+-   For missing or incorrect values, decide whether to update them to `NA` or remove problematic rows, particularly if fields like `mouse_strain` or `life_stage` contain invalid entries.
+
+-   For numerical fields such as `p-value`, it may be useful to cap values, setting anything above 1 to 1 and below 0 to 0.
+
+-   Additionally, identify and manually correct any typos to ensure the data aligns with expectations.
+
+## Cleaning the Metadata Files
 
 ### `IMPC_procedure.txt`
 
+Each row in the `IMPC_procedure.txt` file contains: a line number, procedure name, description, a mandatory boolean field (`TRUE/FALSE`), and the original IMPC ID.
+
+**Key Issues:**
+
+-   **Unnecessary double quotes**: These make parsing unreliable.
+
+-   **Misinterpreted commas**: Commas in the description field require proper quoting.
+
+-   **Incorrectly encoded HTML symbols**: Symbols like `&amp;` and `&lt;` need decoding.
+
+-   **Field duplication**: `line_number` and `procedureId` contain redundant information.
+
+To address these issues, the process involves:
+
+##### **Formatting Cleanup**: Ensuring the raw text is suitable for conversion into a proper CSV file.
+
 ```{r}
+# Read, process, and clean the raw procedure file
+procedure <- read_lines(paste0(rootDir, "data/metadata/IMPC_procedure.txt")) %>%
+  # Replace double quotes between fields with commas
+  str_replace_all('" "', ",") %>%
+  # Remove leading and trailing double quotes
+  str_remove_all('^"|"$') %>%
+  # Wrap descriptions with commas in quotes for proper CSV formatting
+  str_replace('^([0-9]+,[^,]+,)(.*)(, (TRUE|FALSE), [0-9]{5})$', '\\1"\\2"\\3') %>%
+  # Remove the redundant "line_number" field
+  str_remove('^line_number,') %>%
+  # Decode HTML entities to ensure readable and accurate text
+  str_replace_all("&amp;", "&") %>%
+  str_replace_all("&lt;", "<") %>%
+  str_replace_all("&gt;", ">") %>%
+  str_replace_all("&quot;", '"') %>%
+  str_replace_all("&nbsp;", " ")
 
-procedure_path <- paste0(rootDir, "/data/metadata/IMPC_procedure.txt")
-procedure_outputFile <- paste0(rootDir, "/data/cleaned/cleaned_IMPC_procedure.txt")
+# Save the cleaned lines to a new file
+write_lines(procedure, paste0(rootDir, "data/cleaned/cleaned_IMPC_procedure.txt")
+```
 
-# Read the file
-procedure <- readLines(procedure_path, encoding = "UTF-8")
+##### **Data Cleanup**: Ensuring consistency and clarity within the table.
 
+##### Once the code exists for the SOP of analysis, the same constraints can be applied here.  {style="color: red"}
+
+```{r}
+# Read the cleaned file as a CSV and clean data values
+procedure <- read_csv(
+  paste0(rootDir, "data/cleaned/cleaned_IMPC_procedure.txt"),
+  col_names = TRUE
+) %>%
+  # Trim whitespace and replace empty strings or "NA" with NA
+  mutate(across(everything(), ~ .x %>% str_trim() %>% na_if("") %>% na_if("NA"))) %>%
+  # Rename columns for clarity and consistency
+  rename(
+    procedure_id = procedureId,
+    procedure_name = name,
+    procedure_description = description,
+    is_mandatory = isMandatory,
+    parameter_id = impcParameterOrigId
+  )
+
+# Preview the first few rows of the cleaned table
 head(procedure)
-```
-
-Each row includes: 1) a line number 2) a name 3) a description 4) a boolean indicating if the procedure is mandatory 5) the original IMPC ID.
-
-**Issues**:
-
--   Unnecessary double quotes surrounding columns –\> Remove unnecessary quotes and fix column separators.
-
--   Commas in the description column misinterpreted as separators –\>Enclose the description column in double quotes.
-
--   `line_number` and `procedureId` duplicate the same unique information –\> Replace `line_number` with `procedureId`.
-
--   HTML symbols appear incorrectly encoded but will be ignored for simplicity –\> Clean file encoding and ignore invalid characters.
-
-Initial Observation:
-
--   Contains column names enclosed in double quotes and separated by commas
--   "line_number" "procedureId, name, description, isMandatory, impcParameterOrigId".
--   The data is structured as a single string with multiple fields, separated by a mix of , (commas) and " " (quoted spaces).
--   Fields like description can contain commas, making simple comma-based splitting unreliable.
--   Metadata fields include a description with detailed text, Boolean (TRUE/FALSE) values, and numeric IDs at the end.
--   line_number and procedureId duplicate the same unique information.
-
-```{r}
-# Replace double quotes between fields with commas
-procedure <- gsub('" "', ',', procedure)
-
-# Remove leading and trailing double quotes
-procedure <- gsub('^"|"$', '', procedure)
-
-# Wrap specific fields in quotes (based on regex logic)
-procedure <- gsub(
-  '^([0-9]+,[^,]+,)(.*)(, (TRUE|FALSE), [0-9]{5})$',
-  '\\1"\\2"\\3',
-  procedure,
-  perl = TRUE
-)
-
-# Remove the line_number if it exists
-procedure <- gsub('^line_number,', '', procedure)
-
-view(procedure)
-```
-
--   The regex pattern `^([0-9]+,[^,]+,)(.*)(, (TRUE|FALSE), [0-9]{5})$` divides the line into three parts:
-
-    -   `([0-9]+,[^,]+,)`: Matches the `line_number` and `procedureId` fields, which are numeric and followed by commas.
-
-    -   `(.*)`: Matches the `description` field (potentially long text), which can contain commas and needs to be wrapped in quotes.
-
-    -   `, (TRUE|FALSE), [0-9]{5}`: Matches the last part of the line, consisting of the Boolean value (`TRUE` or `FALSE`) and a 5-digit number.
-
--   The replacement `\\1"\\2"\\3` keeps the first and last parts unchanged, but wraps the `description` (middle part) in double quotes.
-
--   **`perl = TRUE`** enables advanced regular expressions, allowing the use of more sophisticated matching.
-
-```{r}
-
-# Handle UTF-8 encoding issues if any
-procedure <- iconv(procedure, from = "UTF-8", to = "UTF-8//IGNORE")
-
-# Save the cleaned data
-writeLines(procedure, procedure_outputFile)
-```
-
-```{r}
-# Load the cleaned procedure data, setting procedureId as row names
-procedure <- read.table(
-  file = paste0(rootDir, "data/cleaned/cleaned_IMPC_procedure.txt"),
-  header = TRUE,                
-  sep = ",",                    
-  quote = '"',                  
-)
-
-# Display the first few rows of the data
-head(procedure)
-
-# Find the maximum string length in the 'name' column
-max(nchar(procedure$name))
-# Find the maximum string length in the 'description' column
-max(nchar(procedure$description))
-# Count the number of duplicated values in the 'impcParameterOrigId' column
-sum(duplicated(procedure$impcParameterOrigId))
-# Count the number of missing (NA) values in the 'isMandatory' column
-sum(is.na(procedure$isMandatory))
 ```
 
 Since the file loads correctly in R, we can confirm that the regular expression (REGEX) accurately matched the columns when enclosing the description. This ensures that each column is in the correct format, so there is no need to further check the column formatting. Additionally, the **procedureId** and **impcParameterOrigId** columns don't contain duplicated values.
