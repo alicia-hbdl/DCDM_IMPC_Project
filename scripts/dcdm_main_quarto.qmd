@@ -5,9 +5,37 @@ editor: visual
 format: html
 ---
 
-# TRE Egress
+# TRE Egress (Ella)
 
-Ella - is there anything to write here?
+## **Data Security Awareness Training**
+
+1.  Account created through the [NHS e-Learning for Healthcare portal](https://portal.e-lfh.org.uk/Component/Details/544034)
+2.  Course *Data Security Awareness - Level 1* :
+    -   Completed the training and passed the examination
+
+## **CREATE TRE Egress**
+
+1.  Logged on to the Virtual Machine
+    -   This [link](https://portal.er.kcl.ac.uk/vdiresource/281) was used to access a virtual machine (specific machine: er-tre-352-vm07) through the KCL e-research portal er_tre_msc_dcdm Virtual Desktops
+    -   Logged into Virtual Machine with my KCL login
+2.  From the Desktop, clicked on the "Data_Egress_Request” icon, which lead to the KCL TRE Data Egress Portal
+3.  Clicked on the "Egress request tab", which led to a form to fill out with details about the data requested
+    -   selected "Group3.zip" within the file picker, requesting our specific dataset
+    -   answered questions about the classification, point of origin, end-point destination, purpose for egress, and type of data, specific to our dataset
+4.  Submitted the Egress Request
+5.  The egress was approved, and the data was made available to us as a zip file (Group3.zip) on the CREATE HPC in the /scratch_tmp/grp/msc_appbio/7BBG1003/CW folder
+
+## Moving the Data
+
+Though we had access to the zip file of our data, we had no permissions on it so were unable to move or copy it to our own data. This required me to download the file to my own system using scp, then re-upload the file to a our group project folder using scp. I checked the file sizes before and after using the `ls -l` command, to ensure no data was corrupted in the process.
+
+```{bash}
+# downloading the data locally from the HPC
+# scp -i ~/.ssh/msckey  k24064085@hpc.create.kcl.ac.uk:/scratch_tmp/grp/msc_appbio/7BBG1003/CW/Group3.zip ~/Desktop/applied_bioinformatics/DCDM/group_project/raw_data/Group3
+
+# uploading the data into our DCDM_group3 directory on the HPC
+# scp -i ~/.ssh/msckey  ~/Desktop/applied_bioinformatics/DCDM/group_project/raw_data/Group3.zip k24064085@hpc.create.kcl.ac.uk:/sratch_tmp/grp/msc_appbio/DCDM_group3
+```
 
 # Data Cleaning
 
@@ -28,9 +56,9 @@ library(stringr)
 # Sanj 
 #rootDir = "/Users/sanjanasrinivasan/Desktop/DCDM_IMPC_Project/"
 # Ella
-#rootDir = ""
+rootDir = "/Users/ellajadealex/Desktop/applied_bioinformatics/DCDM/group_project/DCDM_IMPC_Project/"
 # Sama
-rootDir = "/Users/sama/Desktop/DCDM_Proj2/"
+#rootDir = "/Users/sama/Desktop/DCDM_Proj2/"
 # Esta
 #rootDir = ""
 ```
