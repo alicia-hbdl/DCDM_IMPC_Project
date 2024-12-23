@@ -31,7 +31,11 @@ process_file <- function(file_path) {
   # Identify missing rows and add them, input NA value for second column
   missing_rows <- setdiff(expected_row_names, data[[1]])
   if (length(missing_rows) > 0) {
-    data <- bind_rows(data, tibble(V1 = missing_rows, V2 = NA))
+    missing_data <- tibble(!!colnames(data)[1] := missing_rows)
+    for (i in 2:ncol(data)) {
+      missing_data[[colnames(data)[i]]] <- NA
+    }
+    data <- bind_rows(data, missing_data)
   }
   
   # Reorder rows based on expected_row_names
@@ -51,3 +55,4 @@ summary_message <- sprintf("Validation Summary:\nTotal files checked: %d\nTotal 
                            length(validation_results), sum(validation_results))
 write(summary_message, log_file)
 message(summary_message)
+
