@@ -40,14 +40,12 @@ Though we had access to the zip file of our data, we had no permissions on it so
 # Data Cleaning
 
 ```{r}
-# rm(list = ls())
+rm(list = ls())
 
 # Install and load Tidyverse packages
 #install.packages(c("tidyverse", "janitor"))
 library(tidyverse)
 library(janitor)
-# library(stringr)
-
 ```
 
 ```{r}
@@ -181,7 +179,7 @@ The summary message displays the number of files validated out of the total numb
 
 #### Verify the field names
 
-#### This code duplicates the logic used to modify the files, making it somewhat redundant and unable to detect field name issues. To streamline the process, consider enhancing the first code to include the additional checks (e.g., verifying that the file has exactly two columns). {style="color: red"}
+#### This code duplicates the logic used to modify the files, making it somewhat redundant and unable to detect field name issues. To streamline the process, consider enhancing the first code to include the additional checks (e.g., verifying that the file has exactly two columns); + we will be running the SOP on the cleaned table eventually, so this was probably really helpful when developing the code, but isn't very interesting for the final script  {style="color: red"}
 
 After modifying the files, we run a final validation script to confirm that there are no unexpected row name differences remaining. This ensures the data aligns perfectly with the SOP.
 
@@ -258,7 +256,7 @@ message(summary_message)
 
 This code can be run both locally and on an HPC with minimal adjustments, such as loading individual `dplyr` and `readr` packages instead of the entire `tidyverse`.
 
-To check the differences between the raw and cleaned files:
+To check the differences between the raw and cleaned files (quick visual check to see if we are doing something).
 
 ```{bash}
 #| eval: false
@@ -266,15 +264,9 @@ To check the differences between the raw and cleaned files:
 diff -yr --suppress-common-line /path/to/raw_directory /path/to/cleaned_directory
 ```
 
--   `<`: Lines present in the `raw_data` file but missing in the `updated_data` file.
-
--   `>`: Lines present in the `updated_data` file but missing in the `raw_data` file.
-
--   `c`: Lines that differ between the two files, shown as changes.
-
 ```{r}
-# Remove unused values
-rm(log_file_mod, log_file_valid, raw_data_dir, updated_data_dir, valid_files, total_files)
+# Remove unused values to unclutter the environment
+rm(log_file_mod, log_file_valid, raw_data_dir, updated_data_dir, valid_files, total_files, validation_results, files, summary_message, expected_row_names)
 ```
 
 ### Combining the Raw Data in a Table
@@ -342,11 +334,10 @@ Each row in the `IMPC_procedure.txt` file contains a line number, procedure name
 A first formatting cleanup step addresses these issues to allow the file to be loaded as a table in R.
 
 ```{r}
-procedure_path <- paste0(rootDir, "data/metadata/IMPC_procedure.txt")
-reformatted_procedure_path <- paste0(rootDir, "data/cleaned/reformatted_IMPC_procedure.txt")
+temporary_path <- paste0(rootDir, "data/cleaned/reformatted_IMPC_procedure.txt")
 
 # Reformat for proper table loading
-procedure <- read_lines(procedure_path) %>% 
+procedure <- read_lines(paste0(rootDir, "data/metadata/IMPC_procedure.txt")) %>% 
   # Replace double quotes between fields with commas
   str_replace_all('" "', ",") %>%
   # Remove leading and trailing double quotes from each line
@@ -354,10 +345,8 @@ procedure <- read_lines(procedure_path) %>%
   # Wrap descriptions containing commas in quotes 
   str_replace('^([0-9]+,[^,]+,)(.*)(, (TRUE|FALSE), [0-9]{5})$', '\\1"\\2"\\3') %>%
   # Remove the "line_number" field name 
-  str_remove('line_number,') 
-
-# Save the reformatted lines to a new file
-write_lines(procedure, reformatted_procedure_path)
+  str_remove('line_number,') %>%
+  write_lines(temporary_path) # Save the reformatted lines to a new file
 ```
 
 A second step cleans the table to ensure consistency and reduce redundancy. This includes correcting HTML encoding, trimming spaces, renaming columns for consistency with other tables, and converting empty fields to `NA`.
@@ -368,7 +357,7 @@ Some procedures, such as "MicroCT E14.5-E15.5" and "MicroCT E14.5-E15.5 Analysis
 
 ```{r}
 # Clean and standardize the data
-procedure <- read_csv(reformatted_procedure_path, col_names = TRUE) %>%
+procedure <- read_csv(temporary_path, col_names = TRUE) %>%
   # Apply these transformations to all values in the table
   mutate(across(everything(), ~ .x %>%
       str_trim() %>%                   # Trim leading and trailing whitespace
@@ -414,157 +403,54 @@ procedure <- read_csv(reformatted_procedure_path, col_names = TRUE) %>%
 # Preview the resulting data
 head(procedure)
 
-cleaned_procedure_path <- paste0(rootDir, "data/cleaned/cleaned_IMPC_procedure.csv")
 # Save the cleaned data to a new CSV file
-write_csv(procedure, cleaned_procedure_path)
-file.remove(reformatted_procedure_path)
+write_csv(procedure, paste0(rootDir, "data/cleaned/cleaned_IMPC_procedure.csv"))
 ```
 
 The resulting table retains a row for each parameter tested within a procedure; however, a single procedure consistently shares the same name, description, boolean value, and is assigned a common identifier. This ensures that a simplified, non-redundant procedures table can be created in the database while also allowing for the creation of a clear join table that leverages the original identifiers for accurate mapping.
 
-### `IMPC_parameter_description.txt (Sama)`
+```{r}
+file.remove(temporary_path)
+rm(temporary_path, process_file)
+```
+
+### IMPC_parameter_description.txt (Sama) {style="color: green"}
+
+The same issue as with IMPC_procedure.txt is observed with the parameter `IMPC_parameter_description.txt` file. Therefore, the same two steps are performed: 1) correct the formatting to be able to load it as a table in R 2) clean the values inside the table.
 
 Using readLines(), the metadata file is read and formatting lines as per specified pattern.
 
 ```{r}
-parameter_path <- paste0(rootDir, "/data/metadata/IMPC_parameter_description.txt")
-parameter_outputFile = paste0(rootDir, "/temporary/IMPC_Parameter_Description.txt")
+parameter <- read_lines(paste0(rootDir, "data/metadata/IMPC_parameter_description.txt")) %>%
+  .[-1] %>%                                   # Remove the first line ("x")
+  discard(~ . == "") %>%                      # Remove empty lines
+  str_remove_all('^"|"$') %>%                 # Remove leading and trailing double quotes
+  str_c(collapse = "\n") %>%                  # Combine all lines into one string
+  str_replace_all(c('" "' = ",", "\n" = " ")) %>% # Replace double quotes with commas and remove newlines
+  str_replace_all(c(                          
+    '(IMPC_[A-Z]{3}_[0-9]{3}_[0-9]{3})' = '\\1\n',  # Add newline after each IMPC identifier
+    'line_number,impcParameterOrigId, name, description, parameterId' = 
+      'parameter_mapping, parameter_name, parameter_description, parameter_id\n'  # Rename headers
+  )) %>%
+  str_split("\n") %>%                         # Split back into lines
+  unlist() %>%                                # Flatten into a character vector
+ # str_trim() %>%                              # Trim whitespace
+  str_replace_all('\\(([^)]*)\\)', function(x) str_replace_all(x, ',', ';')) %>% # Replace commas in parentheses
+  str_replace_all(                            # Match fields with regex and enclose them with quotes
+    '^([1-9][0-9]{0,3}),([0-9]{4,5}), ?([^,]+), (.*), ?(IMPC_[A-Z]{3}_[0-9]{3}_[0-9]{3})$', 
+    '"\\2","\\3","\\4","\\5"'                 # Space after comma would cause error with read_csv
+  ) %>%
+  write_lines(paste0(rootDir, "data/cleaned/formatted_IMPC_parameter_description.txt")) # Save to file
 
-# Read the file
-lines <- readLines(parameter_path)
-
-lines_cleaned <- lines %>%
-  # Replace spaces between quotes with commas
-  str_replace_all('" "', '","') %>%
-  # Reformat the lines as per the specified pattern
-  str_replace_all('^(\\d{1,4},\\d{5}, )([A-Z][^,]+(?:\\([^)]*\\))*(?:, )?)([a-z][^,]*\\([^)]*\\)?,?)(,[^,]+, IMPC_[A-Z]{3}_[0-9]{3}_[0-9]{3})$', 
-                '\\1"\\2"\\3"\\4')
-
-# Write the modified lines to a txt file
-writeLines(lines_cleaned, parameter_outputFile)
-
-```
-
-Initital observation:
-
-The metadata contains five columns; line_number, impcParameterOrigId, name, description, parameterId.
-
--   The entire metadata is being read as a single column where all the rows are stored as strings.
--   They all are under a label 'x'. First two columns are merged as one and is not separated by comma.
-
-Opening the saved .txt file of the metadata with a specific format using read_delim() function and specifying that it is delimited by commas.
-
-```{r}
-# Read the metadata file (assuming tab-delimited, change delimiter if needed)
-pd <- read_delim(parameter_outputFile, delim = ",")
-
-pd
-```
-
-Observations:
-
--   There may be a redundancy between name and description, as they often describe the same parameter but in different styles.
--   They are all presented as characters, although some columns contains numeric values, this is because the colnames hasn't been specified yet.
-
-The function below checks for commas in paratheses or any extra commas that will cause an abnormal splits amongst the columns.
-
-```{r}
-# Function to identify rows with extra commas or commas inside parentheses
-identify_comma_issues <- function(pd, expected_columns) {
-  pd <- pd %>%
-    rowwise() %>%
-    mutate(
-      # Count the number of commas in the row
-      comma_count = str_count(paste(across(everything()), collapse = ","), ","),
-      
-      # Expected number of commas (expected_columns - 1)
-      expected_commas = expected_columns - 1,
-      
-      # Flag rows with extra commas
-      has_extra_commas = comma_count > expected_commas,
-      
-      # Check for commas inside parentheses
-      has_commas_in_parentheses = str_detect(paste(across(everything()), collapse = " "), "\\([^\\)]*?,[^\\)]*?\\)")
-    ) %>%
-    ungroup()  # Ungroup after rowwise operations
-  
-  # Filter rows with issues
-  issues <- pd %>%
-    filter(has_extra_commas | has_commas_in_parentheses) %>%
-    select(everything(), comma_count, expected_commas, has_extra_commas, has_commas_in_parentheses)
-  
-  return(issues)
-}
-
-# Define the number of expected columns in your dataset
-expected_columns <- 5
-
-# Call the function on your dataset
-comma_issues <- identify_comma_issues(pd, expected_columns)
-
-# Output the results
-if (nrow(comma_issues) > 0) {
-  print("Rows with potential comma issues:")
-  print(comma_issues)
-} else {
-  print("No rows with comma issues found.")
-}
-
-view(comma_issues)
-```
-
-41 issues has been found. There are commas in parentheses that is causing unnecessary splits. To fix it, the commas in parentheses can be replaced by ;
-
-```{r}
-# Replace commas inside parentheses in all relevant columns (before separating)
-pd <- pd %>%
-  mutate(across(everything(), ~ str_replace_all(., '\\(([^)]*)\\)', function(m) {
-    # Replace commas with semicolons inside the parentheses
-    str_replace_all(m, ',', ';')
-  })))
-
+parameter <- read_csv(
+  paste0(rootDir, "data/cleaned/formatted_IMPC_parameter_description.txt"),
+  quote = ""   # Use this only if quotes are problematic; otherwise, `read_csv` handles them automatically
+) %>%
+  filter(!str_detect(parameter_id, '^IMPC_[A-Z]{3}_[0-9]{3}_[0-9]{3}$'))
 
 ```
 
-```{r}
-# Separate 'x', the single column into multiple columns.
-pd <- pd %>%
-  separate(x, into = c("line_number", "impcParameterOrigId", "name", "description", "parameterId"), sep = ",", extra = "merge", fill = "right")
-
-# Remove the first row as it's been used for column names.
-pd <- pd %>% slice(-1)
-
-# Renaming columns in the metadata dataframe to match the SOP. 
-pd <- pd %>%
-  rename(
-    line_number = line_number,
-    IMPC_parameter_orig_id = impcParameterOrigId,
-    parameter_name = name,
-    description = description,
-    parameter_id = parameterId
-  )
-
-# Remove the 'line_number' column
-pd <- pd %>%
-  select(-line_number)
-
-```
-
-Using separate(), it will split the single 'x' column into different columns based on commas.
-
--   extra = "merge": If there are more fields than columns, merge the extra fields into the last column.
--   fill = "right": Adds NA to empty columns when there are fewer fields than columns.
-
-Each columns are then renamed to correspond to SOP.
-
-```{r}
-# Convert the first two columns line_number and IMPC_parameter_orig_id to integers
-pd <- pd %>%
-  mutate(
-    IMPC_parameter_orig_id = as.numeric(IMPC_parameter_orig_id))
-
-str(pd)
-```
+The initial metadata file contains five intended columns: `line_number`, `impcParameterOrigId`, `name`, `description`, and `parameterId`. However, the entire dataset is being read as a single string under a single column labeled `x`, with the first two columns merged and improperly delimited. Upon opening the file in a delimited format, observations reveal potential redundancy between the `name` and `description` fields, as they often describe the same parameter in different styles. All data is treated as characters, including numeric values, due to the absence of properly specified column names. Additionally, 41 issues were identified where commas within parentheses caused abnormal splits between columns, which can be resolved by replacing these commas with semicolons. By using the `separate()` function with `extra = "merge"` to combine excess fields and `fill = "right"` to handle missing values, the single-column dataset can be split correctly. Finally, column names were standardized to match the SOP.
 
 This script validates columns in a metadata table against constraints defined in an SOP. It then retrieves the column names from the metadata table and prints them for reference and loops through each field name in order to check against the SOP. Furthermore, it skips columns with no SOP definition.
 
@@ -606,7 +492,7 @@ print_invalid_indices_and_values <- function(x, variable_name, invalid_indices) 
 }
 
 # Extract field names from the data table (metadata)
-field_names <- colnames(pd)
+field_names <- colnames(parameter)
 print(field_names)
 
 # Loop through each field name to apply SOP checks
@@ -621,7 +507,7 @@ for (field_name in field_names) {
   }
 
 # Access the column by name from the metadata
-  column <- pd[[field_name]]
+  column <- parameter[[field_name]]
   
   # Validate the column based on SOP constraints (Type, Min, Max)
   SOP_constraints <- validate_type_minmax(column, sop_row$dataType, sop_row$minValue, sop_row$maxValue)
@@ -650,8 +536,8 @@ Extracting any texts that belongs to the description column from the parameter_i
 ```{r}
 
 # Function to move text before IMPC_ into description and keep IMPC_ code in parameter_id
-fix_parameter_id <- function(pd) {
-  pd <- pd %>%
+fix_parameter_id <- function(parameter) {
+  parameter <- parameter %>%
     mutate(
       # Extract text before the IMPC code and keep it in description
       description = paste(description, str_extract(parameter_id, "^(.*?)(?=IMPC_)"), sep = " "),  
@@ -660,17 +546,17 @@ fix_parameter_id <- function(pd) {
       parameter_id = str_extract(parameter_id, "IMPC_[A-Z]{3}_[0-9]{3}_[0-9]{3}")
     )
   
-  return(pd)
+  return(parameter)
 }
 
 # Apply the function to the metadata
-pd <- fix_parameter_id(pd)
+parameter <- fix_parameter_id(parameter)
 ```
 
 ```{r}
 
 # Trim whitespaces and then replace blank strings with NA
-pd <- pd %>%
+parameter <- parameter %>%
   mutate(
     parameter_name = na_if(str_trim(parameter_name), ""),
     description = na_if(str_trim(description), ""),
@@ -684,7 +570,7 @@ pd <- pd %>%
 output_file_parameter <- paste0(rootDir, "data/cleaned/cleaned_IMPC_parameter_description.txt")
 
 # Save the cleaned metadata
-write.csv(pd, file = output_file_parameter, row.names = FALSE)
+write.csv(parameter, file = output_file_parameter, row.names = FALSE)
 
 # Completion message
 cat("Cleaned metadata has been saved to:", output_file_parameter, "\n")
