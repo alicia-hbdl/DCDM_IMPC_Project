@@ -789,171 +789,108 @@ Issues:
 
 -   Duplicate disease_id values exist –\> We need to decide if they are meaningful (they have unique phenodigm scores for reference)
 
-Let's review what the data looks like.
+Step 1: Clean the raw metadata file, organising it into four columns
 
 ```{r}
 
-# Load raw file
-raw_lines <- readLines(paste0(rootDir, "data/metadata/Disease_information.txt"))
+# 1a) Read the raw lines
+raw_lines <- readLines((paste0(rootDir, "data/metadata/Disease_information.txt")))
 
-# Inspect the first few rows
-head(raw_lines, 13)
-```
+# 1b) Remove the first 'x' row (unnecessary header or placeholder)
+cleaned_lines <- raw_lines[-1]
 
-Key Observations: 1)An unnecessary x row exists at the top. 2) Row numbers and extra quotes are embedded in the data. disease_term fields contain commas causing extra splits.
 
-To prepare the data for further processing:1) Remove the first "x" row. 2) Strip row numbers and surrounding quotes.
-
-```{r}
-# Remove the "x" row
-cleaned_lines <- raw_lines[-1]  # Remove the first row ("x")
-
-# Remove row numbers and surrounding quotes
+# 1c) Remove row numbers and surrounding quotes from each line
+#     - '^\\d+\\"\\s' looks for leading digits, a quote, and a space
+#     - '^"|"$' removes any leading or trailing quotes
 cleaned_lines <- cleaned_lines %>%
-  str_remove_all('^\\d+\\"\\s') %>%   #
-  str_remove_all('^"|"$')           # Remove the outer pair of quotes
+  str_remove_all('^\\d+\\"\\s') %>%
+  str_remove_all('^"|"$')
 
 
-# Inspect the cleaned lines
-head(cleaned_lines, 14)
-```
-
-Some disease_term fields contain commas, splitting the data into extra columns. Here, we fix that issue by combining split fields.
-
-```{r}
-# Function to process and clean split rows
-process_split_row <- function(row) {
-  # Split the row by commas outside quotes
-  split_row <- str_split(row, ",\\s*(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)")[[1]]
+# 1d) Function to properly combine split fields (handling split rows)
+process_split_row <- function(row_line) {
+  # Split by commas that are *not* enclosed in quotes:
+  split_row <- str_split(
+    row_line, 
+    pattern = ",\\s*(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)")[[1]]
   
-  # Check if the split_row has more than 4 fields (indicating a split disease term)
+  # If the row is incorrectly split into > 4 parts, we paste everything except the first & last two as the disease_term
   if (length(split_row) > 4) {
-    # Combine extra fields in the disease_term column
     disease_term <- paste(split_row[2:(length(split_row) - 2)], collapse = ", ")
-    return(c(split_row[1], disease_term, split_row[length(split_row) - 1], split_row[length(split_row)]))
+    out <- c(
+      split_row[1], 
+      disease_term, 
+      split_row[length(split_row) - 1], 
+      split_row[length(split_row)]
+    )
+    return(out)
   } else {
-    # Return the row as is if it's already properly split
+    # If it’s already at 4 parts, just return as is
     return(split_row)
   }
 }
 
-# Apply the function to all cleaned lines
+# Apply our row processing to each line
 split_data <- map(cleaned_lines, process_split_row)
 
-#Inspect split_data
-# str(split_data) #This revealed that the phenodigm scores are character values
-
-# Inspect a sample of split_data
-# head(split_data, 20)
-
-# Find problematic rows (e.g., empty or improperly split rows)
+# Check if any rows still have a number of columns that is not equal to 4
 problematic_rows <- which(map_int(split_data, length) != 4)
-print("Indices of problematic rows:")
-print(problematic_rows) #Shows that all the rows have been split well
+if (length(problematic_rows) > 0) {
+  cat("Problematic rows found at indices:", problematic_rows, "\n")
+} else {
+  cat("All rows split correctly into four columns.\n")
+}
 
-# Create data_frame from split_data 
-data_frame <- split_data %>%
+```
+
+Step 2: Load data into a Table & Clean Values within Rows/Columns
+
+```{r}
+# 2a) Convert the list-of-vectors into a tibble
+disease_data <- split_data %>%
   map(~ set_names(as.list(.), c("disease_id", "disease_term", "gene_accession_id", "phenodigm_score"))) %>%
   bind_rows()
 
-```
 
-The phenodigm_score column contains non-numeric characters and spaces. We clean and convert it safely to numeric.
-
-```{r}
-
-# Clean the phenodigm_score column
-data_frame <- data_frame %>%
+# 2b) Trim and remove extra bits from phenodigm_score; convert to numeric
+disease_data <- disease_data %>%
   mutate(
-    phenodigm_score = str_trim(phenodigm_score),  # Remove leading/trailing spaces
-    phenodigm_score = str_replace_all(phenodigm_score, "[^0-9\\.]", "")  # Remove non-numeric characters except "."
-  )
-
-#After cleaning, convert the column to numeric.
-data_frame <- data_frame %>%
-  mutate(
+    # Remove leading/trailing spaces
+    phenodigm_score = str_trim(phenodigm_score),
+    # Remove non-digit and non-dot chars
+    phenodigm_score = str_replace_all(phenodigm_score, "[^0-9\\.]", ""),
+    # Convert safely to numeric
     phenodigm_score = as.numeric(phenodigm_score)
   )
 
-#After cleaning, check for any remaining NAs
-remaining_na <- data_frame %>%
-  filter(is.na(phenodigm_score))
 
-print("Rows with remaining NA values in phenodigm_score:")
-print(remaining_na)
-
-#Inspect the data to verify changes
-str(data_frame)
-summary(data_frame)
-```
-
-Final Cleanup: Fix Rows and Disease IDs 1) Drop the extra header row. 2) Clean disease_id to remove row numbers and quotes.
-
-```{r}
-# Remove the first row
-data_frame <- data_frame[-1, ]  # Drop the first row
-head(data_frame)
-
-# Clean disease_id column
-data_frame <- data_frame %>%
+# 2c) Clean up disease_id if extra quotes or row numbers still remain
+disease_data <- disease_data %>%
   mutate(
-    disease_id = str_remove(disease_id, '^\\d+\\"\\s'), # Remove row numbers and quotes
-    disease_id = str_remove_all(disease_id, '^"|"$')    # Remove any remaining outer quotes
+    disease_id = str_remove(disease_id, '^\\d+\\"\\s'),
+    disease_id = str_remove_all(disease_id, '^"|"$')
   )
 
-#Verify changes
-head(data_frame)
+
+# 2d) The very first row is still a leftover header, remove it
+disease_data <- disease_data[-1, ]  # Drop the first row
+
+
+# Verifying changes
+head(disease_data) 
 
 ```
 
-Final Quality Checks: Verify the dataset for: correct data types, missing values, duplicates, proper formatting
-
-```{r}
-# Verify data types
-str(data_frame)
-
-# Confirm numeric values for phenodigm_score
-summary(data_frame$phenodigm_score)
-
-# Count missing values in each column
-colSums(is.na(data_frame)) #shows there are no missing values in any of the columns
-
-# Verify uniqueness of disease_id
-unique_disease_ids <- nrow(data_frame) == length(unique(data_frame$disease_id))
-
-if (unique_disease_ids) {
-  print("All disease_id values are unique!")
-} else {
-  print("Warning: Duplicate disease_id values found.")
-} #Duplicate disease_id values found!!!
-
-# Check disease_id format (e.g., OMIM:xxxx or ORPHA:xxxx)
-invalid_disease_ids <- data_frame %>%
-  filter(!str_detect(disease_id, "^(OMIM|ORPHA):\\d+$"))
-
-print("Invalid disease_id values:")
-print(invalid_disease_ids) #none
-
-# Check gene_accession_id format (e.g., MGI:xxxxx)
-invalid_gene_ids <- data_frame %>%
-  filter(!str_detect(gene_accession_id, "^MGI:\\d+$"))
-
-print("Invalid gene_accession_id values:")
-print(invalid_gene_ids) #none
-
-```
-
-Are duplicate disease_ids meaningful? Should we leave them as is or should we aggregate them into unique rows by taking a mean of the phenodigm score?
-
-Saving and Loading the Final Data
+Step 3: Saving and Loading the Final Data
 
 ```{r}
 
 # Specify the path to the cleaned directory
-output_path <- paste0(rootDir, "data/cleaned/cleaned_Disease_information.txt")
+output_path <- paste0(rootDir, "data/cleaned/disease_information.txt")
 
 # Save data_frame as a tab-delimited text file
-write.table(data_frame, file = output_path, sep = "\t", row.names = FALSE, quote = FALSE)
+write.table(disease_data, file = output_path, sep = "\t", row.names = FALSE, quote = FALSE)
 
 # Load the final cleaned data
 disease_information <- read.table(
