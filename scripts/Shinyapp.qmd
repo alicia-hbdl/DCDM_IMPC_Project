@@ -56,7 +56,7 @@ ui <- fluidPage(
                      downloadButton("download_phenotype_data", "Download Phenotype Data")),
             tabPanel("Gene Clusters",
                      plotOutput("gene_cluster_plot"),
-                     downloadButton("download_cluster_data", "Download Cluster Data"))
+                     downloadButton("download_cluster_data", "Download Cluster Data")),
             tabPanel("Gene-Disease Associations",
                      plotOutput("gene_disease_plot"),
                      downloadButton("download_gene_disease_data", "Download Gene-Disease Data")),
@@ -148,8 +148,6 @@ server <- function(input, output, session) {
              x = "Disease Term", y = "Phenodigm Score") +
         theme(axis.text.x = element_text(angle = 45, hjust = 1))
 })
-
-
   
   # Populate dropdown with available phenotypes
   observe({
@@ -191,7 +189,7 @@ server <- function(input, output, session) {
       WHERE Parameters.parameter_name = '%s'
       ORDER BY Analyses.p_value ASC;", input$phenotype)
     
-    data <- dbGetQuery(con, query)
+    data <- dbGetQuery(con, query) 
     
     ggplot(data, aes(x = reorder(gene_symbol, p_value), y = p_value)) +
       geom_boxplot() +
