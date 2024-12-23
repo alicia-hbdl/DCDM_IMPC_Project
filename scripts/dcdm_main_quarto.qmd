@@ -51,7 +51,7 @@ library(janitor)
 ```{r}
 # Define the working directory path in r
 # Alicia
-rootDir = "/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/"
+#rootDir = "/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/"
 # Sanj 
 #rootDir = "/Users/sanjanasrinivasan/Desktop/DCDM_IMPC_Project/"
 # Ella
@@ -59,7 +59,7 @@ rootDir = "/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/"
 # Sama
 #rootDir = "/Users/sama/Desktop/DCDM_Proj2/"
 # Esta
-#rootDir = ""
+#rootDir = "~/Desktop/working_directory/DCDM_project"
 ```
 
 ## Cleaning the Raw Data Files
@@ -76,11 +76,11 @@ We begin by defining the directory paths and the log file path.
 
 ```{r}
 # Defing directory paths
-raw_data_dir <- paste0(rootDir, "data/raw_data") # Input raw data directory
-updated_data_dir <- paste0(rootDir, "data/updated_data") # Cleaned analysis data directory (field names only)
-log_file_mod <- paste0(rootDir, "scripts/row_name_modification.log") # Log file for modifications
-log_file_valid <- paste0(rootDir, "scripts/row_name_validation.log")   # Log file for results
-SOP_path <- paste0(rootDir, "data/metadata/IMPC_SOP.csv") # SOP path
+raw_data_dir <- paste0(rootDir, "/data/raw_data") # Input raw data directory
+updated_data_dir <- paste0(rootDir, "/data/updated_data") # Cleaned analysis data directory (field names only)
+log_file_mod <- paste0(rootDir, "/scripts/row_name_modification.log") # Log file for modifications
+log_file_valid <- paste0(rootDir, "/scripts/row_name_validation.log")   # Log file for results
+SOP_path <- paste0(rootDir, "/data/metadata/IMPC_SOP.csv") # SOP path
 
 # Creates output directory if it doesn't already exist & supresses warnings if it does exist
 dir.create(updated_data_dir, showWarnings = FALSE)
@@ -93,8 +93,8 @@ file.create(log_file_valid)
 Then we load the SOP file. *Here, I have normalized the row names to lowercase although this isn't strictly necessary for this specific file.*
 
 ```{r}
-# Load the SOP file and normalize row names (remove white spaces and conver to lowercase)
-expected_row_names <- trimws(tolower(read_csv(SOP_path, show_col_types = FALSE)$dataField))
+# Load the SOP file and normalize row names
+expected_row_names <- trimws(read_csv(SOP_path, show_col_types = FALSE)$dataField)
 
 # Check normalized row names
 expected_row_names
@@ -111,44 +111,31 @@ With the correct files loaded and directories specified, we define a function to
 3.  Reorder the rows to align with the SOP layout.
 
 ```{r}
-# Function to correct row names
+# Function to validate, update, and reorder row names
 process_file <- function(file_path) {
-  # Attempt to read the CSV file specified by file_path
+  # Read the CSV file as headerless
   data <- tryCatch(
-    # col_names = FALSE treats all rows as data, as the files lack headers
-    # suppress console messages about column type detection
-    read_csv(file_path, col_names = FALSE, show_col_types = FALSE),
-    # On error, log the issue and set 'data' to NULL
-    error = function(e) {
-      message(paste("Error reading file:", file_path, "-", e))
-      return(NULL) # Exit with NULL if file reading fails
-    }
-  )
-  # If the file could not be read, return FALSE
+    read_csv(file_path, col_names = FALSE, show_col_types = FALSE), 
+    error = function(e) return(NULL))
+  
+  # If file reading fails, skip processing
   if (is.null(data)) return(FALSE)
   
-  # Convert the fields (first column) to lowercase and remove leading/trailing spaces for consistency
-  data[[1]] <- trimws(tolower(data[[1]]))
+  # Normalize row names
+  data[[1]] <- tolower(data[[1]])
   
-  # Identify rows that are expected but missing in the current data
+  # Identify missing rows and add them, input NA value for second column
   missing_rows <- setdiff(expected_row_names, data[[1]])
-  
-  # Add missing rows to the data, assigning NA to the second column
   if (length(missing_rows) > 0) {
-    missing_data <- tibble(
-      !!colnames(data)[1] := missing_rows, # Use the name of the first column for the row names
-      !!colnames(data)[2] := NA            # Assign NA to the second column for missing rows
-    )
-    data <- bind_rows(data, missing_data)
+    data <- bind_rows(data, tibble(V1 = missing_rows, V2 = NA))
   }
   
-  # Reorder rows to match 'expected_row_names' (optional, as join/merge functions rely on matching field names rather than the order of rows)
-  # data <- data %>% arrange(match(data[[1]], expected_row_names))
-
-  # Save the updated data to the output directory
-  write.table(data, file = file.path(updated_data_dir, basename(file_path)), sep = ",", row.names = FALSE, col.names = FALSE)
-
-  # Return TRUE if processing is successful
+  # Reorder rows based on expected_row_names
+  data <- arrange(data, match(data[[1]], expected_row_names))
+  
+  # Save the updated file as headerless
+  write_csv(data, file.path(updated_data_dir, basename(file_path)), col_names = FALSE)
+ 
   return(TRUE)
 }
 ```
@@ -156,22 +143,13 @@ process_file <- function(file_path) {
 We now apply this function to all data files. This process will generate an `updated_data` folder containing the cleaned files and a log file in the main directory.
 
 ```{r}
-#| eval: false
+# Process files and log results
+validation_results <- sapply(list.files(raw_data_dir, pattern = "\\.csv$", full.names = TRUE), process_file)
 
-# List all CSV files in the data directory
-files <- list.files(raw_data_dir, pattern = "\\.csv$", full.names = TRUE)
-
-# Process each file and store success/failure results
-validation_results <- sapply(files, process_file)
-
-# Create a summary message with the total and successfully processed files
-summary_message <- sprintf(
-  "Validation Summary:\nTotal files checked: %d\nTotal successfully processed files: %d\n",
-  length(validation_results), sum(validation_results)
-)
-
-# Write the summary to the log file and display it in the console
-cat(summary_message, file = log_file_mod)
+# Log summary
+summary_message <- sprintf("Validation Summary:\nTotal files checked: %d\nTotal updated files: %d\n",
+                           length(validation_results), sum(validation_results))
+write(summary_message, log_file_mod)
 message(summary_message)
 ```
 
@@ -179,79 +157,60 @@ The summary message displays the number of files validated out of the total numb
 
 #### Verify the field names
 
-#### This code duplicates the logic used to modify the files, making it somewhat redundant and unable to detect field name issues. To streamline the process, consider enhancing the first code to include the additional checks (e.g., verifying that the file has exactly two columns); + we will be running the SOP on the cleaned table eventually, so this was probably really helpful when developing the code, but isn't very interesting for the final script {style="color: red"}
+#### This code duplicates the logic used to modify the files, making it somewhat redundant and unable to detect field name issues. I have kept it as a separate optional script to check for any potential collating errors - this script is a remnant of the data exploration code I used to identify the steps needed during data cleaning. {style="color: red"}
 
 After modifying the files, we run a final validation script to confirm that there are no unexpected row name differences remaining. This ensures the data aligns perfectly with the SOP.
 
 ```{r}
-# Function to validate a file against the SOP layout and column requirements
-validate_file <- function(file_path, expected_row_names) {
-  # Attempt to read the file
+# Function to validate a file against the SOP layout and column count
+validate_file <- function(file_path) {
+  # Read the file
   data <- tryCatch(
     read_csv(file_path, col_names = FALSE, show_col_types = FALSE),
-    # Handle errors 
-    error = function(e) {
-      message(paste("Error reading file:", file_path, "-", e))
-      return(list(valid = FALSE, message = "Error reading file"))
-    }
-  )
+    error = function(e) return(NULL))
   
-  # If the file couldn't be read, return an invalid result
-  if (is.null(data)) return(list(valid = FALSE, message = "File could not be read"))
+  # Skip files that could not be read
+  if (is.null(data)) return(FALSE)
   
-  # Check if the file has exactly two columns
+  # Check column count
   if (ncol(data) != 2) {
-    return(list(valid = FALSE, message = paste("Invalid column count:", ncol(data), "(expected: 2)")))
+    return(list(valid = FALSE, message = "Incorrect column count"))
   }
   
-  # Normalize row names and compare with expected SOP row names
+  # Normalize row names and validate against SOP
   row_names <- tolower(data[[1]])
-  missing_rows <- setdiff(expected_row_names, row_names) # Rows missing from the file
-  extra_rows <- setdiff(row_names, expected_row_names) # Rows in the file not in the SOP
+  missing_rows <- setdiff(expected_row_names, row_names)
+  extra_rows <- setdiff(row_names, expected_row_names)
   
-  # Return invalid result if row name mismatches are found
+  # Create validation message
   if (length(missing_rows) > 0 || length(extra_rows) > 0) {
-    message <- ""
-    if (length(missing_rows) > 0) {
-      message <- paste(message, "Missing row names:", paste(missing_rows, collapse = ", "), "\n")
-    }
-    if (length(extra_rows) > 0) {
-      message <- paste(message, "Extra row names:", paste(extra_rows, collapse = ", "), "\n")
-    }
-    return(list(valid = FALSE, message = message))
+    message <- c(
+      if (length(missing_rows) > 0) paste("Missing row names:", paste(missing_rows, collapse = ", ")),
+      if (length(extra_rows) > 0) paste("Extra row names:", paste(extra_rows, collapse = ", "))
+    )
+    return(list(valid = FALSE, message = paste(message, collapse = "\n")))
   }
   
-  # Return valid result if all checks pass
-  return(list(valid = TRUE, message = "File is valid"))
+  list(valid = TRUE, message = "File is valid")
 }
-```
 
-```{r}
-#| eval: false
-
-# Validate all files in the updated data directory
-files <- list.files(updated_data_dir, pattern = "\\.csv$", full.names = TRUE)
-validation_results <- lapply(files, function(file_path) {
-  # Validate each file and log results
-  result <- validate_file(file_path, expected_row_names)
-  message <- paste(basename(file_path), ":", result$message, "\n")
-  cat(message, file = log_file_valid, append = TRUE) # Append results to the log file 
-  return(result$valid)
+# Process all files
+validation_results <- lapply(list.files(updated_data_dir, pattern = "\\.csv$", full.names = TRUE), function(file_path) {
+  result <- validate_file(file_path)
+  log_message <- paste(basename(file_path), ":", result$message, "\n")
+  cat(log_message, file = log_file, append = TRUE)
+  result$valid
 })
 
-# Summarize and log the validation results
-valid_files <- sum(unlist(validation_results)) # Count valid files
-total_files <- length(validation_results) # Total files checked
-
-# Create a summary message with the total and valid files
+# Summarize and log results
+valid_files <- sum(unlist(validation_results))
 summary_message <- sprintf(
-  "Validation Summary:\nTotal files checked: %d\nTotal valid files: %d\n",
-  total_files, valid_files
+  "Validation Summary:\nTotal files checked: %d\nTotal valid files: %d\n", 
+  length(validation_results), valid_files
 )
-
-# Write the summary to the log file and display it in the console
 cat(summary_message, file = log_file_valid, append = TRUE)
 message(summary_message)
+
 ```
 
 This code can be run both locally and on an HPC with minimal adjustments, such as loading individual `dplyr` and `readr` packages instead of the entire `tidyverse`.
