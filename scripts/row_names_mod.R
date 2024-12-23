@@ -1,62 +1,53 @@
-library(dplyr)
-library(readr)
+library(tidyverse)
 
 # Set paths to directories
-setwd("/scratch_tmp/grp/msc_appbio/DCDM_group3")
-data_dir <- "data/raw_data"
-output_dir <- "data/updated_data"
-log_file <- "data/row_name_modification.log"
+setwd("~/Desktop/working_directory/DCDM_project/data")
+data_dir <- "raw_data"
+output_dir <- "updated_data"
+log_file <- "row_name_modification.log"
 
-# Creates output directory if it doesn't already exist & supresses warnings if it does exist
+# Create output directory if it doesn't exist
 dir.create(output_dir, showWarnings = FALSE)
 
-# Load the SOP file and normalize row names to lowercase
-expected_row_names <- tolower(read_csv("data/metadata/IMPC_SOP.csv", show_col_types = FALSE)$dataField)
+# Load SOP file and normalize row names to lowercase
+expected_row_names <- read_csv("metadata/IMPC_SOP.csv", show_col_types = FALSE)$dataField
 
-# Clear the log file if it exists or creates it if it doesn't
+# Clear the log file
 file.create(log_file)
 
 # Function to validate, update, and reorder row names
 process_file <- function(file_path) {
-  # Read the file specified by file_path
+  # Read the CSV file as headerless
   data <- tryCatch(
-    read_csv(file_path, col_names = TRUE, show_col_types = FALSE),
-    error = function(e) {
-      message(paste("Error reading file:", file_path, "-", e))
-      return(NULL)
-    }
-  )
+    read_csv(file_path, col_names = FALSE, show_col_types = FALSE), 
+    error = function(e) return(NULL))
+  
+  # If file reading fails, skip processing
   if (is.null(data)) return(FALSE)
   
-  # Normalize row names and identify missing rows
+  # Normalize row names
   data[[1]] <- tolower(data[[1]])
-  missing_rows <- setdiff(expected_row_names, data[[1]])
   
-  # Add missing rows with NA values in the second column
+  # Identify missing rows and add them, input NA value for second column
+  missing_rows <- setdiff(expected_row_names, data[[1]])
   if (length(missing_rows) > 0) {
-    missing_data <- tibble(
-      !!colnames(data)[1] := missing_rows,  # First column: missing row names
-      !!colnames(data)[2] := NA            # Second column: NA values
-    )
-    data <- bind_rows(data, missing_data)
+    data <- bind_rows(data, tibble(V1 = missing_rows, V2 = NA))
   }
   
-  # Reorder rows and save the updated file
-  data <- data %>% arrange(match(data[[1]], expected_row_names))
-  write_csv(data, file.path(output_dir, basename(file_path)))
+  # Reorder rows based on expected_row_names
+  data <- arrange(data, match(data[[1]], expected_row_names))
   
+  # Save the updated file as headerless
+  write_csv(data, file.path(output_dir, basename(file_path)), col_names = FALSE)
+ 
   return(TRUE)
 }
 
-# Process all files and log results
-files <- list.files(data_dir, pattern = "\\.csv$", full.names = TRUE)
-validation_results <- sapply(files, process_file)
+# Process files and log results
+validation_results <- sapply(list.files(data_dir, pattern = "\\.csv$", full.names = TRUE), process_file)
 
-# Write summary to log
-summary_message <- sprintf(
-  "Validation Summary:\nTotal files checked: %d\nTotal updated files: %d\n",
-  length(validation_results), sum(validation_results)
-)
-cat(summary_message, file = log_file)
+# Log summary
+summary_message <- sprintf("Validation Summary:\nTotal files checked: %d\nTotal updated files: %d\n",
+                           length(validation_results), sum(validation_results))
+write(summary_message, log_file)
 message(summary_message)
-
