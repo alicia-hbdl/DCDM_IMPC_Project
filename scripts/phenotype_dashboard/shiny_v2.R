@@ -360,7 +360,7 @@ shinyApp(ui = ui, server = server)
 
 
 
-#parse(file = "/Users/sanjanasrinivasan/Desktop/DCDM_IMPC_Project/scripts/phenotype_dashboard/app.R")
+#parse(file = "/Users/sanjanasrinivasan/Desktop/DCDM_IMPC_Project/scripts/phenotype_dashboard/shiny_v2.R")
 
 
 
