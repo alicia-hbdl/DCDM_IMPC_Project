@@ -37,6 +37,7 @@ ui <- fluidPage(
                       selected = NULL),
           selectInput("disease", "Select Disease:",
                       choices = diseases$disease_term),
+          uiOutput("disease_ui"), # This will render the disease selectInput dynamically
           sliderInput("threshold", "Set Significant Threshold:",
                       min = 0, max = 100, value = 50),
           sliderInput("clusters", "Number of Clusters", 
@@ -47,7 +48,7 @@ ui <- fluidPage(
 
         # Show a plot of the generated distribution
         mainPanel(
-          tabsetPanel( #this neatly organises the 3 visualisations, making the app intuititive to use
+          tabsetPanel( 
             tabPanel("Phenotype Scores for Knockout Mouse",
                      plotOutput("mouse_phenotype_plot"),
                      downloadButton("download_mouse_data", "Download Knockout Mouse Data")),
@@ -95,6 +96,7 @@ server <- function(input, output, session) {
     WHERE gd.gene_accession_id IN (SELECT gene_id
                                     FROM Genes 
                                     WHERE gene_symbol = '%s')", input$mouse_id))
+    selectInput("disease", "Select Disease:", choices = diseases$disease_term)
 })
 
   # Populate dropdown with available knockout mice
@@ -260,14 +262,15 @@ server <- function(input, output, session) {
 }
 
    # Populate dropdown for grouping by parameter
-    observe({
-    grouping_data <- dbGetQuery(con, "
-        SELECT DISTINCT pg.group_name
-        FROM ParameterGroupings pg
-        JOIN parameterXgroup pxg ON pg.grouping_id = pxg.grouping_id
-    ")
-    updateSelectInput(session, "grouping", choices = grouping_data$group_name)
+ observe({
+  grouping_data <- dbGetQuery(con, "
+    SELECT DISTINCT pg.group_name
+    FROM ParameterGroupings pg
+    JOIN parameterXgroup pxg ON pg.grouping_id = pxg.grouping_id
+  ")
+  updateSelectInput(session, "grouping", choices = grouping_data$group_name)
 })
+
 
     # Visualisation 4: Parameter groupings
 output$grouping_plot <- renderPlot({
@@ -290,14 +293,27 @@ output$grouping_plot <- renderPlot({
 })
 
 
+
 # Run the application 
 shinyApp(ui = ui, server = server)
 ```
 
-**PCA for Gene Clusters**:
+**What I added:**
 
--   Instead of using hierarchical clustering (`hclust`), I've used PCA to cluster genes based on phenotype scores. PCA reduces the dimensionality of the dataset, and you can visualise the clustering in a scatter plot of the first two principal components.
+**Selecting the Number of Clusters**
 
-**Dynamic Cluster Number Input**:
+This line creates a slider input that allows the user to select a number of clusters. The value will be used to control the number of clusters in a clustering or grouping operation.
 
--   Added a slider (`sliderInput("clusters", ...)`) to allow the user to specify the number of clusters for visualisation.
+**Gene Symbol Search Functionality:**
+
+This functionality allows users to search for gene symbols dynamically. As the user types in the `textInput` for `gene_search`, the server queries the database to retrieve gene symbols that match the input and updates the `mouse_id`dropdown. When the user types something into the "Search Gene Symbol" field, the server sends a query to the database to find gene symbols that match the entered text. It then updates the `mouse_id` dropdown with the search results.
+
+**Disease dropdown based on gene:** This section allows the disease dropdown to dynamically update based on the gene selected in the `mouse_id` dropdown. After the user selects a gene symbol, a query is triggered to fetch disease terms associated with that gene from the `GeneDisease` table. The results are then used to populate the `disease` dropdown.
+
+**Grouping by Parameter Section: T**he server queries the database to retrieve distinct grouping names and updates the `grouping` dropdown based on the available groups.
+
+**Visualising Parameters in a Grouping:** This section visualizes the number of parameters associated with a selected grouping. After the user selects a parameter grouping, the server fetches data to count how many parameters belong to that grouping, and the results are plotted as a bar chart. ***(?? Is this the purpose, I am not sure. Sanj, if you could check this out and fact check it because I am confused.)***
+
+**Gene-Disease Associations Plot:** This part generates a bar plot showing the association between the selected gene and diseases, based on the `PhenodigmScores` table. The user selects a gene, and the app queries the database to fetch disease terms and corresponding phenodigm scores for that gene. It then plots this data in a bar chart, with diseases on the x-axis and phenodigm scores on the y-axis.
+
+**PCA for Gene Clusters**: I've used PCA to cluster genes based on phenotype scores. PCA reduces the dimensionality of the dataset, and you can visualise the clustering in a scatter plot of the first two principal components. The server fetches data on gene symbols, phenotype parameters, and their associated p-values, reshapes the data and performs PCA. The results are visualised as a scatter plot of the first two principal components.
