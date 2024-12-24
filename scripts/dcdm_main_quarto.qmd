@@ -787,9 +787,7 @@ The Disease_information.txt file contains metadata with four key columns: `disea
 
 -   Row numbers and quotes appear in the `disease_id` column -\> Clean `disease_id` to remove row numbers and quotes
 
--   
-
-Step 1: Clean the raw metadata file, organising it into four columns
+Step 1: Clean the raw metadata file, organising it into four columns.
 
 ```{r}
 
@@ -844,7 +842,7 @@ if (length(problematic_rows) > 0) {
 
 ```
 
-Step 2: Load data into a Table & Clean Values within Rows/Columns
+Step 2: Load data into a Table & Clean Values within Rows/Columns.
 
 ```{r}
 # 2a) Convert the list-of-vectors into a tibble
@@ -882,7 +880,56 @@ head(disease_data)
 
 ```
 
-Step 3: Saving and Loading the Final Data
+Step 3: Validate/fix `gene_accession_id` according to the SOP.
+
+-   The gene_accession_id column in the SOP is described as a 9-11 character string starting with MGI: and followed by a unique numeric ID, with values being unique.
+
+-   In this data-set, duplicates in gene_accession_ids are permissible because the same gene can be associated with multiple diseases.
+
+```{r}
+# 3a) Check & fix data type of gene_accession_id
+if (!is.character(disease_data$gene_accession_id)) {
+  cat("NOTE: 'gene_accession_id' was not a string. Converting it to character...\n")
+  disease_data$gene_accession_id <- as.character(disease_data$gene_accession_id)
+}
+
+# 3b) Check for missing or empty gene_accession_id
+missing_gene_ids <- disease_data %>%
+  filter(is.na(gene_accession_id) | gene_accession_id == "")
+
+if (nrow(missing_gene_ids) > 0) {
+  cat("WARNING: Some rows have missing gene_accession_id:\n")
+  print(missing_gene_ids)
+}
+
+# 3c) Check the format must start with "MGI:" and then digits
+invalid_format <- disease_data %>%
+  filter(!str_detect(gene_accession_id, "^MGI:\\d+$"))
+
+if (nrow(invalid_format) > 0) {
+  cat("WARNING: Some gene_accession_id values do not follow 'MGI:digits' format:\n")
+  print(invalid_format)
+  # Example: Remove them or manually fix them
+  # disease_data <- disease_data %>%
+  #   filter(str_detect(gene_accession_id, "^MGI:\\d+$"))
+}
+
+# 3d) Check the length is between 9 and 11 characters (inclusive)
+wrong_length <- disease_data %>%
+  mutate(gene_len = nchar(gene_accession_id)) %>% #Creates new column storing str length
+  filter(gene_len < 9 | gene_len > 11) #selects rows where length <9 or >11
+
+if (nrow(wrong_length) > 0) {
+  cat("WARNING: Some gene_accession_id values are not between 9 and 11 characters:\n")
+  print(wrong_length)
+}
+
+# Provide final summary
+cat("\nStep 3: SOP & data-type checks complete. Final data overview:\n")
+str(disease_data)
+```
+
+Step 4: Saving and Loading the Final Data
 
 ```{r}
 

@@ -581,7 +581,7 @@ head(disease_data)
 
 ```
 
-Step 3: Validate and Fix gene_accession_id Against SOP
+Step 3: Validate/fix gene_accession_id according to the SOP
 
 The gene_accession_id column in the SOP is described as:
 
