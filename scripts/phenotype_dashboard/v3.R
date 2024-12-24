@@ -1,4 +1,3 @@
-
 library(shiny)
 library(ggplot2)
 library(dplyr)
@@ -13,6 +12,8 @@ ui <- fluidPage(
   
   sidebarLayout(
     sidebarPanel(
+      textInput("gene_search", "Search Gene Symbol:", ""),
+      
       # Conditional inputs for each tab
       conditionalPanel(
         condition = "input.tabs == 'mouse_phenotype_tab'",
@@ -34,7 +35,7 @@ ui <- fluidPage(
                     choices = c("Hierarchical", "K-Means", "PCA"),
                     selected = "Hierarchical"),
         numericInput("num_clusters", "Number of Clusters (K-Means):",
-                     value = 3, min = 2, max = 10, step = 1),
+                     value = 3, min = 2, max = 50, step = 1),
         selectInput("gene_subset", "Subset of Genes:",
                     choices = c("All genes", 
                                 "Genes with significant phenotypes (p<0.05)", 
@@ -42,7 +43,13 @@ ui <- fluidPage(
                     selected = "All genes"),
         textInput("user_genes", 
                   "Enter gene symbols (comma-separated) if 'User-specific genes' is selected:")
-      )
+      ),
+      
+      conditionalPanel(
+        condition = "input.tabs == 'gene_disease_tab'",
+        selectInput("disease", "Select Disease:", choices = NULL),
+        uiOutput("gene_select_ui")  # Dynamically generated selectInput
+      ),
     ),
     
     mainPanel(
@@ -62,7 +69,12 @@ ui <- fluidPage(
         tabPanel("Gene Clusters",
                  value = "clusters_tab",
                  plotOutput("gene_cluster_plot"),
-                 downloadButton("download_cluster_data", "Download Cluster Data"))
+                 downloadButton("download_cluster_data", "Download Cluster Data")),
+        
+        tabPanel("Gene-Disease Associations",
+                 value = "gene_disease_tab",  
+                 plotOutput("gene_disease_plot"),
+                 downloadButton("download_gene_disease_data", "Download Gene-Disease Data"))
       )
     )
   )
@@ -78,7 +90,7 @@ server <- function(input, output, session) {
     host = "localhost",
     port = 3306,
     user = "root",
-    password = "Llama123@"
+    password = "mahiat123"
   )
   
   onStop(function() {
@@ -86,6 +98,8 @@ server <- function(input, output, session) {
   })
   
   # Populate dropdowns
+  
+  
   observe({
     gene_choices <- dbGetQuery(con, "SELECT DISTINCT gene_id FROM Genes;")
     updateSelectInput(session, "selected_mouse", choices = gene_choices$gene_id)
@@ -94,6 +108,25 @@ server <- function(input, output, session) {
   observe({
     phenotype_choices <- dbGetQuery(con, "SELECT DISTINCT parameter_name FROM Parameters;")
     updateSelectInput(session, "selected_phenotype", choices = phenotype_choices$parameter_name)
+  })
+  
+  observe({
+    diseases <- dbGetQuery(con, "SELECT DISTINCT disease_term FROM Diseases;")
+    updateSelectInput(session, "disease", choices = diseases$disease_term)
+  })
+  
+  output$gene_select_ui <- renderUI({
+    gene_choices <- dbGetQuery(con, "SELECT DISTINCT gene_symbol FROM Genes;")
+    req(nrow(gene_choices) > 0)
+    selectInput("selected_mouse", "Select Gene:", choices = gene_choices$gene_symbol)
+  })
+  
+  # Search Gene Symbol functionality
+  observe({
+    gene_search_results <- dbGetQuery(con, paste0(
+      "SELECT DISTINCT gene_symbol FROM Genes WHERE gene_symbol LIKE '%", 
+      input$gene_search, "%'"))
+    updateSelectInput(session, "mouse_id", choices = gene_search_results$gene_symbol)
   })
   
   # Visualisation 1: Phenotype Scores for a Single Knockout Mouse
@@ -159,6 +192,36 @@ server <- function(input, output, session) {
            x = "Knockout Mice", y = "p-value") +
       theme(axis.text.x = element_text(angle = 45, hjust = 1))
   })
+  
+  # Gene-Disease Associations Plot
+  
+  output$gene_disease_plot <- renderPlot({
+    req(input$selected_mouse)  # Ensure that the gene is selected
+    
+    # Query to fetch the gene-disease associations
+    query <- sprintf("
+        SELECT Genes.gene_symbol, Diseases.disease_term, PhenodigmScores.phenodigm_score
+        FROM PhenodigmScores
+        JOIN Genes ON PhenodigmScores.gene_id = Genes.gene_id
+        JOIN Diseases ON PhenodigmScores.disease_id = Diseases.disease_id
+        WHERE Genes.gene_symbol = '%s'", input$selected_mouse)
+    
+    # Fetch data from the database
+    data <- dbGetQuery(con, query)
+    if (nrow(data) == 0) {
+      plot.new()
+      title("No Gene-Disease association data available for this gene.")
+      return()
+    }
+    
+    # Create a bar plot using ggplot2
+    ggplot(data, aes(x = reorder(disease_term, phenodigm_score), y = phenodigm_score, fill = disease_term)) +
+      geom_bar(stat = "identity") +
+      labs(title = paste("Gene-Disease Associations for", input$selected_mouse),
+           x = "Disease Term", y = "Phenodigm Score") +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  })
+  
   
   # Visualisation 3: Gene Clusters
   output$gene_cluster_plot <- renderPlot({
