@@ -217,6 +217,7 @@ Let's review what the data looks like.
 # Load raw file
 raw_lines <- readLines("/Users/sanjanasrinivasan/Desktop/DCDM_IMPC_Project/data/metadata/Disease_information.txt")
 
+
 # Inspect the first few rows
 head(raw_lines, 13)
 
@@ -473,11 +474,166 @@ analyses <- data.frame(
 ```
 
 
+Revising the cleaning script to make it more streamlined + efficient, less redundant and better structured. 
+
+The Disease_information.txt file contains metadata with four key columns: disease_id, disease_term, gene_accession_id, and phenodigm_score.
+
+Issues:
+
+Unecessary rows and formatting (redundant "x" row at the top, row numbers and surrounding double quotes embedded within data) –> Remove unnecessary rows, row numbers and extraneous quotes
+
+The disease_term column contains commas misinterpreted as separators -> Combine split fields to ensure disease_term remains intact
+
+phenodigm_score contains non-numeric characters and extra spaces -> Clean non-numeric values and safely convert to numeric format
+
+Row numbers and quotes appear in the disease_id column -> Clean disease_id to remove row numbers and quotes
+
+Duplicate disease_id values exist –> We need to decide if they are meaningful (they have unique phenodigm scores for reference)
+
+```{r}
+# Load required libraries
+library(tidyverse)
+```
 
 
+• Step 1: Clean the raw file using regex
+```{r}
+# Read the raw lines
+raw_lines <- readLines((paste0(rootDir, "data/metadata/Disease_information.txt")))
 
+# 1a) Remove the first 'x' row (unnecessary header or placeholder)
+cleaned_lines <- raw_lines[-1]
 
+# 1b) Remove row numbers and surrounding quotes from each line
+#     - '^\\d+\\"\\s' looks for leading digits, a quote, and a space
+#     - '^"|"$' removes any leading or trailing quotes
+cleaned_lines <- cleaned_lines %>%
+  str_remove_all('^\\d+\\"\\s') %>%
+  str_remove_all('^"|"$')
 
+# 1c) Function to properly combine split fields (handling split rows)
+process_split_row <- function(row_line) {
+  # Split by commas that are *not* enclosed in quotes:
+  split_row <- str_split(
+    row_line, 
+    pattern = ",\\s*(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)")[[1]]
+  
+  # If the row is incorrectly split into > 4 parts, we paste everything except the first & last two as the disease_term
+  if (length(split_row) > 4) {
+    disease_term <- paste(split_row[2:(length(split_row) - 2)], collapse = ", ")
+    out <- c(
+      split_row[1], 
+      disease_term, 
+      split_row[length(split_row) - 1], 
+      split_row[length(split_row)]
+    )
+    return(out)
+  } else {
+    # If it’s already at 4 parts, just return as is
+    return(split_row)
+  }
+}
+
+# Apply our row processing to each line
+split_data <- map(cleaned_lines, process_split_row)
+
+# Check if any rows still have a different number of columns that is not equal to 4
+problematic_rows <- which(map_int(split_data, length) != 4)
+if (length(problematic_rows) > 0) {
+  cat("Problematic rows found at indices:", problematic_rows, "\n")
+} else {
+  cat("All rows split correctly into four columns.\n")
+}
+
+```
+
+• Step 2: Load data into a Table & Clean Values within Rows/Columns
+
+```{r}
+# 2a) Convert the list-of-vectors into a tibble
+disease_data <- split_data %>%
+  map(~ set_names(as.list(.), c("disease_id", "disease_term", "gene_accession_id", "phenodigm_score"))) %>%
+  bind_rows()
+
+# 2b) Trim and remove extra bits from phenodigm_score; convert to numeric
+disease_data <- disease_data %>%
+  mutate(
+    # Remove leading/trailing spaces
+    phenodigm_score = str_trim(phenodigm_score),
+    # Remove non-digit and non-dot chars
+    phenodigm_score = str_replace_all(phenodigm_score, "[^0-9\\.]", ""),
+    # Convert safely to numeric
+    phenodigm_score = as.numeric(phenodigm_score)
+  )
+
+# 2c) Clean up disease_id if extra quotes or row numbers still remain
+disease_data <- disease_data %>%
+  mutate(
+    disease_id = str_remove(disease_id, '^\\d+\\"\\s'),
+    disease_id = str_remove_all(disease_id, '^"|"$')
+  )
+
+# 2d) The very first row is still a leftover header, remove it
+disease_data <- disease_data[-1, ]  # Drop the first row
+
+# Verifying changes
+head(disease_data) 
+
+```
+
+Step 3: Validate/fix gene_accession_id according to the SOP
+
+The gene_accession_id column in the SOP is described as:
+
+Data Type: String
+Format: Must start with MGI:, followed by a unique numeric identifier.
+Length: Between 9 and 11 characters.
+Uniqueness: Each value must be unique. (Here there can be multiple occurrences of gene_accession_id )
+```{r}
+library(tidyverse)
+
+# 3a) Check & fix data type of gene_accession_id
+if (!is.character(disease_data$gene_accession_id)) {
+  cat("NOTE: 'gene_accession_id' was not a string. Converting it to character...\n")
+  disease_data$gene_accession_id <- as.character(disease_data$gene_accession_id)
+}
+
+# 3b) Check for missing or empty gene_accession_id
+missing_gene_ids <- disease_data %>%
+  filter(is.na(gene_accession_id) | gene_accession_id == "")
+
+if (nrow(missing_gene_ids) > 0) {
+  cat("WARNING: Some rows have missing gene_accession_id:\n")
+  print(missing_gene_ids)
+}
+
+# 3c) Check the format must start with "MGI:" and then digits
+invalid_format <- disease_data %>%
+  filter(!str_detect(gene_accession_id, "^MGI:\\d+$"))
+
+if (nrow(invalid_format) > 0) {
+  cat("WARNING: Some gene_accession_id values do not follow 'MGI:digits' format:\n")
+  print(invalid_format)
+  # Example: Remove them or manually fix them
+  # disease_data <- disease_data %>%
+  #   filter(str_detect(gene_accession_id, "^MGI:\\d+$"))
+}
+
+# 3d) Check the length is between 9 and 11 characters (inclusive)
+wrong_length <- disease_data %>%
+  mutate(gene_len = nchar(gene_accession_id)) %>% #Creates new column storing str length
+  filter(gene_len < 9 | gene_len > 11) #selects rows where length <9 or >11
+
+if (nrow(wrong_length) > 0) {
+  cat("WARNING: Some gene_accession_id values are not between 9 and 11 characters:\n")
+  print(wrong_length)
+}
+
+# Provide final summary
+cat("\nStep 3: SOP & data-type checks complete. Final data overview:\n")
+str(disease_data)
+
+```
 
 
 
