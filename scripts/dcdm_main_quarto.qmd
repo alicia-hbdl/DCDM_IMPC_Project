@@ -53,7 +53,7 @@ library(janitor)
 # Alicia
 #rootDir = "/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/"
 # Sanj 
-#rootDir = "/Users/sanjanasrinivasan/Desktop/DCDM_IMPC_Project/"
+rootDir = "/Users/sanjanasrinivasan/Desktop/DCDM_IMPC_Project/"
 # Ella
 # rootDir = "/Users/ellajadealex/Desktop/applied_bioinformatics/DCDM/group_project/DCDM_IMPC_Project/"
 # Sama
@@ -775,19 +775,19 @@ if (nrow(invalid_entries) > 0) {
 
 ### `disease_information.txt (Sanj)`
 
-The Disease_information.txt file contains metadata with four key columns: disease_id, disease_term, gene_accession_id, and phenodigm_score.
+The Disease_information.txt file contains metadata with four key columns: `disease_id`, `disease_term`, `gene_accession_id`, and `phenodigm_score`.
 
-Issues:
+**Key Issues:**
 
 -   Unecessary rows and formatting (redundant "x" row at the top, row numbers and surrounding double quotes embedded within data) –\> Remove unnecessary rows, row numbers and extraneous quotes
 
--   The disease_term column contains commas misinterpreted as separators -\> Combine split fields to ensure disease_term remains intact
+-   The `disease_term` column contains commas misinterpreted as separators -\> Combine split fields to ensure disease_term remains intact
 
--   phenodigm_score contains non-numeric characters and extra spaces -\> Clean non-numeric values and safely convert to numeric format
+-   `phenodigm_score` contains non-numeric characters and extra spaces -\> Clean non-numeric values and safely convert to numeric format
 
--   Row numbers and quotes appear in the disease_id column -\> Clean disease_id to remove row numbers and quotes
+-   Row numbers and quotes appear in the `disease_id` column -\> Clean `disease_id` to remove row numbers and quotes
 
--   Duplicate disease_id values exist –\> We need to decide if they are meaningful (they have unique phenodigm scores for reference)
+-   
 
 Step 1: Clean the raw metadata file, organising it into four columns
 
@@ -808,7 +808,7 @@ cleaned_lines <- cleaned_lines %>%
   str_remove_all('^"|"$')
 
 
-# 1d) Function to properly combine split fields (handling split rows)
+# 1d) Function to properly combine split fields 
 process_split_row <- function(row_line) {
   # Split by commas that are *not* enclosed in quotes:
   split_row <- str_split(
