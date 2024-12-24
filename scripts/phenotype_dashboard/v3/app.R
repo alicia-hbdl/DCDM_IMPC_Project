@@ -78,7 +78,7 @@ server <- function(input, output, session) {
     host = "localhost",
     port = 3306,
     user = "root",
-    password = "Llama123@"
+    password = "password"
   )
   
   onStop(function() {
@@ -87,8 +87,8 @@ server <- function(input, output, session) {
   
   # Populate dropdowns
   observe({
-    gene_choices <- dbGetQuery(con, "SELECT DISTINCT gene_accession_id FROM Genes;")
-    updateSelectInput(session, "selected_mouse", choices = gene_choices$gene_accession_id)
+    gene_choices <- dbGetQuery(con, "SELECT DISTINCT gene_id FROM Genes;")
+    updateSelectInput(session, "selected_mouse", choices = gene_choices$gene_id)
   })
   
   observe({
@@ -105,7 +105,7 @@ server <- function(input, output, session) {
       FROM Analyses A
       JOIN Parameters P ON A.parameter_id = P.parameter_id
       WHERE A.gene_id IN (
-        SELECT gene_id FROM Genes WHERE gene_accession_id = '%s'
+        SELECT gene_id FROM Genes WHERE gene_id = '%s'
       ) AND A.p_value <= %f
       ORDER BY A.p_value ASC;",
                      input$selected_mouse, input$mouse_threshold)
@@ -134,7 +134,7 @@ server <- function(input, output, session) {
     req(input$selected_phenotype)
     
     query <- sprintf("
-      SELECT A.p_value, G.gene_accession_id 
+      SELECT A.p_value, G.gene_id 
       FROM Analyses A
       JOIN Parameters P ON A.parameter_id = P.parameter_id
       JOIN Genes G ON A.gene_id = G.gene_id
@@ -153,7 +153,7 @@ server <- function(input, output, session) {
     data <- data %>%
       mutate(sig_flag = ifelse(p_value < 0.05, "Significant", "Not Significant"))
     
-    ggplot(data, aes(x = gene_accession_id, y = p_value, color = sig_flag)) +
+    ggplot(data, aes(x = gene_id, y = p_value, color = sig_flag)) +
       geom_point(size = 3) +
       labs(title = paste("Scores of All Knockout Mice for Phenotype:", input$selected_phenotype),
            x = "Knockout Mice", y = "p-value") +
@@ -163,7 +163,7 @@ server <- function(input, output, session) {
   # Visualisation 3: Gene Clusters
   output$gene_cluster_plot <- renderPlot({
     query <- "
-      SELECT G.gene_accession_id, P.parameter_name, A.p_value
+      SELECT G.gene_id, P.parameter_name, A.p_value
       FROM Analyses A
       JOIN Parameters P ON A.parameter_id = P.parameter_id
       JOIN Genes G ON A.gene_id = G.gene_id;"
@@ -180,10 +180,10 @@ server <- function(input, output, session) {
       data <- data %>% filter(p_value < 0.05)
     } else if (input$gene_subset == "User-specific genes") {
       user_genes <- unlist(strsplit(input$user_genes, "\\s*,\\s*"))
-      data <- data %>% filter(gene_accession_id %in% user_genes)
+      data <- data %>% filter(gene_id %in% user_genes)
     }
     
-    cluster_data <- dcast(data, gene_accession_id ~ parameter_name, value.var = "p_value", fill = 0)
+    cluster_data <- dcast(data, gene_id ~ parameter_name, value.var = "p_value", fill = 0)
     mat <- cluster_data[, -1]
     
     if (input$cluster_method == "Hierarchical") {
