@@ -33,9 +33,9 @@ ui <- fluidPage(
         selectInput("selected_mouse", "Select Knockout Mouse:",
                     choices = NULL, selected = NULL),
         sliderInput("mouse_threshold", "Significance Threshold (p-value):",
-                    min = 0, max = 1, value = 0.05, step = 0.01,
-                    helpText = "Highlight phenotypes below this p-value")
-      ),
+                    min = 0, max = 1, value = 0.05, step = 0.01),
+                    helpText("Highlight phenotypes below this p-value")
+      )),
       
       # 2) Inputs for 'Statistical scores of all knockout mice for a selected phenotype'
       conditionalPanel(
@@ -43,8 +43,8 @@ ui <- fluidPage(
         selectizeInput("phenotype", "Select Phenotype:",
           choices = NULL,       # Populated in server
           selected = NULL, multiple = FALSE,
-          options = list(maxOptions = 1000),  # or however many we want to show at once
-          server = TRUE
+          options = list(maxOptions = 1000))  # or however many we want to show at once
+          
         # If you want an optional gene filter, add another select or textInput here
       ),
       
@@ -94,8 +94,7 @@ ui <- fluidPage(
         )
       )
     )
-    )
-  ),
+  )
 
 # Define Server
 server <- function(input, output, session) {
@@ -131,7 +130,7 @@ server <- function(input, output, session) {
   # For phenotypes
   observe({
     pheno_choices <- dbGetQuery(con, "SELECT DISTINCT parameter_name FROM Parameters;")
-    updateSelectInput(session, "selected_phenotype",
+    updateSelectInput(session, "phenotype",
                       choices = pheno_choices$parameter_name)
   })
   
@@ -285,6 +284,11 @@ server <- function(input, output, session) {
       # parse user_genes as comma separated
       user_list <- unlist(strsplit(input$user_genes, "\\s*,\\s*"))
       data <- data %>% filter(gene_accession_id %in% user_list)
+      if (length(user_list) == 0) {
+        plot.new()
+        title("No valid user-specific genes provided.")
+        return()
+      }
     }
     
     if (nrow(data) == 0) {
