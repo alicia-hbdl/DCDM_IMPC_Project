@@ -53,7 +53,7 @@ library(janitor)
 # Alicia
 #rootDir = "/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/"
 # Sanj 
-rootDir = "/Users/sanjanasrinivasan/Desktop/DCDM_IMPC_Project/"
+#rootDir = "/Users/sanjanasrinivasan/Desktop/DCDM_IMPC_Project/"
 # Ella
 # rootDir = "/Users/ellajadealex/Desktop/applied_bioinformatics/DCDM/group_project/DCDM_IMPC_Project/"
 # Sama
@@ -272,21 +272,122 @@ write.table(analysis_table, file = output_path, sep = ",", quote = TRUE, row.nam
 head(analysis_table)
 ```
 
-### 2nd Column Data Cleaning... (To be done after collating data on HPC??? - Esta)
+### Cleaning the Collated Raw Data (Esta)
 
-For each column, we need to check similar things, like whether the data is the correct type (e.g., string or number), whether it has the right length (for strings) or size (for floats), and whether it matches allowed values, like for `mouse_strain` and `mouse_life_stage`. We may also need to find missing values. For each issue, we want to print the value and its index. To make this process less repetitive, we can create reusable functions.
+For each column, we need to check similar things, like whether column values are the right lengths (for strings) or size (for floats), and whether the results matche allowed values, like for `mouse_strain` and `mouse_life_stage`.We also need to check if certain variables are perfectly correlated with one another.
 
-Potential workflow:
+Check if variable data types match those specified in the SOP - all character (or string) data types except for pvalue (numeric or float).
 
--   Start by selecting a column or field, such as `analysis_id`, and verifying that its values are in the correct format (e.g., strings).
+```{r}
+# Read the collated file
+data <- read.csv("data/analysis_table.txt", header = TRUE, stringsAsFactors = FALSE)
 
--   Check whether the length of each value falls within the required range (e.g., `min < nchar < max`).
+# Show data types
+print(sapply(data, class))
+```
 
--   For missing or incorrect values, decide whether to update them to `NA` or remove problematic rows, particularly if fields like `mouse_strain` or `life_stage` contain invalid entries.
+Check if `analysis_id` values are all 15 characters long and all unique.
 
--   For numerical fields such as `p-value`, it may be useful to cap values, setting anything above 1 to 1 and below 0 to 0.
+```{r}
+### Validate 'analysis_id'
 
--   Additionally, identify and manually correct any typos to ensure the data aligns with expectations.
+invalid_ids <- data %>%
+  filter(nchar(analysis_id) != 15 | duplicated(analysis_id))
+message(if (nrow(invalid_ids) == 0) {
+  "All analysis_id values are valid."
+} else {
+  paste("Invalid analysis_id values found:", nrow(invalid_ids))
+})
+```
+
+Check if `gene_accession_id` values are all between 9-11 characters long - According to the SOP they should all be unique but our script shows over 190,000 duplicated results. We have chosen to consider duplicated gene_accession_ids valid.
+
+```{r}
+### Validate 'gene_accession_id'
+
+invalid_gene_lengths <- data %>% filter(nchar(gene_accession_id) < 9 | nchar(gene_accession_id) > 11)
+duplicate_genes <- data %>% group_by(gene_accession_id) %>% filter(n() > 1) %>% ungroup()
+message(if (nrow(invalid_gene_lengths) == 0) "All gene_accession_id values are valid." else paste("Invalid gene_accession_id lengths:", nrow(invalid_gene_lengths)))
+message(if (nrow(duplicate_genes) == 0) "All gene_accession_id values are unique." else paste("Duplicate gene_accession_id values:", nrow(duplicate_genes)))
+```
+
+Check & format `gene_symbol` so all values are in title format.
+
+```{r}
+### Validate & format 'gene_symbol'
+
+to_title_format <- function(gene) paste0(toupper(substr(gene, 1, 1)), tolower(substr(gene, 2, nchar(gene))))
+data <- data %>% mutate(gene_symbol = sapply(gene_symbol, to_title_format))
+invalid_gene_symbols <- data %>% filter(nchar(gene_symbol) < 1 | nchar(gene_symbol) > 13)
+message(if (nrow(invalid_gene_symbols) == 0) "All gene_symbol values are valid." else paste("Invalid gene_symbol values:", nrow(invalid_gene_symbols)))
+```
+
+Check if `gene_accession_id` and `gene_symbol` are perfectly correlated.
+
+```{r}
+### Check `gene_accession_id` and `gene_symbol` correlation
+
+gene_symbol_correlation <- data %>%
+  group_by(gene_accession_id) %>%
+  filter(n_distinct(gene_symbol) > 1)
+message(if (nrow(gene_symbol_correlation) == 0) "Perfect correlation between gene_accession_id and gene_symbol." else "Correlation issues detected.")
+```
+
+Check & format `mouse_strain` so all results are one of the four valid strains specified in the SOP: C57BL, B6J, C3H or 129SV. Our results show 11 unique strains, 9 of which appear to be typos of C57BL (e.g. C53BL, C58BL - none of the 'typos' are valid mouse strains according to MGI).
+
+```{r}
+#### Validate and fix `mouse_strain`
+
+valid_strains <- c("C57BL", "B6J", "C3H", "129SV")
+data <- data %>%
+  mutate(mouse_strain = ifelse(mouse_strain %in% valid_strains, mouse_strain, "C57BL"))
+message("Updated mouse_strain values.") # Selected 'C57BL' after looking at unique results - there appear to be typos of C57BL
+```
+
+Check if `mouse_life_stage` values are one of the allowed values according to the SOP.
+
+```{r}
+### Validate 'mouse_life_stage'
+
+allowed_life_stages <- c("E12.5", "E15.5", "E18.5", "E9.5", "Early adult", "Late adult", "Middle aged adult")
+invalid_life_stages <- data %>% filter(!mouse_life_stage %in% allowed_life_stages)
+message(if (nrow(invalid_life_stages) == 0) "All mouse_life_stage values are valid." else paste("Invalid mouse_life_stage values:", nrow(invalid_life_stages)))
+```
+
+Checking if `parameter_id` is the correct length (15-18 characters) and is perfectly correlated with `parameter_name`. We chose not to validate `parameter_name` specifically as viewing this column shows no suspicious results.
+
+```{r}
+### Validate 'parameter_id' and 'parameter_name'
+
+invalid_parameter_ids <- data %>% filter(nchar(parameter_id) < 15 | nchar(parameter_id) > 18)
+parameter_correlation <- data %>%
+  group_by(parameter_id) %>%
+  summarise(unique_names = n_distinct(parameter_name)) %>%
+  filter(unique_names > 1)
+message(if (nrow(invalid_parameter_ids) == 0) "All parameter_id values are valid." else paste("Invalid parameter_id values:", nrow(invalid_parameter_ids)))
+message(if (nrow(parameter_correlation) == 0) "Perfect correlation between parameter_id and parameter_name." else "Correlation issues detected for parameter_id and parameter_name.")
+# Chose not to validate parameter_name separately 
+```
+
+Check if all `pvalues` are between 0 & 1, if not cap the values at those extremes. In this case, we had no values below 0 but we did have values above 1.
+
+```{r}
+### Validate & fix 'pvalue'
+
+data <- data %>%
+  mutate(pvalue = ifelse(pvalue > 1, 1, pvalue)) # Viewing pvalues before transforming shows values >1
+invalid_pvalues <- data %>% filter(pvalue < 0 | pvalue > 1 | is.na(pvalue))
+message(if (nrow(invalid_pvalues) == 0) "All pvalue values are valid." else paste("Invalid pvalue values:", nrow(invalid_pvalues)))
+```
+
+Save the cleaned dataframe to a new file.
+
+```{r}
+### SAVE CLEANED DATA ###
+
+write.csv(data, "cleaned_analysis_table.txt", row.names = FALSE)
+message("Cleaned dataset saved as 'cleaned_analysis_table.txt'.")
+```
 
 ## Cleaning the Metadata Files
 
