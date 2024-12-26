@@ -35,17 +35,18 @@ procedure_id,procedure_name,procedure_description,is_mandatory
 34,Intraperitoneal glucose tolerance test (IPGTT),"The glucose tolerance test measures the clearance of an intraperitoneally injected glucose load from the body. It is used to detect disturbances in glucose metabolism that can be linked to human conditions such as diabetes or metabolic syndrome. Animals are fasted for approximately 16 hours, fasted blood glucose levels are determined before a solution of glucose is administered by intra-peritoneal (IP) injection. Subsequently, the blood glucose level is measured at different time points during the following 2 hours.Ontological description: MP:0005559 - increased circulating glucose level, MP:0005560 - decreased circulating glucose level, MP:0005293 - impaired glucose tolerance, MP:0005292 - improved glucose tolerance, MP:0005291           abnormal glucose tolerance, MP:0000188 - abnormal circulating glucose level.",TRUE
 35,Light-Dark Test,Light-Dark test monitors the anxiety-related behaviour of mice,FALSE
 36,MicroCT E14.5-E15.5,microct_e14.5-e15.5,FALSE
-37,MicroCT E18.5,microct_e18.5,FALSE
-38,MicroCT E9.5,microct_e9.5,FALSE
-39,OPT E9.5,opt_e9.5,FALSE
-40,Open Field,The Open Field test is used to assess anxiety and exploratory behaviors. It is based on the natural tendency of an animal to explore and to protect itself using avoidance which translates to a normal animal spending more time in the periphery of the Open Field arena than in the center (the most anxiogenic area).,TRUE
-41,Organ Weight,Organ weights from different tissues collected for IMPC,FALSE
-42,Tissue Embedding and Block Banking,Collect and fix a standard list of tissues from the complete necropsy (see IMPC Gross Pathology & Tissue Collection SOP)Trim the fixed tissues into cassettes for processingEmbed the tissues in paraffin in a standard orientation,FALSE
-43,Viability E12.5 Secondary Screen,viability_e12.5_secondary_screen,FALSE
-44,Viability E14.5-E15.5 Secondary Screen,viability_e14.5-e15.5_secondary_screen,FALSE
-45,Viability E18.5 Secondary Screen,viability_e18.5_secondary_screen,FALSE
-46,Viability E9.5 Secondary Screen,viability_e9.5_secondary_screen,FALSE
-47,Viability Primary Screen,Assess the viability of mutant mice of each sex and zygosity.,TRUE
-48,Welfare Observations,The Welfare Observations procedure is used for the recording of welfare issues as and when they occur.,FALSE
-49,X-ray,Construct and analyse digital X-ray images in immobilised mice using a Faxitron X-Ray system or NTB digital X-ray scanner.,TRUE
-50,Y-maze,Y-maze assesses learning and memory; it can be used instead/in parallel of Fear Conditioning,FALSE
+37,MicroCT E14.5-E15.5 Analysis,microct_e14.5-e15.5_analysis,FALSE
+38,MicroCT E18.5,microct_e18.5,FALSE
+39,MicroCT E9.5,microct_e9.5,FALSE
+40,OPT E9.5,opt_e9.5,FALSE
+41,Open Field,The Open Field test is used to assess anxiety and exploratory behaviors. It is based on the natural tendency of an animal to explore and to protect itself using avoidance which translates to a normal animal spending more time in the periphery of the Open Field arena than in the center (the most anxiogenic area).,TRUE
+42,Organ Weight,Organ weights from different tissues collected for IMPC,FALSE
+43,Tissue Embedding and Block Banking,Collect and fix a standard list of tissues from the complete necropsy (see IMPC Gross Pathology & Tissue Collection SOP)Trim the fixed tissues into cassettes for processingEmbed the tissues in paraffin in a standard orientation,FALSE
+44,Viability E12.5 Secondary Screen,viability_e12.5_secondary_screen,FALSE
+45,Viability E14.5-E15.5 Secondary Screen,viability_e14.5-e15.5_secondary_screen,FALSE
+46,Viability E18.5 Secondary Screen,viability_e18.5_secondary_screen,FALSE
+47,Viability E9.5 Secondary Screen,viability_e9.5_secondary_screen,FALSE
+48,Viability Primary Screen,Assess the viability of mutant mice of each sex and zygosity.,TRUE
+49,Welfare Observations,The Welfare Observations procedure is used for the recording of welfare issues as and when they occur.,FALSE
+50,X-ray,Construct and analyse digital X-ray images in immobilised mice using a Faxitron X-Ray system or NTB digital X-ray scanner.,TRUE
+51,Y-maze,Y-maze assesses learning and memory; it can be used instead/in parallel of Fear Conditioning,FALSE

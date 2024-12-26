@@ -70,7 +70,7 @@ OMIM:616364,White-Sutton Syndrome
 ORPHA:1435,Xq21 Microdeletion Syndrome
 ORPHA:1606,1P36 Deletion Syndrome
 ORPHA:1727,22Q11.2 Duplication Syndrome
-ORPHA:10,"48, Xxyy Syndrome"
+ORPHA:10,"48,Xxyy Syndrome"
 ORPHA:1001,2Q37 Microdeletion Syndrome
 ORPHA:100973,Fraxe Intellectual Disability
 OMIM:619695,Rauch-Steindl Syndrome
@@ -489,7 +489,7 @@ ORPHA:3449,Weill-Marchesani Syndrome
 ORPHA:606,Proximal Myotonic Myopathy
 ORPHA:2334,Autosomal Dominant Keratitis
 ORPHA:95409,Acute Adrenal Insufficiency
-ORPHA:8,"47, Xyy Syndrome"
+ORPHA:8,"47,Xyy Syndrome"
 ORPHA:776,Lujan-Fryns Syndrome
 ORPHA:983,Testicular Regression Syndrome
 ORPHA:320,Apparent Mineralocorticoid Excess
@@ -639,7 +639,7 @@ ORPHA:91139,Simple Cryoglobulinemia
 ORPHA:91349,Non-Functioning Pituitary Adenoma
 ORPHA:91495,Persistent Hyperplastic Primary Vitreous
 ORPHA:99827,Crimean-Congo Hemorrhagic Fever
-OMIM:233420,"46, Xy Sex Reversal 7"
+OMIM:233420,"46,Xy Sex Reversal 7"
 OMIM:234700,"Heart Block, Congenital"
 OMIM:136800,"Corneal Dystrophy, Fuchs Endothelial, 1"
 OMIM:147610,"Iris Pigment Layer, Cleavage Of"
@@ -647,7 +647,7 @@ OMIM:217600,Central Cloudy Dystrophy Of Francois
 OMIM:219080,Acth-Independent Macronodular Adrenal Hyperplasia
 OMIM:224100,"Anemia, Congenital Dyserythropoietic, Type Ii"
 OMIM:152700,Systemic Lupus Erythematosus
-OMIM:154230,"46, Xy Sex Reversal 4"
+OMIM:154230,"46,Xy Sex Reversal 4"
 OMIM:156850,"Microphthalmia, Isolated, With Cataract 1"
 OMIM:161200,Nail-Patella Syndrome
 OMIM:235700,"Anemia, Congenital, Nonspherocytic Hemolytic, 5"
@@ -659,10 +659,10 @@ OMIM:125852,Type 1 Diabetes Mellitus 2
 OMIM:300622,Tn Polyagglutination Syndrome
 OMIM:300755,"Agammaglobulinemia, X-Linked"
 OMIM:300779,"Corneal Dystrophy, Endothelial, X-Linked"
-OMIM:300833,"46, Xx Sex Reversal 3"
+OMIM:300833,"46,Xx Sex Reversal 3"
 OMIM:312500,"Reticuloendotheliosis, X-Linked"
-OMIM:400044,"46, Xy Sex Reversal 1"
-OMIM:400045,"46, Xx Sex Reversal 1"
+OMIM:400044,"46,Xy Sex Reversal 1"
+OMIM:400045,"46,Xx Sex Reversal 1"
 OMIM:266200,"Anemia, Congenital, Nonspherocytic Hemolytic, 2"
 OMIM:601666,Type 1 Diabetes Mellitus 15
 OMIM:601859,Autoimmune Lymphoproliferative Syndrome
@@ -670,8 +670,8 @@ OMIM:601941,Type 1 Diabetes Mellitus 6
 OMIM:601942,Type 1 Diabetes Mellitus 10
 OMIM:602247,"Xanthomatosis, Susceptibility To"
 OMIM:602361,Gracile Bone Dysplasia
-OMIM:278850,"46, Xx Sex Reversal 2"
-OMIM:300018,"46, Xy Sex Reversal 2"
+OMIM:278850,"46,Xx Sex Reversal 2"
+OMIM:300018,"46,Xy Sex Reversal 2"
 OMIM:165300,"Optic Atrophy 3, Autosomal Dominant"
 OMIM:169610,"Pemphigus Vulgaris, Familial"
 OMIM:604901,North American Indian Childhood Cirrhosis
@@ -688,9 +688,9 @@ OMIM:614674,"Periodic Fever, Menstrual Cycle-Dependent"
 OMIM:614809,C3 Glomerulopathy 3
 OMIM:613470,"Anemia, Congenital, Nonspherocytic Hemolytic, 4"
 OMIM:612520,Type 1 Diabetes Mellitus 20
-OMIM:612965,"46, Xy Sex Reversal 3"
+OMIM:612965,"46,Xy Sex Reversal 3"
 OMIM:613011,Lymphoproliferative Syndrome 1
-OMIM:613080,"46, Xy Sex Reversal 5"
+OMIM:613080,"46,Xy Sex Reversal 5"
 OMIM:613086,"Glaucoma 3, Primary Congenital, D"
 OMIM:609140,"Corneal Dystrophy, Posterior Polymorphous, 2"
 OMIM:610374,"Diabetes Mellitus, Transient Neonatal, 2"
@@ -698,13 +698,13 @@ OMIM:610600,Corticosterone Methyloxidase Type Ii Deficiency
 OMIM:600886,Hyperferritinemia With Or Without Cataract
 OMIM:600955,Proprotein Convertase 1/3 Deficiency
 OMIM:601186,"Microphthalmia, Syndromic 9"
-OMIM:614279,"46, Xy Sex Reversal 8"
+OMIM:614279,"46,Xy Sex Reversal 8"
 OMIM:613652,C1Q Deficiency 1
-OMIM:613762,"46, Xy Sex Reversal 6"
+OMIM:613762,"46,Xy Sex Reversal 6"
 OMIM:615523,"Corneal Dystrophy, Fuchs Endothelial, 8"
 OMIM:617133,"Spinocerebellar Ataxia, Autosomal Recessive 24"
-OMIM:616067,"46, Xy Sex Reversal 9"
-OMIM:616425,"46, Xy Sex Reversal 10"
+OMIM:616067,"46,Xy Sex Reversal 9"
+OMIM:616425,"46,Xy Sex Reversal 10"
 OMIM:618835,Combined Oxidative Phosphorylation Deficiency 40
 OMIM:618838,Combined Oxidative Phosphorylation Deficiency 41
 OMIM:618839,Combined Oxidative Phosphorylation Deficiency 42
@@ -815,7 +815,7 @@ OMIM:300055,"Intellectual Developmental Disorder, X-Linked, Syndromic 13"
 OMIM:603909,"Autoimmune Lymphoproliferative Syndrome, Type Iia"
 OMIM:216950,Complement Component C1R/C1S Deficiency
 ORPHA:2278,Ichthyosis-Intellectual Disability-Dwarfism-Renal Impairment Syndrome
-ORPHA:325345,"46, Xy Ovotesticular Difference Of Sex Development"
+ORPHA:325345,"46,Xy Ovotesticular Difference Of Sex Development"
 OMIM:612840,"Leukocyte Adhesion Deficiency, Type Iii"
 OMIM:608709,"Lipodystrophy, Partial, Acquired, Susceptibility To"
 OMIM:614292,"Myopia, High, With Cataract And Vitreoretinal Degeneration"
@@ -833,7 +833,7 @@ ORPHA:567548,Idiopathic Steroid-Resistant Nephrotic Syndrome
 ORPHA:449432,Igg4-Related Submandibular Gland Disease
 ORPHA:51608,Generalized Arterial Calcification Of Infancy
 ORPHA:375,Anti-Glomerular Basement Membrane Disease
-ORPHA:393,"46, Xx Testicular Difference Of Sex Development"
+ORPHA:393,"46,Xx Testicular Difference Of Sex Development"
 ORPHA:656,Genetic Steroid-Resistant Nephrotic Syndrome
 ORPHA:2172,Microcephaly-Glomerulonephritis-Marfanoid Habitus Syndrome
 ORPHA:79302,Congenital Bile Acid Synthesis Defect Type 3
@@ -935,18 +935,18 @@ OMIM:247800,"Lymphopenic Hypergammaglobulinemia, Antibody Deficiency, Autoimmune
 OMIM:136580,"Fragile Site, Distamycin A Type, Rare, Fra(16)(Q22.1)"
 OMIM:201810,"Adrenal Hyperplasia, Congenital, Due To 3-Beta-Hydroxysteroid Dehydrogenase 2 Deficiency"
 ORPHA:331206,Severe Combined Immunodeficiency Due To Complete Rag1/2 Deficiency
-OMIM:611812,"46, Xx Sex Reversal With Dysgenesis Of Kidneys, Adrenals, And Lungs"
+OMIM:611812,"46,Xx Sex Reversal With Dysgenesis Of Kidneys, Adrenals, And Lungs"
 OMIM:614199,"Nephrotic Syndrome, Type 5, With Or Without Ocular Abnormalities"
 OMIM:614376,Short-Rib Thoracic Dysplasia 5 With Or Without Polydactyly
-OMIM:613743,"Adrenal Insufficiency, Congenital, With 46, Xy Sex Reversal, Partial Or Complete"
+OMIM:613743,"Adrenal Insufficiency, Congenital, With 46,Xy Sex Reversal, Partial Or Complete"
 OMIM:620367,"Pulmonary Fibrosis And/Or Bone Marrow Failure Syndrome, Telomere-Related, 8"
 ORPHA:567546,Idiopathic Steroid-Sensitive Nephrotic Syndrome With Secondary Steroid Resistance
 ORPHA:399805,Male Infertility With Azoospermia Or Oligozoospermia Due To Single Gene Mutation
 ORPHA:85112,Palmoplantar Keratoderma-Xx Sex Reversal-Predisposition To Squamous Cell Carcinoma Syndrome
 ORPHA:276,T-B+ Severe Combined Immunodeficiency Due To Gamma Chain Deficiency
-ORPHA:168558,"46, Xy Difference Of Sex Development-Adrenal Insufficiency Due To Cyp11A1 Deficiency"
+ORPHA:168558,"46,Xy Difference Of Sex Development-Adrenal Insufficiency Due To Cyp11A1 Deficiency"
 ORPHA:69063,Congenital Membranous Nephropathy Due To Fetomaternal Anti-Neutral Endopeptidase Alloimmunization
-ORPHA:90796,"46, Xy Difference Of Sex Development Due To Isolated 17, 20-Lyase Deficiency"
+ORPHA:90796,"46,Xy Difference Of Sex Development Due To Isolated 17,20-Lyase Deficiency"
 OMIM:251750,"Microspherophakia And/Or Megalocornea, With Ectopia Lentis And With Or Without Secondary Glaucoma"
 ORPHA:562639,Primary Biliary Cholangitis/Primary Sclerosing Cholangitis And Autoimmune Hepatitis Overlap Syndrome
 OMIM:607330,Lathosterolosis
@@ -1095,4 +1095,4 @@ ORPHA:264580,Glycogen Storage Disease Due To Liver Phosphorylase Kinase Deficien
 ORPHA:96184,Temple Syndrome Due To Maternal Uniparental Disomy Of Chromosome 14
 ORPHA:79240,Glycogen Storage Disease Due To Liver And Muscle Phosphorylase Kinase Deficiency
 ORPHA:79259,Glycogen Storage Disease Due To Glucose-6-Phosphatase Deficiency Type Ib
-OMIM:610644,"Palmoplantar Hyperkeratosis With Squamous Cell Carcinoma Of Skin And 46, Xx Sex Reversal"
+OMIM:610644,"Palmoplantar Hyperkeratosis With Squamous Cell Carcinoma Of Skin And 46,Xx Sex Reversal"
