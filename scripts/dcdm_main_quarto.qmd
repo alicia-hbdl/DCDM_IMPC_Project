@@ -51,7 +51,7 @@ library(janitor)
 ```{r}
 # Define the working directory path in r
 # Alicia
-#rootDir = "/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/"
+rootDir = "/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/"
 # Sanj 
 #rootDir = "/Users/sanjanasrinivasan/Desktop/DCDM_IMPC_Project/"
 # Ella
@@ -398,74 +398,76 @@ Each row in the `IMPC_procedure.txt` file contains a line number, procedure name
 A first formatting cleanup step addresses these issues to allow the file to be loaded as a table in R.
 
 ```{r}
-temporary_path <- paste0(rootDir, "data/cleaned/reformatted_IMPC_procedure.txt")
+# Define the path to temporarily store the formatted table before cleaning
+temporary_path <- paste0(rootDir, "data/cleaned/IMPC_procedure_table.txt")
 
-# Reformat for proper table loading
-procedure <- read_lines(paste0(rootDir, "data/metadata/IMPC_procedure.txt")) %>% 
-  # Replace double quotes between fields with commas
-  str_replace_all('" "', ",") %>%
-  # Remove leading and trailing double quotes from each line
-  str_remove_all('^"|"$') %>%
-  # Wrap descriptions containing commas in quotes 
-  str_replace('^([0-9]+,[^,]+,)(.*)(, (TRUE|FALSE), [0-9]{5})$', '\\1"\\2"\\3') %>%
-  # Remove the "line_number" field name 
-  str_remove('line_number,') %>%
-  write_lines(temporary_path) # Save the reformatted lines to a new file
+# Reformat the procedures file for proper table loading
+procedure <- read_lines(paste0(rootDir, "data/metadata/IMPC_procedure.txt")) %>%
+  str_replace_all('" "', ",") %>%           # Replace double quotes between fields with commas
+  str_remove_all('^"|"$') %>%               # Remove leading and trailing double quotes from each line
+  str_replace(                              # Wrap descriptions containing commas in quotes
+    '^([0-9]+,[^,]+,)(.*)(, (TRUE|FALSE), [0-9]{5})$', 
+    '\\1"\\2"\\3'
+  ) %>%
+  str_remove('line_number,') %>%            # Remove the "line_number" field name
+  write_lines(temporary_path)               # Save the reformatted lines to the temporary file
 ```
 
-A second step cleans the table to ensure consistency and reduce redundancy. This includes correcting HTML encoding, trimming spaces, renaming columns for consistency with other tables, and converting empty fields to `NA`.
+A second step cleans the table to remove duplicate rows, implement consistent column names, and ensure that all values are in the correct format.
 
 The table contains over 5,000 rows but only 50 distinct procedures, as each row represents a single parameter tested within a procedure. To reduce redundancy, procedures with identical names, descriptions, and mandatory values were assigned a shared `procedure_id`, while their `impcParameterOrigId` values were stored as a list. This preserves mappings needed for integration with the parameter table.
 
-Some procedures, such as "MicroCT E14.5-E15.5" and "MicroCT E14.5-E15.5 Analysis," were merged as they referred to the same test. For others ("Experimental Design," "Housing and Husbandry," "Electrocardiogram (ECG)," and "Viability Primary Screen,") missing descriptions were filled using existing values, and conflicts were resolved by selecting the most appropriate description. These adjustments were finalized before grouping to ensure accurate consolidation of procedures.
+Some procedures, such as "MicroCT E14.5-E15.5" and "MicroCT E14.5-E15.5 Analysis," were merged as they referred to the same test. Similarly, procedures with the same name but slightly different or missing descriptions (e.g., "Experimental Design," "Housing and Husbandry," "Electrocardiogram (ECG)," and "Viability Primary Screen") were standardized: missing descriptions were filled using existing values, and conflicts were resolved by selecting the most appropriate description.
 
 ```{r}
-# Clean and standardize the data
-procedure <- read_csv(temporary_path, col_names = TRUE) %>%
-  # Apply these transformations to all values in the table
+# Clean and standardize the procedure information
+procedure <- read_csv(temporary_path, show_col_types = FALSE, col_names = TRUE) %>%
+  
+  # Apply basic cleaning steps
   mutate(across(everything(), ~ .x %>%
       str_trim() %>%                   # Trim leading and trailing whitespace
-      str_replace_all(c(               # Replace HTML entities
-        "&amp;" = "&",
-        "&nbsp;" = " ")) %>% 
+      str_replace_all(c(               # Replace HTML entity codes
+        "&amp;" = "&",                 
+        "&nbsp;" = " ")) %>%           
       na_if("")                        # Replace empty strings with NA
   )) %>% 
-  # Rename columns for consistency
+  
+  # Rename columns for consistency throughout 
   rename(
-    procedure_id = procedureId, 
+    procedure_id = procedureId,                       
     procedure_name = name,
     procedure_description = description,
     is_mandatory = isMandatory,
     parameter_mapping = impcParameterOrigId
   ) %>% 
-  # Manually standardize specific procedure names and descriptions
   mutate(
+    # Convert mapping to numeric, introduces NA for invalid entries  
+    parameter_mapping = as.numeric(parameter_mapping),  
+  # Standardize conflicting names and descriptions for rows referring to the same observation
     procedure_name = case_when(
       procedure_name == "MicroCT E14.5-E15.5 Analysis" ~ "MicroCT E14.5-E15.5",
       TRUE ~ procedure_name
     ),
     procedure_description = case_when(
-      procedure_name == "Experimental design" ~ "experimental_design",
+      procedure_name == "Experimental design" ~ "experimental_design",        
       procedure_name == "Housing and Husbandry" ~ "housing_and_husbandry",
       procedure_name == "Viability Primary Screen" ~ "Assess the viability of mutant mice of each sex and zygosity.",
       procedure_name == "Electrocardiogram (ECG)" ~ "To provide a high throughput method to obtain Electrocardiograms in a conscious mouse.",
-      is.na(procedure_description) ~ tolower(str_replace_all(procedure_name, " ", "_")), # Replace NA descriptions with procedure_name (underscored)
+      is.na(procedure_description) ~ tolower(str_replace_all(procedure_name, " ", "_")), # Fill missing descriptions
       TRUE ~ procedure_description
     )
   ) %>% 
-  # Group by identical procedure_name, is_mandatory, and procedure_description
+  
+  # Group procedures to assign unique procedure IDs
   group_by(procedure_name, is_mandatory, procedure_description) %>%
   summarise(
-    # Assign a unique ID to all rows within the group
-    procedure_id = cur_group_id(),
-    # Store all parameter_mapping values as a list
-    parameter_mapping = list(parameter_mapping),
-    .groups = "drop" # Remove grouping 
-  )  %>% 
-  unnest(parameter_mapping) # Expand the list column into multiple rows
+    procedure_id = cur_group_id(),               
+    parameter_mapping = list(parameter_mapping),# Store original IDs as a list for mapping with parameters
+    .groups = "drop"                             
+  ) %>% 
 
-# Preview the resulting data
-head(procedure)
+  # Expand the list of parameter mappings into individual rows
+ unnest(parameter_mapping)
 
 # Save the cleaned data to a new CSV file
 write_csv(procedure, paste0(rootDir, "data/cleaned/cleaned_IMPC_procedure.csv"))
@@ -474,407 +476,209 @@ write_csv(procedure, paste0(rootDir, "data/cleaned/cleaned_IMPC_procedure.csv"))
 The resulting table retains a row for each parameter tested within a procedure; however, a single procedure consistently shares the same name, description, boolean value, and is assigned a common identifier. This ensures that a simplified, non-redundant procedures table can be created in the database while also allowing for the creation of a clear join table that leverages the original identifiers for accurate mapping.
 
 ```{r}
+# Remove unnecessary files and variables
 file.remove(temporary_path)
 rm(temporary_path)
 ```
 
-### `IMPC_parameter_description.txt (Sama)`
-
-###### I noticed that the current code includes some debugging elements, which might make it a bit harder to follow and maintain. To streamline it, I went ahead and created a consolidated version using tidyverse principles. This version removes the debugging code to make it tidier and more reproducible. I’ve kept all your original code intact, so nothing is lost, and my consolidated version is included below. When you have some time, it would be great if you could review it and confirm that it aligns with the intended logic and functionality. {style="color: red"}
-
-Using readLines(), the metadata file is read and formatting lines as per specified pattern.
-
 ```{r}
-#| eval: false
+# Validate procedure table for SOP compliance
+errors <- c()
 
-parameter_path <- paste0(rootDir, "/data/metadata/IMPC_parameter_description.txt")
-parameter_outputFile = paste0(rootDir, "/temporary/IMPC_Parameter_Description.txt")
-
-# Read the file
-lines <- readLines(parameter_path)
-
-lines_cleaned <- lines %>%
-  # Replace spaces between quotes with commas
-  str_replace_all('" "', '","') %>%
-  # Reformat the lines as per the specified pattern
-  str_replace_all('^(\\d{1,4},\\d{5}, )([A-Z][^,]+(?:\\([^)]*\\))*(?:, )?)([a-z][^,]*\\([^)]*\\)?,?)(,[^,]+, IMPC_[A-Z]{3}_[0-9]{3}_[0-9]{3})$', 
-                '\\1"\\2"\\3"\\4')
-
-# Write the modified lines to a txt file
-writeLines(lines_cleaned, parameter_outputFile)
-
-```
-
-Initital observation:
-
-The metadata contains five columns; line_number, impcParameterOrigId, name, description, parameterId.
-
--   The entire metadata is being read as a single column where all the rows are stored as strings.
--   They all are under a label 'x'. First two columns are merged as one and is not separated by comma.
-
-Opening the saved .txt file of the metadata with a specific format using read_delim() function and specifying that it is delimited by commas.
-
-```{r}
-#| eval: false
-
-# Read the metadata file (assuming tab-delimited, change delimiter if needed)
-pd <- read_delim(parameter_outputFile, delim = ",")
-
-pd
-```
-
-Observations:
-
--   There may be a redundancy between name and description, as they often describe the same parameter but in different styles.
--   They are all presented as characters, although some columns contains numeric values, this is because the colnames hasn't been specified yet.
-
-The function below checks for commas in paratheses or any extra commas that will cause an abnormal splits amongst the columns.
-
-```{r}
-#| eval: false
-
-# Function to identify rows with extra commas or commas inside parentheses
-identify_comma_issues <- function(pd, expected_columns) {
-  pd <- pd %>%
-    rowwise() %>%
-    mutate(
-      # Count the number of commas in the row
-      comma_count = str_count(paste(across(everything()), collapse = ","), ","),
-      
-      # Expected number of commas (expected_columns - 1)
-      expected_commas = expected_columns - 1,
-      
-      # Flag rows with extra commas
-      has_extra_commas = comma_count > expected_commas,
-      
-      # Check for commas inside parentheses
-      has_commas_in_parentheses = str_detect(paste(across(everything()), collapse = " "), "\\([^\\)]*?,[^\\)]*?\\)")
-    ) %>%
-    ungroup()  # Ungroup after rowwise operations
-  
-  # Filter rows with issues
-  issues <- pd %>%
-    filter(has_extra_commas | has_commas_in_parentheses) %>%
-    select(everything(), comma_count, expected_commas, has_extra_commas, has_commas_in_parentheses)
-  
-  return(issues)
+# Ensure procedure_name and procedure_description are strings
+if (!all(sapply(procedure$procedure_name, is.character))) {
+  errors <- c(errors, "'procedure_name' contains non-string values.")
+}
+if (!all(sapply(procedure$procedure_description, is.character))) {
+  errors <- c(errors, "'procedure_description' contains non-string values.")
 }
 
-# Define the number of expected columns in your dataset
-expected_columns <- 5
+# Ensure is_mandatory contains only TRUE or FALSE
+if (!all(procedure$is_mandatory %in% c(TRUE, FALSE))) {
+  errors <- c(errors, "'is_mandatory' contains invalid values (not TRUE/FALSE).")
+}
 
-# Call the function on your dataset
-comma_issues <- identify_comma_issues(pd, expected_columns)
+# Ensure procedure_id is a unique numeric value
+if (!all(is.numeric(procedure$procedure_id), na.rm = TRUE)) {
+  errors <- c(errors, "'procedure_id' contains non-numeric values.")
+}
+# Note: this only works when the parameter_mapping field is nested
+if (length(unique(procedure$procedure_id)) != nrow(procedure)) {
+  errors <- c(errors, "'procedure_id' contains duplicate values. This is normal if the parameter_mapping field is unnested.")
+}
 
-# Output the results
-if (nrow(comma_issues) > 0) {
-  print("Rows with potential comma issues:")
-  print(comma_issues)
+# Ensure parameter_mapping is numeric
+if (!all(is.numeric(procedure$parameter_mapping), na.rm = TRUE)) {
+  errors <- c(errors, "'parameter_mapping' contains non-numeric values. This is normal if the parameter_mapping field is nested.")
+}
+
+# Output validation results
+if (length(errors) == 0) {
+  print("All checks passed successfully.")
 } else {
-  print("No rows with comma issues found.")
+  print(paste("Errors found:", paste(errors, collapse = " ")))
 }
-
-view(comma_issues)
 ```
 
-41 issues has been found. There are commas in parentheses that is causing unnecessary splits. To fix it, the commas in parentheses can be replaced by ;
-
-```{r}
-#| eval: false
-
-# Replace commas inside parentheses in all relevant columns (before separating)
-pd <- pd %>%
-  mutate(across(everything(), ~ str_replace_all(., '\\(([^)]*)\\)', function(m) {
-    # Replace commas with semicolons inside the parentheses
-    str_replace_all(m, ',', ';')
-  })))
-
-
-```
-
-```{r}
-#| eval: false
-
-# Separate 'x', the single column into multiple columns.
-pd <- pd %>%
-  separate(x, into = c("line_number", "impcParameterOrigId", "name", "description", "parameterId"), sep = ",", extra = "merge", fill = "right")
-
-# Remove the first row as it's been used for column names.
-pd <- pd %>% slice(-1)
-
-# Renaming columns in the metadata dataframe to match the SOP. 
-pd <- pd %>%
-  rename(
-    line_number = line_number,
-    IMPC_parameter_orig_id = impcParameterOrigId,
-    parameter_name = name,
-    description = description,
-    parameter_id = parameterId
-  )
-
-# Remove the 'line_number' column
-pd <- pd %>%
-  select(-line_number)
-
-```
-
-Using separate(), it will split the single 'x' column into different columns based on commas.
-
--   extra = "merge": If there are more fields than columns, merge the extra fields into the last column.
--   fill = "right": Adds NA to empty columns when there are fewer fields than columns.
-
-Each columns are then renamed to correspond to SOP.
-
-```{r}
-#| eval: false
-
-# Convert the first two columns line_number and IMPC_parameter_orig_id to integers
-pd <- pd %>%
-  mutate(
-    IMPC_parameter_orig_id = as.numeric(IMPC_parameter_orig_id)
-  )
-
-str(pd)
-```
-
-This script validates columns in a metadata table against constraints defined in an SOP. It then retrieves the column names from the metadata table and prints them for reference and loops through each field name in order to check against the SOP. Furthermore, it skips columns with no SOP definition.
-
-```{r}
-#| eval: false
-
-# Function to validate values based on the SOP type ("String" or "Float")
-validate_type_minmax <- function(x, dataType, min_val, max_val) {
-  if (tolower(dataType) == "string") {
-    which(sapply(x, nchar) < min_val | sapply(x, nchar) > max_val)
-  } else if (tolower(dataType) == "float") {
-    which(as.numeric(x) < min_val | as.numeric(x) > max_val)
-  } 
-}
-
-# Check if values in a list are within the allowed values of a given vector
-check_allowed_values <- function(values, allowed_values) {
-  which(!values %in% allowed_values) # Find indices of invalid values
-}
-
-# Function to combine multiple lists of indices and return unique indices
-combine_unique_indices <- function(...) {
-  sort(unique(unlist(list(...))))
-}
-
-# Function to print the indices and values where issues were identified
-print_invalid_indices_and_values <- function(x, variable_name, invalid_indices) {
-  # Count the number of issues
-  num_issues <- length(invalid_indices)
-  
-  # Print the contextual message
-  cat("The '", variable_name, "' column has ", num_issues, " issue(s).\n", sep = "")
-  
-  # Print indices and values if there are any issues
-  if (num_issues > 0) {
-    cat("Indices:\n")
-    print(invalid_indices)
-    cat("Values:\n")
-    print(x[invalid_indices])
-  }
-}
-
-# Extract field names from the data table (metadata)
-field_names <- colnames(pd)
-print(field_names)
-
-# Loop through each field name to apply SOP checks
-for (field_name in field_names) {
-  cat("Processing field:", field_name, "\n")
-  
-  # Extract the corresponding row in the SOP for each field
-  sop_row <- SOP[SOP$dataField == field_name, ]
-  
-  if (nrow(sop_row) == 0) {
-    next  # Skip if no SOP rule exists for the field
-  }
-
-# Access the column by name from the metadata
-  column <- pd[[field_name]]
-  
-  # Validate the column based on SOP constraints (Type, Min, Max)
-  SOP_constraints <- validate_type_minmax(column, sop_row$dataType, sop_row$minValue, sop_row$maxValue)
-  
-  # Initialize a variable for field-specific checks
-  field_specific_check <- integer(0)  # Default to an empty vector
-  
-  # Combine all indices of invalid values from SOP and field-specific checks
-  invalid_indices <- combine_unique_indices(SOP_constraints, field_specific_check)
-  
-  # Print the invalid indices and their corresponding values (if any issues)
-  print_invalid_indices_and_values(column, field_name, invalid_indices)
-}
-
-
-```
-
--   Five issues have been found in parameter_name column. Some of them are in question format, which may need to be standerdaised..
-
--   There are 31 issues with the parameter_id column. They contain parts of description column, alongside of the parameter_id. For example, "in English, IMPC_HOU_076_001" should only be "IMPC_HOU_076_001". This is caused by extra commas present within "description" column.
-
--   There are some missing values in some parts of the dataset.
-
-Extracting any texts that belongs to the description column from the parameter_id, only keeping the unique id starting with "IMPC\_", and moving them to the description column.
-
-```{r}
-#| eval: false
-
-# Function to move text before IMPC_ into description and keep IMPC_ code in parameter_id
-fix_parameter_id <- function(pd) {
-  pd <- pd %>%
-    mutate(
-      # Extract text before the IMPC code and keep it in description
-      description = paste(description, str_extract(parameter_id, "^(.*?)(?=IMPC_)"), sep = " "),  
-
-      # Keep only the IMPC code in parameter_id (get everything starting from IMPC_)
-      parameter_id = str_extract(parameter_id, "IMPC_[A-Z]{3}_[0-9]{3}_[0-9]{3}")
-    )
-  
-  return(pd)
-}
-
-# Apply the function to the metadata
-pd <- fix_parameter_id(pd)
-```
-
-```{r}
-#| eval: false
-
-# Trim whitespaces and then replace blank strings with NA
-pd <- pd %>%
-  mutate(
-    parameter_name = na_if(str_trim(parameter_name), ""),
-    description = na_if(str_trim(description), ""),
-  )
-
-```
-
-```{r}
-#| eval: false
-
-# Define the output path for the cleaned metadata
-output_file_parameter <- paste0(rootDir, "data/cleaned/cleaned_IMPC_parameter_description.txt")
-
-# Save the cleaned metadata
-write.csv(pd, file = output_file_parameter, row.names = FALSE)
-
-# Completion message
-cat("Cleaned metadata has been saved to:", output_file_parameter, "\n")
-
-```
-
-Load the cleaned parameter data.
-
-```{r}
-#| eval: false
-
-# Load the cleaned parameter data
-parameter_description <- read.table(
-  file = paste0(rootDir, "data/cleaned/cleaned_IMPC_parameter_description.txt"), # File path
-  header = TRUE,                 # First row contains column names
-  sep = ",",                     # Fields are separated by commas
-  stringsAsFactors = FALSE,      # Prevent character columns from converting to factors
-  check.names = FALSE            # Keep column names as-is, even if they contain spaces or special characters
-)
-
-# Display the loaded data in a tabular format
-head(parameter_description)
-```
-
-Questions: does the parameter_name content needs to be standardised?
-
-The problematic areas the script found:\
-\[1\] " Difference in Conditioning Post-shock and Conditioning Baseline % Freezing"\
-\[2\] " Nutrition - do you know the composition of the diet (average based on mass)"\
-\[3\] " Nutrition - do you know the composition of the diet (average based on calorific content)"\
-\[4\] " Nutrition - average composition (based on calorific content) - Carbohydrate"\
-\[5\] " Microbiological status - is your unit positive for any of the pathogens tested"
-
-### Consolidated Script for `IMPC_parameter_description.txt` {style="color: red"}
+### `IMPC_parameter_description.txt`
 
 The same issue as with IMPC_procedure.txt is observed with the parameter `IMPC_parameter_description.txt` file. Therefore, the same two steps are performed: 1) correct the formatting to be able to load it as a table in R 2) clean the values inside the table.
 
 ```{r}
-# Read the raw IMPC_parameter_description.txt file line-by-line
+# Define the path to temporarily store the formatted table before cleaning
+temporary_path <- paste0(rootDir, "data/cleaned/IMPC_parameter_description_table.txt")
+
+
+# Reformat the parameters file for proper table loading
 parameter <- read_lines(paste0(rootDir, "data/metadata/IMPC_parameter_description.txt")) %>%
-  .[-1] %>%                                   # Remove the first line, which is assumed to be a header "x"
-  discard(~ . == "") %>%                      # Remove any completely empty lines
-  str_remove_all('^"|"$') %>%                 # Remove leading and trailing double quotes from each line
-  # Remove inconsistent newline characters to ensure each procedure data point forms a single row  
-  str_c(collapse = "\n") %>%                  # Combine all lines into a single string for processing
-  str_replace_all(c('" "'= ",","\n" = " " )) %>%  # Replace double quotes with commas and remove newline characters
+  
+  .[-1] %>%                                   # Remove the first line (header 'x')
+  discard(~ . == "") %>%                      # Remove empty lines
+  str_remove_all('^"|"$') %>%                 # Remove leading and trailing double quotes
+  str_replace_all('" "', ",") %>%             # Replace double quotes separating fields with commas
+  
+  # Handle inconsistent newline characters
+  str_c(collapse = "\n") %>%                  # Combine all lines into a single string
+  str_replace_all("\n", " ") %>%              # Replace all existing newline characters with spaces
+  # Add newline characters at the correct locations
   str_replace_all(c(
-    '(IMPC_[A-Z]{3}_[0-9]{3}_[0-9]{3})' = '\\1\n',  # Add a newline character after each matched IMPC identifier
+    '(IMPC_[A-Z]{3}_[0-9]{3}_[0-9]{3})' = '\\1\n',  # Add a newline after each gene identifier (single observation)
     'line_number,impcParameterOrigId, name, description, parameterId' = 
-      'parameter_mapping, parameter_name, parameter_description, parameter_id\n'  # Rename the header row for consistency
+      'parameter_mapping, parameter_name, parameter_description, parameter_id\n'  # Standardize header row and add a newline
   )) %>%
-  str_split("\n") %>%                         # Split the single string back into lines based on the newline character
+  str_split("\n") %>%                         # Split the string into lines based on the newline character
   unlist() %>%                                # Convert the resulting list into a flat character vector
-  str_trim() %>%                              # Trim whitespace from the beginning and end of each line
-  # Replace commas within parentheses with semicolons
-  str_replace_all('\\(([^)]*)\\)', function(x) str_replace_all(x, ',', ';')) %>% 
-  # Match the desired table structure (line number, procedure_id, name, description, parameter_id) and add quotes 
+  
+  str_trim() %>%                              # Trim whitespace from the start and end of each line
+  
+  # Replace commas within parentheses with semicolons to avoid misinterpretation as field separators
+  str_replace_all('\\(([^)]*)\\)', function(x) str_replace_all(x, ',', ';')) %>%
+  
+  # Format table rows by adding quotes around fields
   str_replace_all(
     '^([1-9][0-9]{0,3}),([0-9]{4,5}), ?([^,]+), ?(.*), ?(IMPC_[A-Z]{3}_[0-9]{3}_[0-9]{3})$', 
-    '"\\2","\\3","\\4","\\5"') %>%
-  write_lines(paste0(rootDir, "data/cleaned/formatted_IMPC_parameter_description.txt")) # Save the cleaned lines to a new file
-
-# Preview the first few lines of the cleaned file
-head(parameter)
+    '"\\2","\\3","\\4","\\5"'
+  ) %>%
+  
+  # Replace semicolons within parentheses back to commas
+  str_replace_all('\\(([^)]*)\\)', function(x) str_replace_all(x, ';', ',')) %>%
+  
+  # Save the cleaned and standardized data to a new file
+  write_lines(temporary_path)
 ```
 
 ```{r}
-# This section is not finished yet
-# Load and clean the parameter data
-parameter <- read_csv(
-  paste0(rootDir, "data/cleaned/formatted_IMPC_parameter_description.txt")
-) %>%
-  # Clean the data: trim whitespace and replace empty strings with NA
+# Load and clean parameter data
+parameter <- read_csv(temporary_path, show_col_types = FALSE) %>%
+  
+  # Clean all table cells: trim whitespace and replace empty strings with NA
+  mutate(across(
+    everything(),
+    ~ .x %>%
+      str_trim() %>%   
+      na_if("")        
+  )) %>%  
   mutate(
-    across(
-      everything(),
-      ~ .x %>%
-        str_trim() %>%   # Remove leading and trailing whitespace
-        na_if("")        # Convert empty strings to NA
+    # Convert mapping to numeric, introduces NA for invalid entries  
+    parameter_mapping = as.numeric(parameter_mapping),  
+    # Update inconsistent parameter names
+    parameter_name = case_when(
+      # Experimental design procedure
+      parameter_id == "IMPC_EXD_007_001" ~ "Frequency of controls",
+      parameter_id == "IMPC_EXD_008_001" ~ "Number male controls",
+      parameter_id == "IMPC_EXD_009_001" ~ "Number female controls",
+      parameter_id == "IMPC_EXD_014_001" ~ "Core stock strategy",
+      parameter_id == "IMPC_EXD_015_001" ~ "Knockout batch strategy",
+      # Histopathology procedure
+      parameter_id == "IMPC_HIS_008_001" ~ "Eye - Free text diagnostic term",
+      parameter_id == "IMPC_HIS_010_001" ~ "Eye - Severity score",
+      parameter_id == "IMPC_HIS_011_001" ~ "Eye - Descriptor PATO",
+      parameter_id == "IMPC_HIS_012_001" ~ "Eye - Description",
+      parameter_id == "IMPC_HIS_140_001" ~ "Testis - Free text diagnostic term",
+      parameter_id == "IMPC_HIS_142_001" ~ "Testis - Severity score",
+      parameter_id == "IMPC_HIS_143_001" ~ "Testis - Descriptor PATO",
+      parameter_id == "IMPC_HIS_144_001" ~ "Testis - Description",
+      parameter_id == "IMPC_HIS_152_001" ~ "Prostate gland - Free text diagnostic term",
+      parameter_id == "IMPC_HIS_154_001" ~ "Prostate gland - Severity score",
+      parameter_id == "IMPC_HIS_155_001" ~ "Prostate gland - Descriptor PATO",
+      parameter_id == "IMPC_HIS_156_001" ~ "Prostate gland - Description",
+      parameter_id == "IMPC_HIS_180_002" ~ "Eye - Significance score",
+      parameter_id == "IMPC_HIS_202_002" ~ "Testis - Significance score",
+      parameter_id == "IMPC_HIS_204_002" ~ "Prostate gland - Significance score",
+      parameter_id == "IMPC_HIS_259_001" ~ "Trigeminal ganglion - Diagnostic term",
+      parameter_id == "IMPC_HIS_261_001" ~ "Trigeminal ganglion - Severity score",
+      parameter_id == "IMPC_HIS_262_001" ~ "Trigeminal ganglion - Descriptor PATO",
+      parameter_id == "IMPC_HIS_263_001" ~ "Trigeminal ganglion - Description",
+      parameter_id == "IMPC_HIS_264_001" ~ "Trigeminal ganglion - Significance score",
+      # Housing and Husbandry procedure
+  parameter_id == "IMPC_HOU_042_001" ~ "Nutrition - Diet Mass Known", # Nutrition - do you know the composition of the diet (average based on mass)
+
+  parameter_id == "IMPC_HOU_046_001" ~ "Nutrition - Diet Cal Known", # Nutrition - do you know the composition of the diet (average based on calorific content)
+  parameter_id == "IMPC_HOU_047_001" ~ "Nutrition - Diet Cal Carb", # Nutrition - average composition (based on calorific content) - Carbohydrate
+  parameter_id == "IMPC_HOU_064_001" ~ "Microbiological Status - Pathogen Positive", # Microbiological status - is your unit positive for any of the pathogens tested
+      TRUE ~ parameter_name  # Default case
+    ),
+    # Fill or update parameter descriptions
+    parameter_description = case_when(
+      parameter_id == "IMPC_EXD_015_001" ~ "Knockout batch strategy",
+      parameter_id == "IMPC_HIS_008_001" ~ "Eye - Free text diagnostic term",
+      parameter_id == "IMPC_HIS_010_001" ~ "Eye - Severity score",
+      is.na(parameter_description) ~ tolower(str_replace_all(parameter_name, " ", "_")), # Fill missing descriptions with underscored name 
+      TRUE ~ parameter_description  # Default case
     )
   ) %>%
-  # Parameters are tested in a single procedure (this was checked using procedure file) so we can keep one record per unique parameter
-  distinct(
-    parameter_name, parameter_description, parameter_id,
-    .keep_all = TRUE
-  ) # Reduces rows from 5326 to 3625
+  
+  # Ensure one record per parameter
+  distinct(parameter_name, parameter_description, parameter_id, .keep_all = TRUE)  # Reduces rows from 5325 to 3600
 
-# Identify rows where parameter_id is duplicated
-duplicated_parameters <- parameter %>%
-  filter(parameter_id %in% parameter_id[duplicated(parameter_id)])
-# Duplicated parameters are due to parameter names or descriptions not being the same, while the ID is - we can look up the ID to check which version to keep, and manually remove the other version (still needs to be done; )
-# Display the rows with duplicated parameter_id
-duplicated_parameters
+# Save the cleaned data to a new CSV file
+write_csv(parameter, paste0(rootDir, "data/cleaned/cleaned_IMPC_parameter_description.csv"))
+```
 
+```{r}
+# Remove unnecessary files and variables
+file.remove(temporary_path)
+rm(temporary_path)
+```
 
-# Validate parameter_name and parameter_id
-parameter_SOP <- parameter %>%
-  mutate(
-    valid_parameter_name = nchar(parameter_name) >= 2 & nchar(parameter_name) <= 74,  # Check name length
-    valid_parameter_id = nchar(parameter_id) >= 15 & nchar(parameter_id) <= 18,       # Check ID length
-    unique_parameter_id = !duplicated(parameter_id)                                   # Check uniqueness of parameter_id
-    )
+```{r}
+# Check the parameter table for SOP compliance
+errors <- c()
 
-# Filter rows with invalid parameter_name, parameter_id, or non-unique parameter_id
-invalid_entries <- parameter_SOP %>%
-  filter(!valid_parameter_name | !valid_parameter_id | !unique_parameter_id) %>%
-  select(parameter_name, parameter_id, valid_parameter_name, valid_parameter_id, unique_parameter_id)
+# Check if parameter_mapping is numeric
+if (!all(is.numeric(parameter$parameter_mapping), na.rm = TRUE)) {
+  errors <- c(errors, "Some 'parameter_mapping' values are not numeric.")
+}
 
-# Output the invalid entries or a success message
-if (nrow(invalid_entries) > 0) {
-  cat("Invalid entries detected:\n")
-  print(invalid_entries)
+# Check if parameter_name, parameter_description, and parameter_id are strings
+if (!all(sapply(parameter$parameter_name, is.character))) {
+  errors <- c(errors, "Some 'parameter_name' values are not strings.")
+}
+if (!all(sapply(parameter$parameter_description, is.character))) {
+  errors <- c(errors, "Some 'parameter_description' values are not strings.")
+}
+if (!all(sapply(parameter$parameter_id, is.character))) {
+  errors <- c(errors, "Some 'parameter_id' values are not strings.")
+}
+
+# Check if parameter_id are unique
+if (length(unique(parameter$parameter_id)) != nrow(parameter)) {
+  errors <- c(errors, "Duplicate 'parameter_id' values found.")
+}
+
+# Check if parameter_id and parameter_name length are within SOP constraints 
+if (!all(nchar(parameter$parameter_id) >= 15 & nchar(parameter$parameter_id) <= 18, na.rm = TRUE)) {
+  errors <- c(errors, "Some 'parameter_id' lengths are outside SOP constraints (15-18 characters).")
+}
+if (!all(nchar(parameter$parameter_name) >= 2 & nchar(parameter$parameter_name) <= 74, na.rm = TRUE)) {
+  errors <- c(errors, "Some 'parameter_name' lengths are outside SOP constraints (2-74 characters).")
+}
+
+# Print results
+if (length(errors) == 0) {
+  print("All checks passed successfully.")
 } else {
-  cat("All entries are valid and parameter IDs are unique.\n")
+  print(paste("Errors found:", paste(errors, collapse = " ")))
 }
 ```
 
