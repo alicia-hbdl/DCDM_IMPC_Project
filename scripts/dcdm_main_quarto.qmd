@@ -51,7 +51,7 @@ library(janitor)
 ```{r}
 # Define the working directory path in r
 # Alicia
-rootDir = "/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/"
+#rootDir = "/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/"
 # Sanj 
 #rootDir = "/Users/sanjanasrinivasan/Desktop/DCDM_IMPC_Project/"
 # Ella
@@ -59,7 +59,7 @@ rootDir = "/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/"
 # Sama
 #rootDir = "/Users/sama/Desktop/DCDM_Proj2/"
 # Esta
-#rootDir = "~/Desktop/working_directory/DCDM_project"
+rootDir = "~/Desktop/working_directory/DCDM_project"
 ```
 
 ## Cleaning the Raw Data Files
@@ -241,14 +241,51 @@ head(analysis_table)
 
 For each column, we need to check similar things, like whether column values are the right lengths (for strings) or size (for floats), and whether the results matche allowed values, like for `mouse_strain` and `mouse_life_stage`.We also need to check if certain variables are perfectly correlated with one another.
 
-Check if variable data types match those specified in the SOP - all character (or string) data types except for pvalue (numeric or float).
+First we load the data and generate a log file.
 
 ```{r}
 # Read the collated file
-data <- read_csv(paste0(rootDir, "data/cleaned/analysis_table.txt"))
+data <- read_csv(paste0(rootDir, "/data/analysis_table.txt"))
 
-# Show data types
-print(sapply(data, class))
+# Log file
+log_file <- "collated_validation_log.txt"
+file.create(log_file)
+
+# Custom logging function
+log_message <- function(message) {
+  cat(message, "\n", file = log_file, append = TRUE)
+  message(message) # Optionally display in the console
+}
+
+# Start logging
+log_message("=== Data Validation and Transformation Log ===")
+
+```
+
+Check if variable data types match those specified in the SOP - all character (or string) data types except for pvalue (numeric or float).
+
+```{r}
+# Extract expected data types
+expected_data_types <- read_csv(SOP_path, show_col_types = FALSE)$dataType %>% recode("String" = "character", "Float" = "numeric") # Convert datatypes to those recognised by R
+
+# Get actual data types
+data_types <- sapply(data, class)
+
+# Identify and report mismatches
+type_mismatches <- tibble(
+  variable = names(data_types),
+  actual_type = unname(data_types),
+  expected_type = expected_data_types[names(data_types)]
+) %>%
+  filter(actual_type != expected_type)
+
+# Log results
+if (nrow(type_mismatches) > 0) {
+  log_message("Data type mismatches found:")
+  log_message(capture.output(print(type_mismatches)))
+} else {
+  log_message("All data types match the SOP specification.")
+}
 ```
 
 Check if `analysis_id` values are all 15 characters long and all unique.
@@ -258,7 +295,7 @@ Check if `analysis_id` values are all 15 characters long and all unique.
 
 invalid_ids <- data %>%
   filter(nchar(analysis_id) != 15 | duplicated(analysis_id))
-message(if (nrow(invalid_ids) == 0) {
+log_message(if (nrow(invalid_ids) == 0) {
   "All analysis_id values are valid."
 } else {
   paste("Invalid analysis_id values found:", nrow(invalid_ids))
@@ -272,8 +309,8 @@ Check if `gene_accession_id` values are all between 9-11 characters long - Accor
 
 invalid_gene_lengths <- data %>% filter(nchar(gene_accession_id) < 9 | nchar(gene_accession_id) > 11)
 duplicate_genes <- data %>% group_by(gene_accession_id) %>% filter(n() > 1) %>% ungroup()
-message(if (nrow(invalid_gene_lengths) == 0) "All gene_accession_id values are valid." else paste("Invalid gene_accession_id lengths:", nrow(invalid_gene_lengths)))
-message(if (nrow(duplicate_genes) == 0) "All gene_accession_id values are unique." else paste("Duplicate gene_accession_id values:", nrow(duplicate_genes)))
+log_message(if (nrow(invalid_gene_lengths) == 0) "All gene_accession_id values are valid." else paste("Invalid gene_accession_id lengths:", nrow(invalid_gene_lengths)))
+log_message(if (nrow(duplicate_genes) == 0) "All gene_accession_id values are unique." else paste("Duplicate gene_accession_id values:", nrow(duplicate_genes)))
 ```
 
 Check & format `gene_symbol` so all values are in title format.
@@ -281,10 +318,11 @@ Check & format `gene_symbol` so all values are in title format.
 ```{r}
 ### Validate & format 'gene_symbol'
 
-to_title_format <- function(gene) paste0(toupper(substr(gene, 1, 1)), tolower(substr(gene, 2, nchar(gene))))
-data <- data %>% mutate(gene_symbol = sapply(gene_symbol, to_title_format))
+# Convert all gene_symbols to title format
+data <- data %>% mutate(gene_symbol = str_to_title(gene_symbol))
+# Check length of gene_symbol values
 invalid_gene_symbols <- data %>% filter(nchar(gene_symbol) < 1 | nchar(gene_symbol) > 13)
-message(if (nrow(invalid_gene_symbols) == 0) "All gene_symbol values are valid." else paste("Invalid gene_symbol values:", nrow(invalid_gene_symbols)))
+log_message(if (nrow(invalid_gene_symbols) == 0) "All gene_symbol values are valid." else paste("Invalid gene_symbol values:", nrow(invalid_gene_symbols)))
 ```
 
 Check if `gene_accession_id` and `gene_symbol` are perfectly correlated.
@@ -295,7 +333,7 @@ Check if `gene_accession_id` and `gene_symbol` are perfectly correlated.
 gene_symbol_correlation <- data %>%
   group_by(gene_accession_id) %>%
   filter(n_distinct(gene_symbol) > 1)
-message(if (nrow(gene_symbol_correlation) == 0) "Perfect correlation between gene_accession_id and gene_symbol." else "Correlation issues detected.")
+log_message(if (nrow(gene_symbol_correlation) == 0) "Perfect correlation between gene_accession_id and gene_symbol." else "Correlation issues detected.")
 ```
 
 Check & format `mouse_strain` so all results are one of the four valid strains specified in the SOP: C57BL, B6J, C3H or 129SV. Our results show 11 unique strains, 9 of which appear to be typos of C57BL (e.g. C53BL, C58BL - none of the 'typos' are valid mouse strains according to MGI).
@@ -306,7 +344,7 @@ Check & format `mouse_strain` so all results are one of the four valid strains s
 valid_strains <- c("C57BL", "B6J", "C3H", "129SV")
 data <- data %>%
   mutate(mouse_strain = ifelse(mouse_strain %in% valid_strains, mouse_strain, "C57BL"))
-message("Updated mouse_strain values.") # Selected 'C57BL' after looking at unique results - there appear to be typos of C57BL
+log_message("Updated mouse_strain values.") # Selected 'C57BL' after looking at unique results - there appear to be typos of C57BL
 ```
 
 Check if `mouse_life_stage` values are one of the allowed values according to the SOP.
@@ -316,22 +354,27 @@ Check if `mouse_life_stage` values are one of the allowed values according to th
 
 allowed_life_stages <- c("E12.5", "E15.5", "E18.5", "E9.5", "Early adult", "Late adult", "Middle aged adult")
 invalid_life_stages <- data %>% filter(!mouse_life_stage %in% allowed_life_stages)
-message(if (nrow(invalid_life_stages) == 0) "All mouse_life_stage values are valid." else paste("Invalid mouse_life_stage values:", nrow(invalid_life_stages)))
+log_message(if (nrow(invalid_life_stages) == 0) "All mouse_life_stage values are valid." else paste("Invalid mouse_life_stage values:", nrow(invalid_life_stages)))
 ```
 
-Checking if `parameter_id` is the correct length (15-18 characters) and is perfectly correlated with `parameter_name`. We chose not to validate `parameter_name` specifically as viewing this column shows no suspicious results.
+Checking if `parameter_id` & `parameter_name` are the correct lengths (15-18 characters & 2-74 characters respectively). Also checking if they are perfectly correlated with each other.
 
 ```{r}
-### Validate 'parameter_id' and 'parameter_name'
+### Validate 'parameter_id'
 
 invalid_parameter_ids <- data %>% filter(nchar(parameter_id) < 15 | nchar(parameter_id) > 18)
-parameter_correlation <- data %>%
-  group_by(parameter_id) %>%
-  summarise(unique_names = n_distinct(parameter_name)) %>%
-  filter(unique_names > 1)
-message(if (nrow(invalid_parameter_ids) == 0) "All parameter_id values are valid." else paste("Invalid parameter_id values:", nrow(invalid_parameter_ids)))
-message(if (nrow(parameter_correlation) == 0) "Perfect correlation between parameter_id and parameter_name." else "Correlation issues detected for parameter_id and parameter_name.")
-# Chose not to validate parameter_name separately 
+log_message(if (nrow(invalid_parameter_ids) == 0) {"All parameter_id values are valid."} else {paste("Invalid parameter_id values:", nrow(invalid_parameter_ids))})
+
+### Validate 'parameter_name'
+
+invalid_parameter_names <- data %>% filter(nchar(parameter_name) < 2 | nchar(parameter_name) > 74)
+log_message(if (nrow(invalid_parameter_names) == 0) {"All parameter_name values have valid lengths."} else {paste("Invalid parameter_name values:", nrow(invalid_parameter_names))})
+
+### Correlation between 'parameter_id' & 'parameter_name'
+
+parameter_correlation <- data %>% group_by(parameter_id) %>% summarise(unique_names = n_distinct(parameter_name)) %>% filter(unique_names > 1)
+log_message(if (nrow(parameter_correlation) == 0) {"Perfect correlation between parameter_id and parameter_name."} else {"Correlation issues detected for parameter_id and parameter_name."})
+
 ```
 
 Check if all `pvalues` are between 0 & 1, if not cap the values at those extremes. In this case, we had no values below 0 but we did have values above 1.
@@ -342,7 +385,7 @@ Check if all `pvalues` are between 0 & 1, if not cap the values at those extreme
 data <- data %>%
   mutate(pvalue = ifelse(pvalue > 1, 1, pvalue)) # Viewing pvalues before transforming shows values >1
 invalid_pvalues <- data %>% filter(pvalue < 0 | pvalue > 1 | is.na(pvalue))
-message(if (nrow(invalid_pvalues) == 0) "All pvalue values are valid." else paste("Invalid pvalue values:", nrow(invalid_pvalues)))
+log_message(if (nrow(invalid_pvalues) == 0) "All pvalue values are valid." else paste("Invalid pvalue values:", nrow(invalid_pvalues)))
 ```
 
 Save the cleaned dataframe to a new file.
@@ -351,8 +394,11 @@ Save the cleaned dataframe to a new file.
 ### SAVE CLEANED DATA ###
 
 write.csv(data, "cleaned_analysis_table.txt", row.names = FALSE)
-message("Cleaned dataset saved as 'cleaned_analysis_table.txt'.")
+log_message("Cleaned dataset saved as 'cleaned_analysis_table.txt'.")
+log_message("=== End of Log ===")
 ```
+
+Log file shows the all the messaged corresponding to the if/else statement results in every step of this workflow.
 
 ## Cleaning the Metadata Files
 
