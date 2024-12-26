@@ -243,8 +243,6 @@ To streamline data cleaning and enable further analysis, these files must be com
 Below is a function that reads a file and converts its data into a row for the unified table:
 
 ```{r}
-#| eval: false
-
 # Define a function to process a single file
 process_file <- function(file_path) {
   read.csv(file_path, header = FALSE, col.names = c("field", "value")) %>%
@@ -282,7 +280,7 @@ Check if variable data types match those specified in the SOP - all character (o
 
 ```{r}
 # Read the collated file
-data <- read.csv("data/analysis_table.txt", header = TRUE, stringsAsFactors = FALSE)
+data <- read_csv(paste0(rootDir, "data/cleaned/analysis_table.txt"))
 
 # Show data types
 print(sapply(data, class))
@@ -796,6 +794,114 @@ if (length(errors) == 0) {
 
 # Collating
 
+This step subsets the data from the metadata table according to the database schema decide dupon:
+
+### Procedures 
+
+```{r}
+procedures <- procedure %>%
+  select(procedure_id, procedure_name, procedure_description, is_mandatory) %>%  # Select specific columns
+  distinct() # Keep only unique rows (this shrinks the table from 5311 rows to 50 rows)
+
+View(procedures)
+
+# Save the table as CSV 
+write_csv(procedures, paste0(rootDir, "/data/collated/Procedures.csv"))
+rm(procedures)
+```
+
+### Genes
+
+```{r}
+# Prepare the genes table by subsetting, ensuring unique rows, converting gene symbols to title case, and filling missing data
+genes <- analysis %>%
+  select(gene_accession_id, gene_symbol) %>%   # Select relevant columns
+  distinct() %>%         # Remove duplicates
+  bind_rows(              # Add missing gene_accession_ids from `disease`
+    disease %>%
+      select(gene_accession_id) %>%
+      filter(!gene_accession_id %in% genes$gene_accession_id) %>% # Identify missing IDs
+      mutate(gene_symbol = NA)      # Assign NA for missing gene symbols
+  ) %>%
+  distinct()                  # Ensure the final table is unique
+
+View(genes)
+
+# Save the table as CSV 
+write_csv(genes, file = paste0(rootDir, "/data/collated/Genes.csv"))
+rm(genes)
+```
+
+# Parameters
+
+```{r}
+# Load analysis table 
+parameter <- read_delim(paste0(rootDir, "data/cleaned/cleaned_IMPC_parameter_description.txt"), delim = ",")
+
+
+# Select the subset of columns required for the Parameters table
+parameters <- parameter %>%
+  clean_names() %>% 
+  mutate_all(~ str_trim(.)) %>%                       # Trim leading/trailing whitespace
+  mutate_all(~ ifelse(. %in% c("", "NA"), NA, .)) %>% # Replace empty strings or "NA" with actual NA
+  select(parameter_id, name, description) %>%          # Select only the specific columns needed
+  rename(parameter_id = parameter_id,                  # Rename the columns
+         parameter_name = name,                      
+         parameter_description = description) %>%
+  group_by(parameter_id) %>%                          # Group by parameter_id
+  slice_min(nchar(parameter_name), with_ties = FALSE) %>% # Keep the row with the shortest parameter_name
+  ungroup()                                     # Remove grouping
+
+parameters[(nchar(parameters$parameter_name))> 74, ]
+# Save the table as CSV 
+write.csv(parameters, file = paste0(rootDir, "/data/collated/Parameters.csv"), row.names = FALSE, quote = TRUE) 
+```
+
+# Diseases
+
+```{r}
+# Select the subset of columns required for the Parameters table
+diseases <- disease %>%
+  clean_names() %>% 
+  select(disease_id, disease_term) %>%          # Select only the specific columns needed
+  distinct()
+
+write_csv(diseases, paste0(rootDir, "/data/collated/Diseases.csv"))
+
+```
+
+### PhenoDigm
+
+```{r}
+# Select the subset of columns required for the Parameters table
+phenodigm_scores <- disease %>%
+  clean_names() %>% 
+  select(disease_id, gene_accession_id, phenodigm_score) %>%          # Select only the specific columns needed
+  distinct()
+
+write_csv(phenodigm_scores, paste0(rootDir, "/data/collated/PhenodigmScores.csv")) 
+```
+
+### Analysis
+
+```{r}
+# Load analysis table 
+analysis <- read_delim(paste0(rootDir, "data/cleaned/analysis_table.txt"), delim = ",")
+
+head(analysis)
+analyses <- analysis %>%
+  clean_names() %>% 
+  mutate_all(~ str_trim(.)) %>%                       # Trim leading/trailing whitespace
+  mutate_all(~ ifelse(. %in% c("", "NA"), NA, .)) %>% # Replace empty strings or "NA" with actual NA
+  select(analysis_id, gene_accession_id, mouse_strain, mouse_life_stage, parameter_id, pvalue)   %>%  
+    rename(# Select only the specific columns needed  rename(parameter_id = parameter_id,                  # Rename the columns
+      p_value = pvalue)   %>%  
+    distinct()
+head(analyses)
+write_csv(analyses, paste0(rootDir, "/data/collated/Analyses.csv"))
+rm(analyses)
+```
+
 # MySQL Database
 
 ```{sql}
@@ -925,17 +1031,7 @@ Once a CSV file has been created for each table, the data can be loaded directly
 
 -   **`IGNORE 1 LINES`**: Skips the header row in the CSV, if present.
 
-### Procedure Table
-
-```{r}
-procedures <- procedure %>%
-  select(procedure_id, procedure_name, procedure_description, is_mandatory) %>%  # Select specific columns
-  distinct() # Keep only unique rows (this shrinks the table from 5311 rows to 50 rows)
-
-# Save the table as CSV 
-write_csv(procedures, paste0(rootDir, "/data/collated/Procedures.csv"))
-rm(procedures)
-```
+### 
 
 ```{sql}
 #| eval: false
@@ -947,73 +1043,13 @@ OPTIONALLY ENCLOSED BY '"'
 IGNORE 1 LINES;
 ```
 
-### Genes Table
-
-```{r}
-# Load analysis table 
-analysis <- read_csv(cleaned_procedure_path)
-disease <- read_delim(paste0(rootDir, "data/cleaned/cleaned_Disease_information.txt"), delim = "\t")
-head(disease)
-
-# Subset the table, ensure unique rows, convert gene symbols to title case, and rename
-genes <- analysis %>%
-  clean_names() %>% 
-  mutate(gene_symbol = str_to_title(gene_symbol)) %>%  # Convert gene_symbol to title case 
-  select(gene_accession_id, gene_symbol) %>%          # Select specific columns
-  distinct() %>%                                      # Keep only unique rows
-  rename(gene_accession_id = gene_accession_id)                 # Rename columns
-
-# Find `gene_accession_id`s in `disease` table that are not in `genes`
-missing_genes <- disease %>%
-  select(gene_accession_id) %>%                # Extract gene IDs from `disease`
-  rename(gene_accession_id = gene_accession_id) %>%
-  distinct() %>%                               # Ensure unique rows
-  filter(!gene_accession_id %in% genes$gene_accession_id)          # Find those not in `genes`
-
-# Add missing `gene_accession_id`s to `genes` with `gene_symbol` as NULL; here we could manually search them and add them! 
-genes <- genes %>%
-  bind_rows(missing_genes %>% 
-  mutate(gene_symbol = NA)) %>% # Add missing genes with NA for gene_symbol
-  distinct()                    # Ensure no duplicates
-
-head(genes)
-
-# Save the table as CSV 
-write.csv(genes, file = paste0(rootDir, "/data/collated/Genes.csv"), row.names = FALSE, quote = TRUE)
-```
-
 ```{sql}
 #| eval: false
 LOAD DATA LOCAL INFILE '/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/collated/Genes.csv'
 INTO TABLE Genes
 FIELDS TERMINATED BY ',' 
 OPTIONALLY ENCLOSED BY '"'
-IGNORE 1 LINES;
-```
-
-### Parameters Table
-
-```{r}
-# Load analysis table 
-parameter <- read_delim(paste0(rootDir, "data/cleaned/cleaned_IMPC_parameter_description.txt"), delim = ",")
-
-
-# Select the subset of columns required for the Parameters table
-parameters <- parameter %>%
-  clean_names() %>% 
-  mutate_all(~ str_trim(.)) %>%                       # Trim leading/trailing whitespace
-  mutate_all(~ ifelse(. %in% c("", "NA"), NA, .)) %>% # Replace empty strings or "NA" with actual NA
-  select(parameter_id, name, description) %>%          # Select only the specific columns needed
-  rename(parameter_id = parameter_id,                  # Rename the columns
-         parameter_name = name,                      
-         parameter_description = description) %>%
-  group_by(parameter_id) %>%                          # Group by parameter_id
-  slice_min(nchar(parameter_name), with_ties = FALSE) %>% # Keep the row with the shortest parameter_name
-  ungroup()                                     # Remove grouping
-
-parameters[(nchar(parameters$parameter_name))> 74, ]
-# Save the table as CSV 
-write.csv(parameters, file = paste0(rootDir, "/data/collated/Parameters.csv"), row.names = FALSE, quote = TRUE)
+IGNORE 1 LINES; 
 ```
 
 *\*Some of the IDs appeared to be duplicated, but upon inspection, the rows contained equivalent values (e.g., for IMPC_HIS_010_001: "Eye with optic nerve - Severity score" and "Eye - Severity score"). Given the same identifier and the similarity of these terms, it is reasonable to assume that they refer to the same parameter, and only one of the duplicates was uploaded to the database.*
@@ -1033,18 +1069,6 @@ OPTIONALLY ENCLOSED BY '"'
 IGNORE 1 LINES;
 ```
 
-### Disease Table
-
-```{r}
-# Select the subset of columns required for the Parameters table
-diseases <- disease %>%
-  clean_names() %>% 
-  select(disease_id, disease_term) %>%          # Select only the specific columns needed
-  distinct()
-
-write_csv(diseases, paste0(rootDir, "/data/collated/Diseases.csv")) 
-```
-
 ```{sql}
 #| eval: false
 LOAD DATA LOCAL INFILE '/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/collated/Diseases.csv'
@@ -1052,18 +1076,6 @@ INTO TABLE Diseases
 FIELDS TERMINATED BY ',' 
 OPTIONALLY ENCLOSED BY '"'
 IGNORE 1 LINES;
-```
-
-### PhenoDigm Score Table
-
-```{r}
-# Select the subset of columns required for the Parameters table
-phenodigm_scores <- disease %>%
-  clean_names() %>% 
-  select(disease_id, gene_accession_id, phenodigm_score) %>%          # Select only the specific columns needed
-  distinct()
-
-write_csv(phenodigm_scores, paste0(rootDir, "/data/collated/PhenodigmScores.csv")) 
 ```
 
 ```{sql}
@@ -1077,21 +1089,6 @@ IGNORE 1 LINES
 (disease_id, gene_accession_id, phenodigm_score); -- so that the phenodigm_id is created dynamically
 ```
 
-## parameterXprocedure
-
-```{r}
-# Join the parameters table and the procedure table using "parameter_mapping" and "procedure_id"
-parameterXprocedure <- procedure %>%
-  left_join(parameter, by = c("parameter_mapping" = "procedure_id")) %>%
-  select(procedure_id, parameter_id) %>%  # Retain only the relevant columns
-  distinct() # Ensure no duplicates (this shrinks the table from 5311 rows to 3600 rows)
-
-# Save the resulting table as a CSV file
-write_csv(parameterXprocedure, paste0(rootDir, "/data/collated/parameterXprocedure.csv"))
-# Remove unused files 
-rm(parameterXprocedure)
-```
-
 ```{sql}
 #| eval: false
 LOAD DATA LOCAL INFILE '/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/collated/parameterXprocedure.csv'
@@ -1100,26 +1097,6 @@ FIELDS TERMINATED BY ','
 OPTIONALLY ENCLOSED BY '"' 
 LINES TERMINATED BY '\n'
 IGNORE 1 LINES; -- so that the phenodigm_id is created dynamically
-```
-
-### Analysis Table
-
-```{r}
-# Load analysis table 
-analysis <- read_delim(paste0(rootDir, "data/cleaned/analysis_table.txt"), delim = ",")
-
-head(analysis)
-analyses <- analysis %>%
-  clean_names() %>% 
-  mutate_all(~ str_trim(.)) %>%                       # Trim leading/trailing whitespace
-  mutate_all(~ ifelse(. %in% c("", "NA"), NA, .)) %>% # Replace empty strings or "NA" with actual NA
-  select(analysis_id, gene_accession_id, mouse_strain, mouse_life_stage, parameter_id, pvalue)   %>%  
-    rename(# Select only the specific columns needed  rename(parameter_id = parameter_id,                  # Rename the columns
-      p_value = pvalue)   %>%  
-    distinct()
-head(analyses)
-write_csv(analyses, paste0(rootDir, "/data/collated/Analyses.csv"))
-rm(analyses)
 ```
 
 ```{sql}
