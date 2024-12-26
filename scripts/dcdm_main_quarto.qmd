@@ -78,16 +78,14 @@ We begin by defining the directory paths and the log file path.
 # Defing directory paths
 raw_data_dir <- paste0(rootDir, "/data/raw_data") # Input raw data directory
 updated_data_dir <- paste0(rootDir, "/data/updated_data") # Cleaned analysis data directory (field names only)
-log_file_mod <- paste0(rootDir, "/scripts/row_name_modification.log") # Log file for modifications
-log_file_valid <- paste0(rootDir, "/scripts/row_name_validation.log")   # Log file for results
+log_file <- paste0(rootDir, "/scripts/row_name_cleaning.log") # Log file for validation & modifications
 SOP_path <- paste0(rootDir, "/data/metadata/IMPC_SOP.csv") # SOP path
 
 # Creates output directory if it doesn't already exist & supresses warnings if it does exist
 dir.create(updated_data_dir, showWarnings = FALSE)
 
 # Clear the log files if they exist or create them otherwise
-file.create(log_file_mod)
-file.create(log_file_valid)
+file.create(log_file)
 ```
 
 Then we load the SOP file. *Here, I have normalized the row names to lowercase although this isn't strictly necessary for this specific file.*
@@ -100,6 +98,26 @@ expected_row_names <- trimws(read_csv(SOP_path, show_col_types = FALSE)$dataFiel
 expected_row_names
 ```
 
+#### Validating the number of columns
+
+To quickly identify any any delimation errors, we can validate the number of columns per CSV file (each file should have 2 columns).
+
+```{r}
+# Function to validate column count
+validate_columns <- function(file_path) {
+  # Read the file and check its column count
+  data <- tryCatch(
+    read_csv(file_path, col_names = FALSE, show_col_types = FALSE),
+    error = function(e) return(NULL)
+  )
+  
+  if (is.null(data)) return(FALSE)
+  
+  # Return TRUE if the file has exactly 2 columns, otherwise FALSE
+  return(ncol(data) == 2)
+}
+```
+
 #### Modify the field names
 
 With the correct files loaded and directories specified, we define a function to perform the following tasks:
@@ -110,9 +128,16 @@ With the correct files loaded and directories specified, we define a function to
 
 3.  Reorder the rows to align with the SOP layout.
 
+Here, I have also included the column count validation function defined above. This means the results will all be presented in the same file.
+
 ```{r}
 # Function to validate, update, and reorder row names
 process_file <- function(file_path) {
+  # Validate column count
+  if(!validate_columns(file_path)){
+    message(paste("File", basename(file_path), "does not have exactly 2 columns. Skipping."))
+    return(FALSE)
+  }
   # Read the CSV file as headerless
   data <- tryCatch(
     read_csv(file_path, col_names = FALSE, show_col_types = FALSE), 
@@ -153,69 +178,11 @@ validation_results <- sapply(list.files(raw_data_dir, pattern = "\\.csv$", full.
 # Log summary
 summary_message <- sprintf("Validation Summary:\nTotal files checked: %d\nTotal updated files: %d\n",
                            length(validation_results), sum(validation_results))
-write(summary_message, log_file_mod)
+write(summary_message, log_file)
 message(summary_message)
 ```
 
-The summary message displays the number of files validated out of the total number in the `raw_data` folder. This information is shown on the console and saved to the log file. The log file, now streamlined to include only this summary, initially contained detailed row name differences between the files and the SOP, based on a subset of 600 files.
-
-#### Verify the field names
-
-#### This code duplicates the logic used to modify the files, making it somewhat redundant and unable to detect field name issues. I have kept it as a separate optional script to check for any potential collating errors - this script is a remnant of the data exploration code I used to identify the steps needed during data cleaning. {style="color: red"}
-
-After modifying the files, we run a final validation script to confirm that there are no unexpected row name differences remaining. This ensures the data aligns perfectly with the SOP.
-
-```{r}
-# Function to validate a file against the SOP layout and column count
-validate_file <- function(file_path) {
-  # Read the file
-  data <- tryCatch(
-    read_csv(file_path, col_names = FALSE, show_col_types = FALSE),
-    error = function(e) return(NULL))
-  
-  # Skip files that could not be read
-  if (is.null(data)) return(FALSE)
-  
-  # Check column count
-  if (ncol(data) != 2) {
-    return(list(valid = FALSE, message = "Incorrect column count"))
-  }
-  
-  # Normalize row names and validate against SOP
-  row_names <- tolower(data[[1]])
-  missing_rows <- setdiff(expected_row_names, row_names)
-  extra_rows <- setdiff(row_names, expected_row_names)
-  
-  # Create validation message
-  if (length(missing_rows) > 0 || length(extra_rows) > 0) {
-    message <- c(
-      if (length(missing_rows) > 0) paste("Missing row names:", paste(missing_rows, collapse = ", ")),
-      if (length(extra_rows) > 0) paste("Extra row names:", paste(extra_rows, collapse = ", "))
-    )
-    return(list(valid = FALSE, message = paste(message, collapse = "\n")))
-  }
-  
-  list(valid = TRUE, message = "File is valid")
-}
-
-# Process all files
-validation_results <- lapply(list.files(updated_data_dir, pattern = "\\.csv$", full.names = TRUE), function(file_path) {
-  result <- validate_file(file_path)
-  log_message <- paste(basename(file_path), ":", result$message, "\n")
-  cat(log_message, file = log_file, append = TRUE)
-  result$valid
-})
-
-# Summarize and log results
-valid_files <- sum(unlist(validation_results))
-summary_message <- sprintf(
-  "Validation Summary:\nTotal files checked: %d\nTotal valid files: %d\n", 
-  length(validation_results), valid_files
-)
-cat(summary_message, file = log_file_valid, append = TRUE)
-message(summary_message)
-
-```
+The log file, now streamlined to include only this summary, initially contained detailed row name differences between the files and the SOP, based on a subset of 600 files.
 
 This code can be run both locally and on an HPC with minimal adjustments, such as loading individual `dplyr` and `readr` packages instead of the entire `tidyverse`.
 
@@ -234,7 +201,7 @@ rm(log_file_mod, log_file_valid, raw_data_dir, updated_data_dir, valid_files, to
 
 ### Combining the Raw Data in a Table
 
-The dataset consists of thousands of CSV files with key fields: `analysis_id`, `gene_accession_id`, `gene_symbol`, `mouse_strain`, `mouse_life_stage`, `parameter_id`, `parameter_name`, and `pvalue`.
+The data-set consists of thousands of CSV files with key fields: `analysis_id`, `gene_accession_id`, `gene_symbol`, `mouse_strain`, `mouse_life_stage`, `parameter_id`, `parameter_name`, and `pvalue`.
 
 To streamline data cleaning and enable further analysis, these files must be combined into a single table based on their shared fields.
 
