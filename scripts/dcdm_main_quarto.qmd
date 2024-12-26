@@ -43,9 +43,10 @@ Though we had access to the zip file of our data, we had no permissions on it so
 rm(list = ls())
 
 # Install and load Tidyverse packages
-#install.packages(c("tidyverse", "janitor"))
+#install.packages(c("tidyverse", "janitor", "fs"))
 library(tidyverse)
 library(janitor)
+library(fs)
 
 # ADD DIRECTORY STRUCTURE HERE 
 ```
@@ -78,10 +79,11 @@ We begin by defining the directory paths and the log file path.
 
 ```{r}
 # Defing directory paths
-raw_data_dir <- paste0(rootDir, "data/raw_data") # Input raw data directory
-updated_data_dir <- paste0(rootDir, "data/updated_data") # Input raw data directory
+raw_data_dir <- paste0(rootDir, "data/raw_data/") # Input raw data directory
+updated_data_dir <- paste0(rootDir, "data/updated_data/") # Input raw data directory
 
 log_file <- paste0(rootDir, "scripts/row_name_cleaning.log") # Log file for validation & modifications
+
 SOP_path <- paste0(rootDir, "data/metadata/IMPC_SOP.csv") # SOP path
 
 # Clear the log files if they exist or create them otherwise
@@ -165,7 +167,7 @@ process_file <- function(file_path) {
   data <- arrange(data, match(data[[1]], expected_row_names))
   
   # Save the updated file as headerless
-  write_csv(data, updated_data_dir, col_names = FALSE)
+  write_csv(data, paste0(updated_data_dir, basename(file_path)), col_names = FALSE)
  
   return(TRUE)
 }
@@ -175,12 +177,14 @@ We now apply this function to all data files. This process will generate an `upd
 
 ```{r}
 # Process files and log results
-validation_results <- sapply(list.files(raw_data_dir, pattern = "\\.csv$", full.names = TRUE), process_file)
+validation_results <- dir_ls(path = raw_data_dir, glob = "*.csv") %>%
+  map(process_file) %>%
+  map(as.integer) %>%
+  unlist()
 
 # Log summary
-summary_message <- sprintf("Validation Summary:\nTotal files checked: %d\nTotal updated files: %d\n",
-                           length(validation_results), sum(validation_results))
-write(summary_message, log_file)
+summary_message <- sprintf("Validation Summary:\nTotal files checked: %d\nTotal updated files: %d\n", length(validation_results), sum(validation_results))
+write_lines(summary_message, log_file)
 message(summary_message)
 ```
 
@@ -197,7 +201,7 @@ diff -yr --suppress-common-line /path/to/raw_directory /path/to/cleaned_director
 
 ```{r}
 # Remove unused values to unclutter the environment
-rm(log_file_mod, log_file_valid, raw_data_dir, updated_data_dir, valid_files, total_files, validation_results, files, summary_message, expected_row_names)
+rm(log_file_mod, log_file_valid, raw_data_dir, valid_files, total_files, validation_results, files, summary_message, expected_row_names)
 ```
 
 ### Combining the Raw Data in a Table
@@ -211,7 +215,7 @@ Below is a function that reads a file and converts its data into a row for the u
 ```{r}
 # Define a function to process a single file
 process_file <- function(file_path) {
-  read_csv(file_path, header = FALSE, col.names = c("field", "value")) %>%
+  read_csv(file_path, show_col_types = FALSE) %>%
     # Transpose the data so that fields become column names and values form the row
     t() %>% 
     # Convert to dataframe (needed by the map_dfr function)
@@ -390,10 +394,32 @@ invalid_pvalues <- data %>% filter(pvalue < 0 | pvalue > 1 | is.na(pvalue))
 log_message(if (nrow(invalid_pvalues) == 0) "All pvalue values are valid." else paste("Invalid pvalue values:", nrow(invalid_pvalues)))
 ```
 
+```{r}
+data <- data %>%
+  mutate(
+    gene_symbol = str_to_title(gene_symbol)) %>%
+  mutate(# Convert to title case 
+    gene_symbol = case_when(
+      gene_accession_id == "MGI:98967" ~ "Wt",
+      gene_accession_id == "MGI:96090" ~ "Asmt",
+      gene_accession_id == "MGI:98266" ~ "Sord",
+      gene_accession_id == "MGI:1928271" ~ "Malrd1",
+      gene_accession_id == "MGI:109279" ~ "Nnt",
+      gene_accession_id == "MGI:3665157" ~ "Rsxr",
+      gene_accession_id == "MGI:1345961" ~ "Coro1a",
+      gene_accession_id == "MGI:87868" ~ "Acads",
+      gene_accession_id == "MGI:1351634" ~ "Abcc6",
+      gene_accession_id == "MGI:104511" ~ "Tnfsf4",
+      TRUE ~ gene_symbol)) %>% 
+  distinct()                 
+data
+```
+
 Save the cleaned dataframe to a new file.
 
 ```{r}
 ### SAVE CLEANED DATA ###
+
 
 write_csv(data, paste0(rootDir, "data/cleaned/cleaned_analysis_table.txt"))
 log_message("Cleaned dataset saved as 'cleaned_analysis_table.txt'.")
@@ -475,10 +501,10 @@ procedure <- read_csv(temporary_path, show_col_types = FALSE, col_names = TRUE) 
     procedure_id = cur_group_id(),               
     parameter_mapping = list(parameter_mapping),# Store original IDs as a list for mapping with parameters
     .groups = "drop"                             
-  ) #%>% 
+  ) %>% 
 
   # Expand the list of parameter mappings into individual rows
- #unnest(parameter_mapping)
+ unnest(parameter_mapping)
 
 # Save the cleaned data to a new CSV file
 write_csv(procedure, paste0(rootDir, "data/cleaned/cleaned_IMPC_procedure.csv"))
@@ -809,114 +835,73 @@ if (length(errors) == 0) {
 
 This step subsets the data from the metadata table according to the database schema decide dupon:
 
+```{r}
+# load tables to not have to run the rest of the script: 
+procedure <- read_csv(paste0(rootDir, "data/cleaned/cleaned_IMPC_procedure.csv"), show_col_types = FALSE) 
+analysis <- read_csv(paste0(rootDir, "data/cleaned/cleaned_analysis_table.txt"), show_col_types = FALSE) 
+parameter <- read_csv(paste0(rootDir, "data/cleaned/cleaned_IMPC_parameter_description.csv"), show_col_types = FALSE)
+disease <- read_csv(paste0(rootDir, "data/cleaned/cleaned_Disease_information.csv"), show_col_types = FALSE)
+
+```
+
 ### Procedures
 
 ```{r}
-# Load procedure table temporarily, normally it is already in the env. 
-analysis <- read_csv(paste0(rootDir, "data/cleaned/cleaned_IMPC_procedure.csv")) 
-
 procedures <- procedure %>%
   select(procedure_id, procedure_name, procedure_description, is_mandatory) %>%  # Select specific columns
-  distinct() # Keep only unique rows (this shrinks the table from 5311 rows to 50 rows)
- 
-View(procedures)
+  distinct() # Keep only unique rows (this is needed due to the parameter_mapping field)
 
 # Save the table as CSV 
 write_csv(procedures, paste0(rootDir, "/data/collated/Procedures.csv"))
-rm(procedures)
 ```
 
 ### Genes
 
 ```{r}
-# Load analysis table temporarily, normally it is already in the env. 
-analysis <- read_csv(paste0(rootDir, "data/cleaned/cleaned_analysis_table.txt")) 
-
 genes <- analysis %>% select(gene_accession_id, gene_symbol) %>% # Select desired columns
-  mutate(
-    gene_symbol = str_to_title(gene_symbol))%>% # Convert to title case (optional, this should have been done in a previous step)
-# Ensure all genes from analysis are in the genes table 
   bind_rows(disease %>% 
       select(gene_accession_id) %>%
-      filter(!gene_accession_id %in% analysis$gene_accession_id)) %>%
-  # Add symbol to genes with NA symbols based on MGI
-  mutate(
-    gene_symbol = case_when(
-      gene_accession_id == "MGI:98967" ~ "Wt",
-      gene_accession_id == "MGI:96090" ~ "Asmt",
-      gene_accession_id == "MGI:98266" ~ "Sord",
-      gene_accession_id == "MGI:1928271" ~ "Malrd1",
-      gene_accession_id == "MGI:109279" ~ "Nnt",
-      gene_accession_id == "MGI:3665157" ~ "Rsxr",
-      gene_accession_id == "MGI:1345961" ~ "Coro1a",
-      gene_accession_id == "MGI:87868" ~ "Acads",
-      gene_accession_id == "MGI:1351634" ~ "Abcc6",
-      gene_accession_id == "MGI:104511" ~ "Tnfsf4",
-      TRUE ~ gene_symbol)) %>% 
-  distinct()                  # Ensure the final table has unique rows
+      filter(!gene_accession_id %in% analysis$gene_accession_id)) 
 
-View(genes)
-
-# Save the table as CSV 
-write_csv(genes, file = paste0(rootDir, "/data/collated/Genes.csv"))
-rm(genes)
+write_csv(genes, paste0(rootDir, "/data/collated/Genes.csv"))
 ```
 
 # Parameters
 
 ```{r}
-# Load parameter table 
-parameter <- read_csv(paste0(rootDir, "data/cleaned/cleaned_IMPC_parameter_description.csv"))
+parameters <- left_join(parameter, procedure, by = join_by(parameter_mapping)) %>% 
+  distinct(parameter_id, parameter_name, parameter_description, procedure_id)
 
-# Select the subset of columns required for the Parameters table
-parameters <- parameter %>%
-  select(parameter_id, parameter_name, parameter_description) 
-
-View(parameters)
-
-write_csv(parameters, file = paste0(rootDir, "/data/collated/Parameters.csv")) 
+write_csv(parameters, paste0(rootDir, "/data/collated/Parameters.csv")) 
 ```
 
 # Diseases
 
 ```{r}
-# Select the subset of columns required for the disease table
 diseases <- disease %>%
-  select(disease_id, disease_term) %>%          # Select only the specific columns needed
+  select(disease_id, disease_term) %>% 
   distinct()
 
-View(diseases)
-
 write_csv(diseases, paste0(rootDir, "/data/collated/Diseases.csv"))
-
 ```
 
 ### PhenoDigm
 
 ```{r}
-# Select the subset of columns required for the Parameters table
 phenodigm_scores <- disease %>%
   select(disease_id, gene_accession_id, phenodigm_score) 
-
-View(phenodigm_scores) 
 
 write_csv(phenodigm_scores, paste0(rootDir, "/data/collated/PhenodigmScores.csv")) 
 ```
 
-### Analysis
+### Analyses
 
 ```{r}
-# Load analysis table 
-analysis <- read_delim(paste0(rootDir, "data/cleaned/cleaned_analysis_table.txt"), delim = ",")
-
 analyses <- analysis %>%
   select(analysis_id, gene_accession_id, mouse_strain, mouse_life_stage, parameter_id, pvalue)   %>%  
     distinct()
 
-View(analyses)
-
 write_csv(analyses, paste0(rootDir, "/data/collated/Analyses.csv"))
-rm(analyses)
 ```
 
 # MySQL Database
