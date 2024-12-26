@@ -230,7 +230,7 @@ clean_files <- function(file_path) {
 # Apply the function to each file and combine the results into a single data frame
 analysis <- dir_ls(path = updated_data_dir, glob = "*.csv") %>%
   map_dfr(clean_files) %>%
-  write_csv(paste0(rootDir, "data/analysis_table.txt"))
+  write_csv(paste0(rootDir, "data/raw_data/analysis_table.txt"))
 
 # Display the first 6 rows of the combined table
 head(analysis)
@@ -244,7 +244,7 @@ First we load the data and generate a log file.
 
 ```{r}
 # Read the collated file
-analysis <- read_csv(paste0(rootDir, "data/analysis_table.txt"), show_col_types = FALSE)
+analysis <- read_csv(paste0(rootDir, "data/raw_data/analysis_table.txt"), show_col_types = FALSE)
 
 # Custom logging function
 log_message <- function(message) {
@@ -765,6 +765,7 @@ disease <- read_csv(temporary_path, show_col_types = FALSE) %>%
 # Save the cleaned data to a new CSV file
 write_csv(disease, paste0(rootDir, "data/cleaned/cleaned_disease_information.csv"))
 
+## WE STILL NEED TO DISCUSS HOW WE WANT TO ADRESS THIS 
 # Find rows with the same disease_id and gene_accession_id
 duplicates <- disease %>%
   group_by(disease_id, gene_accession_id) %>%
@@ -833,7 +834,7 @@ rm(errors)
 
 # Collating
 
-### Groupings
+### GroupingsTable
 
 To reduce the parameter space the collaborator would like to start grouping parameters_table together based on phenotype test similarity and/or naming similarity. Design the database to reflect new groupings for weight,  images and brain parameters_table, plus at least 3 others of your choice (refer to below). 
 
@@ -842,6 +843,9 @@ In addition to the data provided, each group must  find at least 3 other parame
 ```{r}
 # Create a data frame with IDs and names
 groupings_table <- data.frame(group_id = 1:6,group_name = c("weight", "brain", "images", "cardiovascular", "eye", "neuro"))
+
+# Save the table as CSV 
+write_csv(groupings_table, paste0(rootDir, "/data/collated/GroupingsTable.csv"))
 ```
 
 This step subsets the data from the metadata table according to the database schema decide dupon:
@@ -885,15 +889,15 @@ parameters_table <- left_join(parameter, procedure, by = join_by(parameter_mappi
   mutate(parameter_group = case_when(
     str_detect(parameter_name, regex(
       "weight|density|fat|lean|BMI|BMC|mass|composition|bone|length|adipose|lipid|body size|size|growth|skeletal|area|volume", 
-      ignore_case = TRUE)) ~ groupings$group_id[groupings$group_name == "weight"],
+      ignore_case = TRUE)) ~ groupings_table$group_id[groupings_table$group_name == "weight"],
         str_detect(parameter_name, regex(
         "image|screenshot|microscope|pdf|lacz|waveform|ogram|resolution|visual|pixel|scan|photo|imaging|bit depth|microscopy|contrast", 
-      ignore_case = TRUE)) ~ groupings$group_id[groupings$group_name == "images"],
+      ignore_case = TRUE)) ~ groupings_table$group_id[groupings_table$group_name == "images"],
     str_detect(parameter_name, regex(
         "brain|cortex|hippo|thalamus|amygdala|lobe|cere|spinal|pituitary|striatum|hypothal|neural|neuronal|pons|medulla|ganglion|nerve|enceph|ventricle|choroid",
-        ignore_case = TRUE)) ~ groupings$group_id[groupings$group_name == "brain"],
+        ignore_case = TRUE)) ~ groupings_table$group_id[groupings_table$group_name == "brain"],
     str_detect(parameter_name, regex(
-        "heart|cardiac|vascular|blood|vein|aort|arter|HR|stroke|ejection|QT|circulation|pulse|pressure|rate|systolic|diastolic|respiration|ECG|cardio|valve",       ignore_case = TRUE)) ~ groupings$group_id[groupings$group_name == "cardiovascular"]))
+        "heart|cardiac|vascular|blood|vein|aort|arter|HR|stroke|ejection|QT|circulation|pulse|pressure|rate|systolic|diastolic|respiration|ECG|cardio|valve",       ignore_case = TRUE)) ~ groupings_table$group_id[groupings_table$group_name == "cardiovascular"]))
 
 write_csv(parameters_table, paste0(rootDir, "/data/collated/Parameters.csv")) 
 ```
@@ -981,11 +985,11 @@ CREATE TABLE Diseases (
 ) COMMENT = 'Stores disease identifiers and terms. Linked to Genes in PhenodigmScores (many-to-many).';
 
 
--- Table: ParameterGroupings
-CREATE TABLE ParameterGroupings (
-    grouping_id INT PRIMARY KEY AUTO_INCREMENT,   -- Automatically increments for each new row
-    grouping_name VARCHAR(50)                     -- Name of the parameter group
-) COMMENT = 'Defines groups of parameters_table. Linked to Parameters via a many-to-many join.';
+-- Table: GroupingsTable
+CREATE TABLE GroupingsTable (
+    group_id INT PRIMARY KEY ,   -- Automatically increments for each new row
+    group_name VARCHAR(50)                     -- Name of the parameter group
+) COMMENT = 'Defines groups of parameters_table. Linked to Parameters via a one-to-many join.';
 
 
 -- Create tables with foreign keys
@@ -994,10 +998,12 @@ CREATE TABLE ParameterGroupings (
 CREATE TABLE Parameters (
     parameter_id VARCHAR(18) PRIMARY KEY,          -- SOP: 15 to 18 characters
     parameter_name VARCHAR(74),                    -- SOP: 2 to 74 characters
-    parameter_description VARCHAR(1000)            -- Descriptive field for the parameter
+    parameter_description VARCHAR(1000),           -- Descriptive field for the parameter
     procedure_id INT,                              -- Foreign key to ProcedureTable
-    FOREIGN KEY (procedure_id) REFERENCES Procedures(procedure_id)
-) COMMENT = 'Stores parameter metadata. References Procedures (many-to-one), links to ParameterGroupings (many-to-many) and referenced by Analyses (one-to-many).';
+    group_id INT,                              -- Foreign key to GroupingsTable
+    FOREIGN KEY (procedure_id) REFERENCES Procedures(procedure_id),
+    FOREIGN KEY (group_id) REFERENCES GroupingsTable(group_id)
+) COMMENT = 'Stores parameter metadata. References Procedures (many-to-one), links to GroupingsTable (many-to-one) and referenced by Analyses (one-to-many).';
 
 
 -- Table: Analysis
@@ -1013,7 +1019,7 @@ CREATE TABLE Analyses (
 ) COMMENT = 'Stores analysis results linking Genes and Parameters (many-to-one), including p-values and strain info.';
 
 
--- Table: GeneDisease
+-- Table: PhenodigmScores
 CREATE TABLE PhenodigmScores (
     phenodigm_id INT AUTO_INCREMENT PRIMARY KEY,
 
@@ -1023,18 +1029,6 @@ CREATE TABLE PhenodigmScores (
     FOREIGN KEY (disease_id) REFERENCES Diseases(disease_id),
     FOREIGN KEY (gene_accession_id) REFERENCES Genes(gene_accession_id)
 ) COMMENT = 'Stores gene-disease association scores (many-to-many) linking Genes and Diseases.';
-
-
--- Create join tables
-
--- Table: ParameterGroup
-CREATE TABLE parameterXgroup (
-    grouping_id INT,                               -- Foreign key to ParameterGroupings table
-    parameter_id VARCHAR(18),                      -- Foreign key to Parameter table
-    PRIMARY KEY (grouping_id, parameter_id),       -- Composite primary key to ensure uniqueness
-    FOREIGN KEY (grouping_id) REFERENCES ParameterGroupings(grouping_id),
-    FOREIGN KEY (parameter_id) REFERENCES Parameters(parameter_id)
-) COMMENT = 'Join table linking Parameters to ParameterGroupings (many-to-many).';
 ```
 
 ## Populate Database
@@ -1054,7 +1048,7 @@ Once a CSV file has been created for each table, the data can be loaded directly
 ```{sql}
 #| eval: false
 -- Path to tables 
-LOAD DATA LOCAL INFILE '/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/cleaned/Procedures.csv'
+LOAD DATA LOCAL INFILE '/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/collated/Procedures.csv'
 INTO TABLE Procedures
 FIELDS TERMINATED BY ',' 
 OPTIONALLY ENCLOSED BY '"'
@@ -1080,6 +1074,13 @@ IGNORE 1 LINES;
 
 ```{sql}
 #| eval: false
+LOAD DATA LOCAL INFILE '/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/collated/Groupings.csv'
+INTO TABLE GroupingsTable
+FIELDS TERMINATED BY ',' 
+OPTIONALLY ENCLOSED BY '"'
+IGNORE 1 LINES;
+
+
 LOAD DATA LOCAL INFILE '/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/collated/Parameters.csv'
 INTO TABLE Parameters
 FIELDS TERMINATED BY ',' 
@@ -1105,16 +1106,6 @@ OPTIONALLY ENCLOSED BY '"'
 LINES TERMINATED BY '\n' 
 IGNORE 1 LINES
 (disease_id, gene_accession_id, phenodigm_score); -- so that the phenodigm_id is created dynamically
-```
-
-```{sql}
-#| eval: false
-LOAD DATA LOCAL INFILE '/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/collated/parameterXprocedure.csv'
-INTO TABLE parameterXprocedure
-FIELDS TERMINATED BY ',' 
-OPTIONALLY ENCLOSED BY '"' 
-LINES TERMINATED BY '\n'
-IGNORE 1 LINES; -- so that the phenodigm_id is created dynamically
 ```
 
 ```{sql}
