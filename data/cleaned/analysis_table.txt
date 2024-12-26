@@ -1,0 +1,1162 @@
+gene_accession_id,gene_symbol,mouse_strain,mouse_life_stage,parameter_id,parameter_name,pvalue
+MGI:1921263,Rftn2,C57BL,Early adult,IMPC_CSD_024_001,Vibrissae - appearance,0.7546106
+MGI:2679420,Pak6,C57BL,Early adult,JAX_OFD_017_001,Center average speed,0.2953247
+MGI:2444631,Bltp1,C57BL,Early adult,IMPC_XRY_016_001,Number of pelvic vertebrae,0.2686382
+MGI:1916413,Mrpl44,C57BL,E9.5,IMPC_CBC_014_001,Alkaline phosphatase,0.8637466
+MGI:1920199,Ccnt2,C57BL,E12.5,IMPC_CSD_013_001,Coat - hair distribution - abdomen,0.977817
+MGI:2140050,Ints3,C57BL,E9.5,IMPC_GEO_019_001,Embryo Size,0.5993076
+MGI:1913420,Chchd5,C57BL,Early adult,IMPC_ACS_037_001,% Pre-pulse inhibition - Global,0.6837732
+MGI:1924467,Rspo4,C57BL,Early adult,IMPC_IPG_010_001,Fasted blood glucose concentration,1.271505e-05
+MGI:1924232,Vxn,C57BL,Early adult,IMPC_HEM_019_001,Mean platelet volume,0.4749299
+MGI:98386,Sptan1,C57BL,Early adult,IMPC_EYE_012_001,Pupil Shape,0.9217141
+MGI:1915862,Ube2c,C57BL,E18.5,IMPC_OFD_021_001,Number of rears - total,0.6148917
+MGI:1922776,Eppin,C57BL,Middle aged adult,IMPC_CBC_016_001,HDL-cholesterol,0.6056912
+MGI:2684896,Maneal,C57BL,Early adult,IMPC_EYE_027_001,Persistence of hyaloid vascular system,0.2976817
+MGI:1918398,Mier1,129SV,Early adult,IMPC_CSD_025_001,Head size,0.2751707
+MGI:98960,Wnt6,C57BL,E15.5,IMPC_CSD_023_001,Vibrissae - presence,0.09547829
+MGI:3611450,Mettl21c,C57BL,Early adult,MGP_IMM_004_001,Total CD4+ T cells - % of ab T cells,0.7571238
+MGI:2387617,Obp2a,C57BL,Early adult,IMPC_HEM_030_001,Neutrophil cell count,0.3816427
+MGI:1913721,Anp32e,C57BL,Early adult,IMPC_OFD_050_001,Percentage center movement time,0.4944902
+MGI:1917770,Glipr2,C57BL,Early adult,IMPC_EYE_026_001,Retinal Blood Vessels Pattern,0.1241104
+MGI:1919051,Plekhf2,C57BL,Early adult,MGP_IMM_108_001,Marginal zone B cells - % of CD45+,0.2976805
+MGI:1914199,Trim59,C57BL,Early adult,IMPC_CSD_041_002,Hindpaw - size,0.3212645
+MGI:1927580,Bloc1s6,C59BL,Early adult,IMPC_CBC_003_001,Chloride,0.9700992
+MGI:1915282,Emc4,C57BL,Early adult,IMPC_HEM_006_001,Mean corpuscular hemoglobin,0.9394754
+MGI:1924955,Cstdc2,C57BL,Early adult,IMPC_EYE_017_001,Lens Opacity,0.5112005
+MGI:97383,Ntrk1,C57BL,Early adult,IMPC_GRS_010_001,Forelimb grip strength normalised against body weight,0.2943943
+MGI:1927753,Inpp5e,C57BL,E15.5,IMPC_CSD_078_001,Vocalization,0.2390857
+MGI:1337072,Ier5,C57BL,Early adult,M-G-P_026_001_003,Coat intact,0.9278199
+MGI:1919880,Hspa12b,C57BL,Early adult,IMPC_CSD_038_001,Trunk curl,0.8866748
+MGI:1916428,Snx5,C57BL,Early adult,IMPC_XRY_022_001,Radius,0.8230056
+MGI:2138198,D630023F18Rik,C57BL,Early adult,MGP_MLN_080_001,Effector gd cells - % of CD45+,0.1583881
+MGI:1349164,Sdc4,C57BL,Early adult,IMPC_ABR_010_001,24kHz-evoked ABR Threshold,0.4488389
+MGI:2442704,Frrs1l,C57BL,Early adult,IMPC_HEM_019_001,Mean platelet volume,0.2394178
+MGI:107171,Ppp3r2,C57BL,Early adult,ESLIM_008_001_007,Transfer arousal,0.4180805
+MGI:2444631,Bltp1,C57BL,E12.5,IMPC_GEL_058_001,Heart morphology,0.9944418
+MGI:104899,Mob4,C57BL,Early adult,IMPC_GEP_011_002,Hemorrhage,0.7364502
+MGI:1914199,Trim59,C57BL,Early adult,IMPC_HEM_001_001,White blood cell count,0.3669798
+MGI:1346069,Cdh20,C57BL,Early adult,JAX_OFD_009_001,Whole arena average speed,0.08096606
+MGI:1917770,Glipr2,C57BL,Early adult,IMPC_GEM_069_001,Hindbrain morphology,0.2369657
+MGI:104294,Tyro3,C57BL,Early adult,IMPC_OFD_050_001,Percentage center movement time,0.08298324
+MGI:1350930,Srp9,C57BL,Early adult,IMPC_CSD_030_001,Tremor,0.6145621
+MGI:2444631,Bltp1,C57BL,Early adult,IMPC_OFD_018_001,Latency to center entry,0.1009468
+MGI:1914210,Mindy3,C57BL,Early adult,IMPC_GEO_043_002,spina bifida,0.8417374
+MGI:1096385,Bcan,C57BL,Middle aged adult,IMPC_XRY_027_001,Joints,0.7977132
+MGI:1337072,Ier5,C57BL,Late adult,IMPC_EYE_017_001,Lens Opacity,0.1750285
+MGI:2140050,Ints3,C57BL,E9.5,IMPC_IMM_040_002,Effector CD4+ NKT cells - % of live leukocytes (Panel A),0.7013873
+MGI:1919300,Poglut2,C57BL,Early adult,IMPC_ECH_012_001,LVPWs,0.3644325
+MGI:1913746,Ppdpf,C57BL,Early adult,KMPCLA_GRS_010_001,Forelimb grip strength normalised against body weight,0.3783162
+MGI:104899,Mob4,C57BL,E9.5,IMPC_EYE_063_001,Right inner nuclear layer,0.3873563
+MGI:2685869,Dpy19l4,C57BL,Early adult,IMPC_CBC_017_001,Triglycerides,0.6230316
+MGI:2443564,Ambra1,C57BL,E9.5,IMPC_DXA_009_001,Fat/Body weight,0.6530873
+MGI:104793,Runx1t1,C57BL,Early adult,IMPC_GEP_034_001,Skin Appearance,0.1239294
+MGI:1931071,Sec61a2,C57BL,Early adult,MGP_IMM_127_001,Plasmacytoid DC - % of CD45+,0.2049603
+MGI:1921520,Usp20,C57BL,Early adult,IMPC_DXA_004_001,Bone Mineral Density (excluding skull),0.6273834
+MGI:2443100,Bend7,C57BL,Early adult,IMPC_GEM_025_002,Pallor,0.09748086
+MGI:1916022,Smpdl3b,C57BL,Early adult,M-G-P_012_001_005,Body Weight,0.0785232
+MGI:2684789,Lrsam1,C57BL,Early adult,ESLIM_015_001_011,Iron,0.3689669
+MGI:2444508,Fitm2,C57BL,E15.5,IMPC_IMM_004_002,NKT cells (panel A) - % of live leukocytes (Panel A),0.6510462
+MGI:2444508,Fitm2,C57BL,E12.5,IMPC_OFD_011_001,Periphery resting time,0.4212592
+MGI:1914210,Mindy3,C57BL,Early adult,IMPC_IMM_014_002,Treg cells - % of live leukocytes (Panel A),0.9821411
+MGI:2443564,Ambra1,C57BL,E12.5,IMPC_CBC_002_001,Potassium,0.07443484
+MGI:2139461,Tmem62,C57BL,Early adult,MGP_PBI_005_001,Gamma delta T cell percentage,0.4668118
+MGI:95975,Ifi44l,C57BL,Early adult,IMPC_HEM_032_001,Lymphocyte cell count,0.318936
+MGI:1890510,Atp6v0b,C57BL,Early adult,IMPC_DXA_009_001,Fat/Body weight,1.34313e-09
+MGI:1915282,Emc4,C57BL,Early adult,IMPC_ACS_006_001,Response amplitude - S,0.5399675
+MGI:2140050,Ints3,C57BL,E9.5,IMPC_IMM_011_002,CD4+ NKT cells - % of live leukocytes (Panel A),0.3644017
+MGI:98386,Sptan1,C57BL,E15.5,MGP_MLN_080_001,Effector gd cells - % of CD45+,0.2250577
+MGI:107341,Ctss,C57BL,Early adult,IMPC_EYE_063_001,Right inner nuclear layer,0.05792599
+MGI:2444631,Bltp1,C57BL,Early adult,ESLIM_011_001_005,PP4 startle magnitude,0.401883
+MGI:1309469,Casq2,C57BL,E12.5,MGP_IMM_130_001,CD11b-low cDC - % of CD45+,0.9421668
+MGI:107171,Ppp3r2,C57BL,Early adult,IMPC_DXA_006_001,Body length,0.6978473
+MGI:1924486,Sccpdh,C57BL,Early adult,IMPC_EYE_092_002,Retina (combined),0.6742481
+MGI:1922387,Rprd2,C57BL,Early adult,IMPC_GEM_007_001,Pericardium Morphology,0.2628013
+MGI:3649135,Gm7694,C57BL,Early adult,CCP_XRY_061_001,Fusion of processes,0.6728696
+MGI:1350930,Srp9,C57BL,Early adult,IMPC_CSD_038_001,Trunk curl,0.06092209
+MGI:97565,Pgm1,C57BL,E12.5,IMPC_OFD_013_001,Periphery average speed,0.6550375
+MGI:107171,Ppp3r2,C57BL,Early adult,IMPC_EYE_070_001,Left outer nuclear layer,0.1549889
+MGI:1891259,Lrat,C57BL,Early adult,JAX_LDT_009_001,Percent time in light,0.8125881
+MGI:1350930,Srp9,C57BL,Early adult,MGP_IMM_073_001,Effector CD4+ T helper cells - % of CD45+,0.08269183
+MGI:2140361,Slc35d1,C57BL,E18.5,IMPC_GEM_025_002,Pallor,0.3151736
+MGI:3611233,Tox2,C57BL,Early adult,IMPC_EYE_025_001,Retinal Blood Vessels Structure,0.5267301
+MGI:1919880,Hspa12b,C57BL,Early adult,UCD_OWT_005_001,Right kidney,0.4667722
+MGI:107363,Stxbp1,C57BL,Early adult,IMPC_IPG_010_001,Fasted blood glucose concentration,0.8891581
+MGI:2387617,Obp2a,C57BL,Early adult,IMPC_DXA_006_001,Body length,0.4420585
+MGI:1919128,Fam83d,C57BL,Early adult,UCDLA_CSD_012_001,Coat - hair distribution - head,0.3341795
+MGI:1890510,Atp6v0b,C57BL,Early adult,CCP_XRY_001_001,Skull shape,0.1308271
+MGI:1921735,Lrrc71,C57BL,Early adult,IMPC_IMM_032_002,Effector CD8+ T cells - % of live leukocytes (Panel A),0.2153291
+MGI:1915643,Mogat1,C57BL,Early adult,MGP_IMM_010_001,Effector Treg cells - % of Treg,0.6912183
+MGI:3588202,Garin4,C57BL,Early adult,IMPC_EYE_027_001,Persistence of hyaloid vascular system,0.5908706
+MGI:1923676,Fam209,C57BL,Early adult,MGP_IMM_004_001,Total CD4+ T cells - % of ab T cells,0.7501101
+MGI:1920199,Ccnt2,C57BL,Early adult,IMPC_GEO_065_001,Limb morphology,0.5905942
+MGI:1917120,Polr3gl,C57BL,E18.5,JAX_ROT_002_001,Average duration,0.1745492
+MGI:1923073,Fam227b,C57BL,Early adult,CCP_XRY_005_001,Teeth,0.7747743
+MGI:106637,Slc30a2,C57BL,Early adult,IMPC_CSD_015_001,Coat - hair texture / appearance - head,0.8122028
+MGI:98386,Sptan1,C57BL,E9.5,MGP_IMM_013_001,Total CD8+ T cells - % of ab T cells,0.6218659
+MGI:107363,Stxbp1,C57BL,E18.5,HMGULA_DYS_014_001,Coat - hair texture / appearance - back,0.1083035
+MGI:106925,Cldn11,C57BL,Middle aged adult,IMPC_EYE_056_001,Mean left eye lens density,0.471783
+MGI:1914454,Eif2s2,C57BL,E9.5,ESLIM_015_001_002,Urea,0.6083802
+MGI:1337072,Ier5,C57BL,Late adult,MGP_MLN_114_001,Total DC - % of CD45+,0.6739605
+MGI:1927753,Inpp5e,C57BL,E12.5,MGP_IMM_093_001,Resting CD4- NKT cells - % of CD45+,0.9947938
+MGI:97383,Ntrk1,C57BL,Early adult,IMPC_ECH_018_001,Respiration Rate,0.08249887
+MGI:2444631,Bltp1,C57BL,E12.5,CCP_XRY_031_001,Digit integrity,0.149796
+MGI:1924232,Vxn,C57BL,Early adult,ESLIM_016_001_004,Haematocrit,0.7883811
+MGI:1931071,Sec61a2,C57BL,Early adult,MGP_PBI_015_001,IgD+ mature B cell percentage,0.3718842
+MGI:97324,Nhlh2,C57BL,Early adult,IMPC_CSD_015_001,Coat - hair texture / appearance - head,0.8660292
+MGI:2445096,Dhtkd1,C57BL,Early adult,MGP_CSD_026_001,Ventral coat/hair colour,0.6006808
+MGI:104559,Rcn1,C57BL,Early adult,IMPC_ECG_010_001,HRV,0.9466729
+MGI:1922387,Rprd2,C57BL,E9.5,ESLIM_008_001_016,Trunk curl,0.7063446
+MGI:1913491,Tmem9,C57BL,Early adult,IMPC_EYE_065_001,Right posterior chamber depth,0.4643552
+MGI:103559,Sox18,C57BL,Early adult,IMPC_CBC_004_001,Urea (Blood Urea Nitrogen - BUN),0.2242012
+MGI:2444391,Slc25a44,C57BL,Early adult,M-G-P_016_001_006,Mean-corpuscular-haemoglobin,0.9982552
+MGI:2676312,Abca12,C57BL,Early adult,JAX_LDT_004_001,Dark side time spent,0.7131597
+MGI:1923953,Cpb1,C57BL,Early adult,IMPC_GEP_022_001,Embryo Size,0.437636
+MGI:1921520,Usp20,C57BL,Early adult,IMPC_CBC_013_001,Alanine aminotransferase,0.3223831
+MGI:104516,Slc23a3,C57BL,Early adult,IMPC_IMM_004_002,NKT cells (panel A) - % of live leukocytes (Panel A),0.525513
+MGI:2135283,Igsf9,C57BL,Early adult,ESLIM_005_001_701,BMC/Body weight,0.2325874
+MGI:1920484,Snorc,C57BL,Early adult,UCDLA_CSD_012_001,Coat - hair distribution - head,0.8559221
+MGI:1924467,Rspo4,C57BL,Early adult,IMPC_EYE_069_001,Left inner nuclear layer,0.64724
+MGI:104793,Runx1t1,C57BL,Early adult,JAX_OFD_017_001,Center average speed,0.6861189
+MGI:1915599,Ndufs3,C57BL,Early adult,CCP_XRY_005_001,Teeth,0.1114065
+MGI:1913721,Anp32e,C57BL,Early adult,IMPC_IMM_032_002,Effector CD8+ T cells - % of live leukocytes (Panel A),0.09163452
+MGI:97565,Pgm1,C57BL,Early adult,M-G-P_026_001_003,Coat intact,0.52135
+MGI:2158201,Acot8,C57BL,Early adult,CCP_XRY_019_001,Fusion of vertebrae,0.1999087
+MGI:1919880,Hspa12b,C57BL,Early adult,IMPC_EYE_025_001,Retinal Blood Vessels Structure,0.7375433
+MGI:98386,Sptan1,C57BL,Early adult,ESLIM_008_001_022,Vocalisation,0.2837255
+MGI:3576049,Ugt1a2,C57BL,Early adult,IMPC_EYE_070_001,Left outer nuclear layer,0.6887831
+MGI:1918398,Mier1,C57BL,Early adult,CCP_LDT_008_001,Percent time in light,0.13155
+MGI:1924232,Vxn,C57BL,Early adult,IMPC_CSD_026_001,Head morphology,0.7683114
+MGI:2444631,Bltp1,C57BL,E12.5,MGP_MLN_080_001,Effector gd cells - % of CD45+,0.4469908
+MGI:1350930,Srp9,C57BL,E12.5,IMPC_DXA_009_001,Fat/Body weight,0.3735927
+MGI:1914454,Eif2s2,C57BL,E12.5,IMPC_FEA_003_001,Conditioning Baseline % Freezing Time,0.9881373
+MGI:1915862,Ube2c,C57BL,E18.5,IMPC_CBC_023_001,Alpha-amylase,0.547062
+MGI:97565,Pgm1,C57BL,E9.5,IMPC_EYE_064_001,Right outer nuclear layer,0.3302339
+MGI:1913790,Fam107b,C57BL,Early adult,MGP_IMM_086_001,CD5+ gd T cells - % of CD45+,0.06371847
+MGI:1926106,Fam163b,C57BL,Early adult,IMPC_HEM_038_001,Basophil differential count,0.8527822
+MGI:105383,Il18r1,C57BL,Early adult,IMPC_OFD_009_001,Whole arena average speed,0.8833708
+MGI:2685195,Zbtb34,C57BL,E9.5,IMPC_XRY_027_001,Joints,0.8634949
+MGI:2443100,Bend7,C57BL,Early adult,MGP_MLN_075_001,Resting CD8+ T cells - % of CD45+,0.6204375
+MGI:2679260,Crb2,C57BL,Early adult,IMPC_CSD_078_001,Vocalization,0.4162955
+MGI:2442177,Pced1a,C57BL,Early adult,IMPC_CSD_078_001,Vocalization,0.5326356
+MGI:106925,Cldn11,C57BL,Middle aged adult,MGP_IMM_012_001,KLRG1+ Treg cells - % of Treg,0.2839288
+MGI:1096385,Bcan,C57BL,Late adult,UCDLA_CSD_011_001,Coat - hair distribution - back,0.9985413
+MGI:1916987,Ttl,C57BL,E12.5,MGP_PBI_015_001,IgD+ mature B cell percentage,0.2463879
+MGI:1913790,Fam107b,C57BL,Early adult,M-G-P_026_001_010,Mouth morphology,5.686925e-07
+MGI:1921520,Usp20,C57BL,Early adult,CCP_LDT_007_001,Percent time in dark,0.8367766
+MGI:1922776,Eppin,C57BL,Early adult,MGP_IMM_006_001,Effector CD4+ T helper cells - % of CD4+ T helper cells,0.7482361
+MGI:1346342,Clca1,C57BL,Early adult,IMPC_GEO_043_002,spina bifida,0.09189939
+MGI:106637,Slc30a2,C57BL,Early adult,IMPC_CBC_009_001,Calcium,0.702226
+MGI:1923073,Fam227b,C57BL,Early adult,M-G-P_025_001_002,Urea,0.5162972
+MGI:2676312,Abca12,C57BL,Early adult,IMPC_OWT_002_001,Spleen weight,0.5902634
+MGI:2384297,Map7d1,C57BL,E9.5,IMPC_ACS_006_001,Response amplitude - S,0.3050735
+MGI:1919471,Cimip1,C57BL,Early adult,MGP_IMM_005_001,CD4+ T helper cells - % of CD4+,0.730254
+MGI:2684789,Lrsam1,C57BL,Early adult,MGP_IMM_130_001,CD11b-low cDC - % of CD45+,0.4452064
+MGI:2444508,Fitm2,C57BL,E12.5,JAX_OFD_009_001,Whole arena average speed,0.5122807
+MGI:1916987,Ttl,C57BL,Early adult,IMPC_CSD_015_001,Coat - hair texture / appearance - head,0.06292944
+MGI:3617846,Ankrd34a,C57BL,Early adult,MGP_IMM_016_001,Naive CD8+ T cells - % of CD8+,0.3488772
+MGI:1201673,Shox2,C57BL,E15.5,IMPC_GRS_009_001,Forelimb and hindlimb grip strength measurement mean,0.1060898
+MGI:87867,Acadm,C57BL,Early adult,JAX_LDT_009_001,Percent time in light,0.2423103
+MGI:1919369,Tpx2,C57BL,E9.5,IMPC_EYE_087_001,Right vitreous humor thickness,0.907695
+MGI:106637,Slc30a2,C57BL,E9.5,IMPC_ACS_035_001,% Pre-pulse inhibition - PPI3,0.147197
+MGI:1918142,Ttll7,C57BL,Early adult,IMPC_CSD_028_001,Snout size,0.3186615
+MGI:1924232,Vxn,C57BL,Early adult,IMPC_DXA_009_001,Fat/Body weight,0.9655122
+MGI:1913423,CCDC107,C57BL,Early adult,CCP_XRY_018_001,Shape of vertebrae,0.7850896
+MGI:3617846,Ankrd34a,C57BL,Early adult,JAX_PLC_004_001,Glucose,0.8758001
+MGI:1917120,Polr3gl,C57BL,Early adult,IMPC_IMM_040_002,Effector CD4+ NKT cells - % of live leukocytes (Panel A),0.7956127
+MGI:106925,Cldn11,C57BL,Early adult,IMPC_GRS_010_001,Forelimb grip strength normalised against body weight,0.8582319
+MGI:106637,Slc30a2,C54BL,E9.5,IMPC_CBC_016_001,HDL-cholesterol,0.2671063
+MGI:88525,Cryge,C57BL,Early adult,MGP_IMM_019_001,CD5+ gd T cells - % of gd T cells,0.635224
+MGI:1095412,Unc5c,C57BL,Middle aged adult,JAX_LDT_002_001,Light side time spent,0.803952
+MGI:103300,Rbl1,C57BL,Early adult,UCD_OWT_003_001,Spleen weight,0.9466426
+MGI:3611450,Mettl21c,C57BL,Early adult,IMPC_XRY_027_001,Joints,0.860063
+MGI:1920199,Ccnt2,C57BL,Early adult,IMPC_CBC_004_001,Urea (Blood Urea Nitrogen - BUN),0.2126099
+MGI:95777,Gnas,129SV,Early adult,IMPC_CBC_003_001,Chloride,0.3035859
+MGI:2444508,Fitm2,C57BL,E15.5,IMPC_XRY_023_001,Ulna,0.3347577
+MGI:1927241,Wdr12,C57BL,E12.5,IMPC_GRS_010_001,Forelimb grip strength normalised against body weight,0.5628369
+MGI:1922387,Rprd2,C57BL,E12.5,IMPC_CSD_013_001,Coat - hair distribution - abdomen,0.9571669
+MGI:2387617,Obp2a,C57BL,Early adult,IMPC_XRY_023_001,Ulna,1.176422
+MGI:1918398,Mier1,C57BL,Early adult,JAX_OFD_014_001,Center distance travelled,0.1371298
+MGI:1927241,Wdr12,C57BL,Early adult,ESLIM_008_001_022,Vocalisation,0.9110654
+MGI:1917770,Glipr2,C57BL,Early adult,IMPC_EYE_092_002,Retina (combined),0.5466274
+MGI:1859866,Cdc20,C57BL,Early adult,IMPC_FEA_015_001,Cue Baseline % Freezing Time,0.1600154
+MGI:101770,Bfsp1,C57BL,Early adult,IMPC_ECH_013_001,HR,0.5324877
+MGI:2443805,Bnc2,C57BL,Early adult,IMPC_HEM_030_001,Neutrophil cell count,0.9722131
+MGI:2444274,Cfap65,C57BL,Early adult,IMPC_OFD_009_001,Whole arena average speed,0.8452188
+MGI:2444631,Bltp1,C57BL,Early adult,MGP_IMM_013_001,Total CD8+ T cells - % of ab T cells,0.8972444
+MGI:1927753,Inpp5e,C57BL,E15.5,IMPC_HEM_004_001,Hematocrit,0.6239287
+MGI:98386,Sptan1,C57BL,E9.5,IMPC_HEM_027_001,Red blood cell distribution width,0.3070182
+MGI:1916987,Ttl,C57BL,E12.5,IMPC_OFD_019_001,Number of center entries,0.5850847
+MGI:1921263,Rftn2,C57BL,Early adult,ESLIM_013_001_004,Left retina pigmentation,0.216896
+MGI:1914454,Eif2s2,C57BL,E12.5,IMPC_IMM_011_002,CD4+ NKT cells - % of live leukocytes (Panel A),0.511238
+MGI:1309469,Casq2,C57BL,E12.5,MGP_IMM_128_001,Conventional DC (cDC) - % of CD45+,0.1754263
+MGI:107363,Stxbp1,C57BL,E18.5,IMPC_GEM_068_001,Forebrain morphology,0.5097024
+MGI:1924232,Vxn,C57BL,Early adult,UCDLA_EYE_083_001,Vitreous,0.2447342
+MGI:88015,Ampd1,C57BL,E15.5,IMPC_EYE_017_001,Lens Opacity,0.1266463
+MGI:107191,Bmpr1b,C57BL,Early adult,ESLIM_020_001_002,Heart weight,0.8926117
+MGI:1916330,Gmppa,C57BL,Early adult,IMPC_ECH_012_001,LVPWs,0.2877018
+MGI:1919471,Cimip1,C57BL,Early adult,IMPC_GEO_064_001,Edema,0.7090884
+MGI:1922387,Rprd2,C57BL,E12.5,ESLIM_016_001_004,Haematocrit,0.6936145
+MGI:1096385,Bcan,C57BL,Late adult,UCDIP_CSD_014_001,Coat - hair texture / appearance - back,0.3606844
+MGI:104294,Tyro3,C57BL,Early adult,ESLIM_013_001_004,Left retina pigmentation,0.6970378
+MGI:1922776,Eppin,C57BL,Early adult,IMPC_HEM_027_001,Red blood cell distribution width,0.110921
+MGI:2138198,D630023F18Rik,C57BL,Early adult,IMPC_CBC_024_001,UIBC (unsaturated iron binding capacity),0.6335595
+MGI:2140050,Ints3,C57BL,Early adult,IMPC_IPG_012_001,Area under glucose response curve,0.2550914
+MGI:98397,Src,129SV,Early adult,IMPC_ECG_028_001,QT,0.7352954
+MGI:1919051,Plekhf2,C57BL,Early adult,MGP_PBI_005_001,Gamma delta T cell percentage,0.2384632
+MGI:101813,Coq3,C57BL,E9.5,CCP_XRY_004_001,Mandibles,0.7553434
+MGI:2444631,Bltp1,C57BL,Early adult,MGP_IMM_128_001,Conventional DC (cDC) - % of CD45+,0.09500919
+MGI:101813,Coq3,C57BL,Early adult,MGP_CSD_027_001,Ventral coat/hair colour pattern,0.7247845
+MGI:98386,Sptan1,C57BL,Early adult,JAX_LDT_009_001,Percent time in light,0.2707336
+MGI:2677271,Slc24a5,C57BL,Early adult,IMPC_GEO_019_001,Embryo Size,0.800492
+MGI:107674,Cd1d1,C57BL,Early adult,IMPC_OFD_050_001,Percentage center movement time,0.7779199
+MGI:101813,Coq3,C57BL,E9.5,CCP_LDT_003_001,Time mobile light side,0.2634812
+MGI:1914199,Trim59,C57BL,E18.5,IMPC_HEM_003_001,Hemoglobin,0.3516525
+MGI:1919051,Plekhf2,C57BL,Early adult,UCDLA_CSD_011_001,Coat - hair distribution - back,0.2075904
+MGI:1096385,Bcan,C57BL,Late adult,IMPC_GEM_019_001,Embryo Size,0.8960334
+MGI:105383,Il18r1,C57BL,Early adult,IMPC_GEM_019_001,Embryo Size,0.4117648
+MGI:1921735,Lrrc71,C57BL,Early adult,JAX_OFD_050_001,Percentage center movement time,0.845315
+MGI:107363,Stxbp1,C57BL,E9.5,IMPC_CSD_007_001,Coat - color - abdomen,0.8087706
+MGI:1914454,Eif2s2,C57BL,Early adult,IMPC_GRS_009_001,Forelimb and hindlimb grip strength measurement mean,0.4390814
+MGI:1309469,Casq2,C57BL,E15.5,IMPC_CBC_010_001,Phosphorus,0.6057513
+MGI:1922423,Tex38,C57BL,Early adult,IMPC_EYE_023_001,Optic Disc,0.7258464
+MGI:1913761,Chtop,C57BL,Early adult,MGP_MLN_015_001,Naive CD8+ T cells - % of CD8+,0.0529714
+MGI:2385213,Pdik1l,C57BL,Late adult,ESLIM_015_001_011,Iron,0.4683818
+MGI:1350930,Srp9,C57BL,Early adult,CCP_XRY_062_001,Polysyndactylism,0.8579555
+MGI:1921263,Rftn2,C57BL,Early adult,IMPC_XRY_057_001,Kyphosis,0.3223051
+MGI:3576049,Ugt1a2,C57BL,Early adult,IMPC_EYE_063_001,Right inner nuclear layer,0.4940689
+MGI:1201673,Shox2,C50BL,E12.5,MGP_IMM_013_001,Total CD8+ T cells - % of ab T cells,0.09771712
+MGI:2444824,Sirpb1a,C57BL,Early adult,IMPC_CSD_014_001,Coat - hair texture / appearance - back,0.135488
+MGI:107674,Cd1d1,C57BL,Early adult,MGP_MLN_012_001,Total CD8+ T cells - % of ab T cells,0.8013516
+MGI:1309469,Casq2,C57BL,E12.5,IMPC_GEL_011_001,Embryo turning,0.9776704
+MGI:88015,Ampd1,C57BL,E15.5,MGP_IMM_052_001,Plasma cells - % of B2 cells,0.6604419
+MGI:1278321,Epc2,C57BL,Early adult,MGP_IMM_108_001,Marginal zone B cells - % of CD45+,0.6509706
+MGI:1922828,Fggy,C57BL,Early adult,IMPC_XRY_006_001,Scapulae,0.5052725
+MGI:1919128,Fam83d,C57BL,Early adult,IMPC_CBC_003_001,Chloride,0.7223276
+MGI:1337072,Ier5,C57BL,Late adult,ESLIM_008_001_016,Trunk curl,0.5455338
+MGI:1890510,Atp6v0b,C57BL,Early adult,IMPC_CSD_014_001,Coat - hair texture / appearance - back,0.4726685
+MGI:3045320,Mgat4f,C57BL,Early adult,JAX_LDT_009_001,Percent time in light,0.09760414
+MGI:3588216,Ube2u,C57BL,Early adult,JAX_LDT_002_001,Light side time spent,0.7405956
+MGI:104516,Slc23a3,C57BL,Early adult,IMPC_EYE_065_001,Right posterior chamber depth,0.9605218
+MGI:2444824,Sirpb1a,C57BL,Early adult,MGP_IMM_116_001,Plasma cells - % of CD45+,0.8837661
+MGI:1349164,Sdc4,C57BL,Early adult,ESLIM_013_001_004,Left retina pigmentation,0.6957086
+MGI:1095412,Unc5c,C57BL,Middle aged adult,IMPC_CBC_010_001,Phosphorus,0.06121722
+MGI:104708,Cct3,C57BL,E9.5,IMPC_CSD_023_001,Vibrissae - presence,0.7877606
+MGI:97803,Ptma,C57BL,E15.5,IMPC_GRS_011_001,Forelimb and hindlimb grip strength normalised against body weight,0.9940189
+MGI:2679420,Pak6,C57BL,Early adult,IMPC_EYE_062_001,Right total retinal thickness,0.6163224
+MGI:1201673,Shox2,C57BL,E9.5,MGP_IMM_128_001,Conventional DC (cDC) - % of CD45+,0.7267413
+MGI:2140050,Ints3,C57BL,E9.5,HMGULA_DYS_016_001,Coat - hair texture / appearance - abdomen,0.4278983
+MGI:99218,Cdh4,C57BL,Early adult,IMPC_CBC_008_001,Total bilirubin,0.9658038
+MGI:1096385,Bcan,C57BL,Middle aged adult,IMPC_XRY_015_001,Number of lumbar vertebrae,0.5412016
+MGI:1915247,Ddx59,C57BL,E9.5,MGP_MLN_072_001,KLRG1+ Treg cells - % of CD45+,0.9334905
+MGI:1915247,Ddx59,C57BL,E9.5,HRWL_OWT_001_001,Spleen weight,0.4161443
+MGI:2679260,Crb2,C57BL,Early adult,UCD_OWT_003_001,Spleen weight,0.343523
+MGI:1351315,Eloa,C57BL,Early adult,IMPC_GEP_005_002,Responsive to tactile stimuli,0.4580237
+MGI:1913761,Chtop,C57BL,Early adult,IMPC_XRY_060_001,Transitional vertebrae,0.5750767
+MGI:1096385,Bcan,C57BL,Early adult,IMPC_DXA_007_001,BMC/Body weight,0.3121377
+MGI:97565,Pgm1,C57BL,E12.5,CCP_LFO_001_001,Weight,0.9265876
+MGI:2139018,Olah,C57BL,Early adult,MGP_IMM_116_001,Plasma cells - % of CD45+,0.8235727
+MGI:88525,Cryge,C57BL,Early adult,IMPC_CBC_001_001,Sodium,0.2056472
+MGI:1915862,Ube2c,C57BL,Early adult,IMPC_ECG_028_001,QT,0.9666203
+MGI:3650206,Gm12695,C57BL,Early adult,M-G-P_025_001_005,Potassium,0.6426002
+MGI:2684789,Lrsam1,C57BL,Early adult,IMPC_GEP_034_001,Skin Appearance,0.1353233
+MGI:2685195,Zbtb34,C57BL,E9.5,CCP_LDT_003_001,Time mobile light side,0.3447588
+MGI:2384297,Map7d1,C57BL,Early adult,CCP_XRY_019_001,Fusion of vertebrae,0.4528551
+MGI:1098604,Rragd,C57BL,Early adult,MGP_MLN_066_001,Effector CD4+ T helper cells - % of CD45+,0.214033
+MGI:1925835,Jade1,C57BL,Early adult,IMPC_EYE_062_001,Right total retinal thickness,0.9749023
+MGI:1927753,Inpp5e,C57BL,E15.5,MGP_IMM_009_001,Total Treg cells - % of CD4+,0.926252
+MGI:1914454,Eif2s2,C57BL,E9.5,MGP_IMM_093_001,Resting CD4- NKT cells - % of CD45+,0.07227868
+MGI:1890510,Atp6v0b,C57BL,Early adult,UCDIP_CSD_014_001,Coat - hair texture / appearance - back,0.1878189
+MGI:2443564,Ambra1,C57BL,Early adult,CCP_XRY_018_001,Shape of vertebrae,0.8852809
+MGI:2443925,Thsd7b,C57BL,Early adult,M-G-P_016_001_002,Red Blood Cell-count,0.6092145
+MGI:2385213,Pdik1l,C59BL,Middle aged adult,UCD_OWT_003_001,Spleen weight,0.1923292
+MGI:1931071,Sec61a2,C57BL,Early adult,IMPC_ECG_028_001,QT,0.3854255
+MGI:1351315,Eloa,C57BL,E9.5,CCP_XRY_020_001,Processes on vertebrae,0.9696425
+MGI:102844,Mybpc3,C57BL,Early adult,JAX_OFD_017_001,Center average speed,0.7633074
+MGI:1339755,Csf3r,C57BL,Early adult,IMPC_CSD_040_002,Forepaw - size,0.07827212
+MGI:2443925,Thsd7b,C57BL,Early adult,IMPC_EYE_008_001,Corneal opacity,0.674995
+MGI:1346086,Aplnr,C57BL,Early adult,MGP_MLN_014_001,Resting CD8+ T cells - % of CD8+,0.3072632
+MGI:109424,Abca4,C57BL,Early adult,IMPC_CBC_012_001,Aspartate aminotransferase,0.4194655
+MGI:1339968,Cth,C57BL,Early adult,IMPC_XRY_012_001,Pelvis,0.1726491
+MGI:1918142,Ttll7,C57BL,Early adult,IMPC_CSD_025_001,Head size,0.5246922
+MGI:1927753,Inpp5e,C57BL,Early adult,MGP_MLN_003_001,Total CD4+ T cells - % of ab T cells,0.05752027
+MGI:1350930,Srp9,C57BL,E12.5,JAX_OFD_021_001,Number of rears - total,0.5059387
+MGI:1924265,Mpped2,C57BL,Early adult,IMPC_ECH_018_001,Respiration Rate,0.9974112
+MGI:1927753,Inpp5e,C57BL,Early adult,IMPC_EYE_087_001,Right vitreous humor thickness,0.7621781
+MGI:2444631,Bltp1,C57BL,E15.5,IMPC_GEP_022_001,Embryo Size,0.9924669
+MGI:1098604,Rragd,C57BL,Early adult,MGP_IMM_076_001,Total Treg cells - % of CD45+,0.673351
+MGI:1924232,Vxn,C57BL,Early adult,MGP_IMM_006_001,Effector CD4+ T helper cells - % of CD4+ T helper cells,0.8840702
+MGI:1915643,Mogat1,C57BL,Early adult,IMPC_GEP_030_002,Edema,0.845233
+MGI:1278321,Epc2,C57BL,Early adult,IMPC_CSD_036_001,Startle response,0.5931636
+MGI:2676312,Abca12,C57BL,Early adult,IMPC_CSD_028_001,Snout size,0.2030563
+MGI:87879,Aco1,C57BL,Early adult,IMPC_CBC_009_001,Calcium,0.05876604
+MGI:1918142,Ttll7,C57BL,Early adult,IMPC_GEL_058_001,Heart morphology,0.2557134
+MGI:99218,Cdh4,C57BL,Early adult,MGP_IMM_079_001,KLRG1+ Treg cells - % of CD45+,0.07763008
+MGI:104559,Rcn1,C57BL,Early adult,IMPC_CSD_030_001,Tremor,0.7701634
+MGI:1914199,Trim59,C57BL,E18.5,IMPC_CBC_002_001,Potassium,0.9871648
+MGI:1339755,Csf3r,C57BL,Early adult,CCP_XRY_061_001,Fusion of processes,0.3457996
+MGI:98960,Wnt6,C57BL,E12.5,IMPC_HEM_003_001,Hemoglobin,0.796572
+MGI:2444508,Fitm2,C57BL,E12.5,IMPC_HEM_019_001,Mean platelet volume,0.1453793
+MGI:1913761,Chtop,C57BL,Early adult,IMPC_HEM_004_001,Hematocrit,0.5800781
+MGI:1350930,Srp9,C57BL,E12.5,MGP_IMM_124_001,Monocytes - % of CD45+,0.1312832
+MGI:1916428,Snx5,129SV,Early adult,MGP_CSD_027_001,Ventral coat/hair colour pattern,0.7474255
+MGI:109424,Abca4,C57BL,Early adult,IMPC_GEO_065_001,Limb morphology,0.7525361
+MGI:97850,Raly,C57BL,Early adult,IMPC_GEL_011_001,Embryo turning,0.3762628
+MGI:2444989,Spg11,C58BL,Early adult,IMPC_CBC_020_001,Fructosamine,0.5559933
+MGI:2442704,Frrs1l,C57BL,Early adult,ESLIM_015_001_011,Iron,0.1231638
+MGI:1913761,Chtop,C57BL,Early adult,IMPC_ECG_003_001,CV,0.5038811
+MGI:1917770,Glipr2,C57BL,Early adult,IMPC_CSD_013_001,Coat - hair distribution - abdomen,0.09105765
+MGI:1921722,Stpg3,C57BL,Early adult,IMPC_GEL_060_001,Neural tube morphology,0.224469
+MGI:109424,Abca4,C57BL,Early adult,IMPC_GEM_019_001,Embryo Size,0.6640131
+MGI:2676312,Abca12,C57BL,E18.5,MGP_IMM_006_001,Effector CD4+ T helper cells - % of CD4+ T helper cells,0.6667997
+MGI:108429,Lpar1,C57BL,E12.5,IMPC_EYE_017_001,Lens Opacity,0.4455169
+MGI:2676312,Abca12,C57BL,Early adult,IMPC_XRY_022_001,Radius,0.3047644
+MGI:1918066,Rpusd2,C57BL,Early adult,IMPC_CBC_009_001,Calcium,0.8335299
+MGI:2441837,Adgrb3,C57BL,Early adult,MGP_MLN_012_001,Total CD8+ T cells - % of ab T cells,0.3667238
+MGI:2139018,Olah,C57BL,Early adult,IMPC_EYE_012_001,Pupil Shape,0.1260296
+MGI:2444631,Bltp1,C57BL,Early adult,MGP_IMM_052_001,Plasma cells - % of B2 cells,0.2030792
+MGI:1339968,Cth,C57BL,Early adult,IMPC_ABR_008_001,18kHz-evoked ABR Threshold,0.4021878
+MGI:1916413,Mrpl44,C57BL,E9.5,IMPC_EYE_063_001,Right inner nuclear layer,0.4334905
+MGI:1927753,Inpp5e,C57BL,E15.5,IMPC_XRY_016_001,Number of pelvic vertebrae,0.05597686
+MGI:2444391,Slc25a44,C57BL,Early adult,MGP_MLN_115_001,Plasmacytoid DC - % of CD45+,0.8937422
+MGI:108429,Lpar1,C57BL,Early adult,JAX_OFD_017_001,Center average speed,0.1241576
+MGI:2443100,Bend7,C57BL,Early adult,IMPC_CBC_013_001,Alanine aminotransferase,0.6052987
+MGI:1860511,Heyl,C57BL,Early adult,JAX_LDT_004_001,Dark side time spent,0.2169853
+MGI:2444631,Bltp1,C57BL,Early adult,IMPC_OWT_002_001,Spleen weight,0.9691668
+MGI:2684789,Lrsam1,C57BL,Early adult,IMPC_CAL_017_001,Respiratory Exchange Ratio,0.5811802
+MGI:106925,Cldn11,C57BL,Early adult,IMPC_GEM_075_001,Delayed embryonic development,0.7536286
+MGI:2681832,Cspp1,C57BL,Early adult,IMPC_GEM_068_001,Forebrain morphology,0.7450418
+MGI:1914454,Eif2s2,C57BL,E9.5,IMPC_EYE_003_001,Eye Hemorrhage or Blood Presence,0.3837551
+MGI:1350930,Srp9,C57BL,Early adult,IMPC_GEO_063_001,Craniofacial morphology,0.2213484
+MGI:97383,Ntrk1,C57BL,Early adult,IMPC_ACS_006_001,Response amplitude - S,0.7727775
+MGI:1913746,Ppdpf,C57BL,Early adult,IMPC_OFD_022_001,Percentage center time,0.9218185
+MGI:3611450,Mettl21c,C57BL,Early adult,IMPC_ECG_010_001,HRV,0.311152
+MGI:3649135,Gm7694,C57BL,Early adult,MGP_IMM_076_001,Total Treg cells - % of CD45+,0.3789638
+MGI:1913692,Spc25,C57BL,Early adult,IMPC_CBC_009_001,Calcium,0.852854
+MGI:1350930,Srp9,C57BL,E12.5,IMPC_OFD_022_001,Percentage center time,0.7218467
+MGI:1916987,Ttl,C57BL,E15.5,IMPC_CSD_016_001,Coat - hair texture / appearance - abdomen,0.7724963
+MGI:1337072,Ier5,C57BL,Early adult,IMPC_GEO_017_002,Facial Cleft,0.08598411
+MGI:2384297,Map7d1,C57BL,E9.5,IMPC_CSD_007_001,Coat - color - abdomen,0.7430174
+MGI:106637,Slc30a2,C57BL,Early adult,MGP_MLN_075_001,Resting CD8+ T cells - % of CD45+,0.1556801
+MGI:2444631,Bltp1,C57BL,Early adult,IMPC_EYE_068_001,Left total retinal thickness,0.4669386
+MGI:1922776,Eppin,C57BL,Early adult,IMPC_EYE_082_001,Iris transilumination,0.5866552
+MGI:1917120,Polr3gl,C57BL,E18.5,IMPC_XRY_063_001,Cervical processes,0.9457618
+MGI:1341898,Nmur1,C57BL,Early adult,UCD_OWT_029_001,Body length,0.8377971
+MGI:3611233,Tox2,C57BL,Early adult,ESLIM_011_001_002,PP1 startle magnitude,0.4955616
+MGI:1914210,Mindy3,C57BL,Early adult,IMPC_IMM_032_002,Effector CD8+ T cells - % of live leukocytes (Panel A),0.4117288
+MGI:109424,Abca4,C57BL,Early adult,IMPC_EYE_068_001,Left total retinal thickness,0.6324648
+MGI:108429,Lpar1,C57BL,E18.5,MGP_IMM_006_001,Effector CD4+ T helper cells - % of CD4+ T helper cells,0.1050325
+MGI:1923304,Prrc2b,C57BL,Early adult,IMPC_XRY_016_001,Number of pelvic vertebrae,0.510115
+MGI:2384297,Map7d1,C57BL,E18.5,JAX_OFD_050_001,Percentage center movement time,0.2767293
+MGI:97565,Pgm1,C57BL,Early adult,IMPC_GEM_069_001,Hindbrain morphology,0.3621869
+MGI:1339755,Csf3r,C57BL,Early adult,IMPC_CSD_037_001,Unexpected behaviors,0.3865084
+MGI:1914542,Pigc,C57BL,Early adult,IMPC_CBC_010_001,Phosphorus,0.5591416
+MGI:1922776,Eppin,C57BL,Early adult,CCP_XRY_004_001,Mandibles,0.09784774
+MGI:2677271,Slc24a5,C57BL,Early adult,IMPC_CBC_018_001,Glucose,0.4778005
+MGI:88015,Ampd1,C57BL,Early adult,IMPC_ECG_010_001,HRV,0.4891701
+MGI:101770,Bfsp1,C57BL,Early adult,IMPC_CSD_005_001,Coat - color - back,0.5600961
+MGI:1350926,Etv3,C57BL,Early adult,IMPC_OFD_018_001,Latency to center entry,0.5293036
+MGI:1917120,Polr3gl,C57BL,E18.5,IMPC_GEP_026_001,Outer ear morpholgy,0.2604124
+MGI:98960,Wnt6,C57BL,Early adult,MGP_IMM_130_001,CD11b-low cDC - % of CD45+,0.6060393
+MGI:1341898,Nmur1,C57BL,Early adult,MGP_IMM_016_001,Naive CD8+ T cells - % of CD8+,0.9678771
+MGI:1916732,Nup35,C57BL,Early adult,ESLIM_011_001_004,PP3 startle magnitude,0.3779803
+MGI:2140712,Phf24,C57BL,Early adult,JAX_OFD_013_001,Periphery average speed,0.9860035
+MGI:1923304,Prrc2b,C57BL,Early adult,IMPC_GEO_019_001,Embryo Size,0.9667705
+MGI:1919084,Zbtb43,C57BL,Early adult,IMPC_CBC_058_001,Cholesterol ratio,0.6818071
+MGI:2443805,Bnc2,C57BL,Early adult,JAX_OFD_050_001,Percentage center movement time,0.2224677
+MGI:97565,Pgm1,C57BL,Early adult,UCD_OWT_005_001,Right kidney,0.6698516
+MGI:1914199,Trim59,C57BL,Early adult,ESLIM_011_001_001,BN startle magnitude,0.2812017
+MGI:96429,Ifi204,C57BL,Early adult,JAX_LDT_004_001,Dark side time spent,0.3431865
+MGI:1924467,Rspo4,C57BL,Early adult,UCDLA_CSD_012_001,Coat - hair distribution - head,0.7157993
+MGI:1916413,Mrpl44,C57BL,E9.5,MGP_IMM_044_001,Marginal zone B cells - % of B2 cells,0.5288001
+MGI:106637,Slc30a2,C57BL,E9.5,IMPC_EYE_092_002,Retina (combined),0.3273048
+MGI:1922776,Eppin,C57BL,Middle aged adult,IMPC_GEM_075_001,Delayed embryonic development,0.9593613
+MGI:95975,Ifi44l,C57BL,Early adult,IMPC_HEM_029_001,Neutrophil differential count,0.8353743
+MGI:1919471,Cimip1,C57BL,Early adult,IMPC_CSD_033_001,Gait,0.9523809
+MGI:98397,Src,129SV,Early adult,ESLIM_008_001_002,Tremor,0.8496141
+MGI:98397,Src,C57BL,Early adult,IMPC_GEL_058_001,Heart morphology,0.611915
+MGI:2444508,Fitm2,C57BL,E15.5,IMPC_CBC_014_001,Alkaline phosphatase,0.9487664
+MGI:1332243,Ugcg,C57BL,Early adult,IMPC_HEM_003_001,Hemoglobin,0.1671918
+MGI:2387617,Obp2a,C57BL,Early adult,CCP_XRY_031_001,Digit integrity,0.3352307
+MGI:2444631,Bltp1,C57BL,Early adult,ESLIM_008_001_002,Tremor,0.2062661
+MGI:1919051,Plekhf2,C57BL,Early adult,MGP_IMM_093_001,Resting CD4- NKT cells - % of CD45+,0.1057974
+MGI:1309469,Casq2,C57BL,E12.5,JAX_OFD_012_001,Periphery permanence time,0.7178259
+MGI:1915862,Ube2c,C57BL,E12.5,IMPC_GEL_060_001,Neural tube morphology,0.9918857
+MGI:95281,Ect2,C57BL,Early adult,JAX_LDT_008_001,Percent time in dark,0.9273454
+MGI:2139018,Olah,C57BL,Early adult,ESLIM_008_001_016,Trunk curl,0.9875992
+MGI:106637,Slc30a2,C57BL,Early adult,ESLIM_016_001_004,Haematocrit,0.259157
+MGI:102844,Mybpc3,C57BL,Early adult,IMPC_ACS_033_001,% Pre-pulse inhibition - PPI1,0.1184961
+MGI:1913692,Spc25,C57BL,Early adult,IMPC_EYE_016_001,Lens,0.3871983
+MGI:98397,Src,129SV,Early adult,IMPC_ECG_010_001,HRV,0.7450059
+MGI:106925,Cldn11,C59BL,Middle aged adult,IMPC_EYE_026_001,Retinal Blood Vessels Pattern,0.7419745
+MGI:108429,Lpar1,C57BL,E18.5,MGP_IMM_073_001,Effector CD4+ T helper cells - % of CD45+,0.4278506
+MGI:104708,Cct3,C57BL,Early adult,MGP_MLN_076_001,Naive CD8+ T cells - % of CD45+,0.3955902
+MGI:2385213,Pdik1l,C57BL,Early adult,IMPC_ACS_033_001,% Pre-pulse inhibition - PPI1,0.2557633
+MGI:1095412,Unc5c,C57BL,Middle aged adult,IMPC_IMM_040_002,Effector CD4+ NKT cells - % of live leukocytes (Panel A),0.6710721
+MGI:98960,Wnt6,C57BL,E12.5,IMPC_IMM_014_002,Treg cells - % of live leukocytes (Panel A),0.2978616
+MGI:98386,Sptan1,C57BL,Early adult,MGP_IMM_010_001,Effector Treg cells - % of Treg,0.1091708
+MGI:1914454,Eif2s2,C57BL,E9.5,IMPC_CSD_016_001,Coat - hair texture / appearance - abdomen,0.3668637
+MGI:2441837,Adgrb3,C57BL,E18.5,IMPC_DXA_009_001,Fat/Body weight,0.7551811
+MGI:1350930,Srp9,C57BL,E12.5,IMPC_OFD_007_001,Whole arena resting time,0.6399405
+MGI:1343489,Mpdz,C57BL,Early adult,IMPC_XRY_063_001,Cervical processes,0.3324252
+MGI:1918142,Ttll7,C57BL,Early adult,IMPC_CBC_018_001,Glucose,0.922648
+MGI:1201673,Shox2,C57BL,Early adult,MGP_CSD_027_001,Ventral coat/hair colour pattern,0.2986692
+MGI:1919369,Tpx2,C57BL,Early adult,JAX_LDT_009_001,Percent time in light,0.5318481
+MGI:1927241,Wdr12,C57BL,Early adult,JAX_OFD_016_001,Center permanence time,0.5617518
+MGI:3617846,Ankrd34a,C57BL,Early adult,ESLIM_021_001_002,Total cholesterol,0.8602855
+MGI:104708,Cct3,C57BL,E9.5,IMPC_XRY_012_001,Pelvis,0.09934878
+MGI:106637,Slc30a2,C57BL,Early adult,ESLIM_008_001_022,Vocalisation,0.4041358
+MGI:1915862,Ube2c,C57BL,E12.5,CCP_XRY_019_001,Fusion of vertebrae,0.4911326
+MGI:95777,Gnas,129SV,Early adult,IMPC_CBC_024_001,UIBC (unsaturated iron binding capacity),0.09774378
+MGI:97565,Pgm1,C57BL,E12.5,MGP_IMM_052_001,Plasma cells - % of B2 cells,0.6961656
+MGI:2442704,Frrs1l,C57BL,Early adult,JAX_SLW_003_001,Sleep light phase percent,0.5872398
+MGI:1914199,Trim59,C57BL,E18.5,IMPC_EYE_083_001,Vitreous,0.9568879
+MGI:1914199,Trim59,C57BL,E18.5,IMPC_CBC_020_001,Fructosamine,0.4953155
+MGI:1914199,Trim59,C57BL,Early adult,MGP_IMM_019_001,CD5+ gd T cells - % of gd T cells,0.2776148
+MGI:1913882,Dph6,C57BL,Early adult,JAX_LDT_004_001,Dark side time spent,0.9618179
+MGI:1915599,Ndufs3,C57BL,Early adult,IMPC_CSD_016_001,Coat - hair texture / appearance - abdomen,0.5873653
+MGI:1919369,Tpx2,C57BL,E9.5,M-G-P_025_001_005,Potassium,0.07177372
+MGI:1916987,Ttl,C57BL,E15.5,M-G-P_025_001_001,Glucose,0.9058117
+MGI:1916987,Ttl,C57BL,E15.5,IMPC_EYE_017_001,Lens Opacity,0.9511337
+MGI:1914199,Trim59,C57BL,E12.5,M-G-P_026_001_010,Mouth morphology,0.7612675
+MGI:109424,Abca4,C57BL,Early adult,IMPC_GEM_069_001,Hindbrain morphology,0.3165534
+MGI:95975,Ifi44l,C57BL,Early adult,IMPC_EYE_023_001,Optic Disc,0.4429591
+MGI:3041190,Skint7,C57BL,Early adult,IMPC_CSD_025_001,Head size,0.7745736
+MGI:1919369,Tpx2,C57BL,Early adult,IMPC_XRY_033_001,Tibia length,0.4360342
+MGI:1918142,Ttll7,C57BL,Early adult,M-G-P_016_001_002,Red Blood Cell-count,0.2040687
+MGI:1916330,Gmppa,C57BL,Early adult,CCP_LDT_008_001,Percent time in light,0.6198329
+MGI:106925,Cldn11,C57BL,Early adult,UCDLA_HEM_002_001,Red blood cell count,0.5005762
+MGI:2443564,Ambra1,C57BL,E12.5,M-G-P_025_001_005,Potassium,0.6403495
+MGI:1919880,Hspa12b,C57BL,Early adult,IMPC_GEM_069_001,Hindbrain morphology,0.5272446
+MGI:108429,Lpar1,C57BL,Early adult,IMPC_GEM_070_001,Midbrain morphology,0.8071819
+MGI:2385213,Pdik1l,C57BL,Middle aged adult,MGP_MLN_014_001,Resting CD8+ T cells - % of CD8+,0.1250658
+MGI:1095412,Unc5c,C57BL,Late adult,ESLIM_005_001_005,Bone Mineral Content,0.4774274
+MGI:98386,Sptan1,C57BL,E9.5,M-G-P_009_001_003,Body weight,0.4739256
+MGI:2679260,Crb2,C57BL,Early adult,IMPC_CSD_025_001,Head size,0.4197592
+MGI:106637,Slc30a2,C57BL,E9.5,IMPC_GRS_011_001,Forelimb and hindlimb grip strength normalised against body weight,0.2049075
+MGI:2685195,Zbtb34,C57BL,Early adult,UCDLA_HEM_002_001,Red blood cell count,0.6686079
+MGI:104899,Mob4,C57BL,E9.5,MGP_MLN_078_001,Total gd T cells - % of CD45+,0.6939148
+MGI:1916413,Mrpl44,C57BL,E9.5,IMPC_HEM_037_001,Basophil cell count,0.1453685
+MGI:106925,Cldn11,C57BL,Early adult,IMPC_OFD_013_001,Periphery average speed,3.558145e-05
+MGI:2140361,Slc35d1,C57BL,Early adult,HMGULA_DYS_016_001,Coat - hair texture / appearance - abdomen,0.5801533
+MGI:1919369,Tpx2,C57BL,E9.5,IMPC_CSD_040_002,Forepaw - size,0.6774134
+MGI:1095412,Unc5c,C57BL,Late adult,MGP_IMM_019_001,CD5+ gd T cells - % of gd T cells,0.1671303
+MGI:1914199,Trim59,C57BL,E18.5,IMPC_EYE_088_001,Left vitreous humour thickness,0.1115217
+MGI:2443564,Ambra1,C57BL,E9.5,IMPC_CSD_015_001,Coat - hair texture / appearance - head,0.9856168
+MGI:2385213,Pdik1l,C57BL,Early adult,CCP_XRY_062_001,Polysyndactylism,0.2235897
+MGI:88015,Ampd1,C57BL,E15.5,IMPC_GEL_060_001,Neural tube morphology,0.5647817
+MGI:1919300,Poglut2,C57BL,Early adult,JAX_LDT_004_001,Dark side time spent,0.7310959
+MGI:1923676,Fam209,C57BL,Early adult,MGP_IMM_007_001,Resting CD4+ T helper cells - % of CD4+ T helper cells,0.8651882
+MGI:1927753,Inpp5e,C57BL,Early adult,IMPC_XRY_016_001,Number of pelvic vertebrae,0.9369469
+MGI:1350930,Srp9,C57BL,Early adult,IMPC_CBC_023_001,Alpha-amylase,0.8267538
+MGI:2154090,Igsf8,C57BL,Early adult,IMPC_GEO_043_002,spina bifida,0.4474182
+MGI:2442792,Cdh7,C57BL,Early adult,IMPC_XRY_012_001,Pelvis,0.7457306
+MGI:1913746,Ppdpf,C57BL,Early adult,JAX_OFD_014_001,Center distance travelled,0.6238087
+MGI:1922387,Rprd2,C57BL,E9.5,MGP_IMM_127_001,Plasmacytoid DC - % of CD45+,0.9223701
+MGI:107171,Ppp3r2,C57BL,Early adult,IMPC_GEM_070_001,Midbrain morphology,0.5390696
+MGI:2684789,Lrsam1,C57BL,Early adult,IMPC_HEM_029_001,Neutrophil differential count,0.8691781
+MGI:1927753,Inpp5e,C57BL,Early adult,IMPC_DXA_002_001,Fat mass,0.1166405
+MGI:2444631,Bltp1,C57BL,E15.5,IMPC_CSD_007_001,Coat - color - abdomen,0.688659
+MGI:102519,Cst3,C57BL,Early adult,IMPC_IMM_032_002,Effector CD8+ T cells - % of live leukocytes (Panel A),0.2481734
+MGI:1889549,Txnip,C57BL,Early adult,IMPC_OFD_007_001,Whole arena resting time,0.2524262
+MGI:87867,Acadm,C57BL,Early adult,JAX_HBD_001_001,Total holepokes,0.2480771
+MGI:1095412,Unc5c,C57BL,Early adult,MGP_IMM_011_001,Resting Treg cells - % of Treg,0.3992064
+MGI:98960,Wnt6,C57BL,Early adult,M-G-P_025_001_001,Glucose,0.4198268
+MGI:2139018,Olah,C57BL,Early adult,CCP_XRY_019_001,Fusion of vertebrae,0.9988281
+MGI:2679260,Crb2,C57BL,Early adult,IMPC_CBC_016_001,HDL-cholesterol,0.2906589
+MGI:1914199,Trim59,C57BL,Early adult,JAX_LDT_008_001,Percent time in dark,0.1414669
+MGI:1309469,Casq2,C57BL,E15.5,IMPC_HEM_032_001,Lymphocyte cell count,0.4327305
+MGI:1915599,Ndufs3,C57BL,Early adult,IMPC_DXA_004_001,Bone Mineral Density (excluding skull),0.4941159
+MGI:98960,Wnt6,C57BL,Early adult,M-G-P_025_001_001,Glucose,0.1175657
+MGI:1921722,Stpg3,C50BL,Early adult,JAX_LDT_009_001,Percent time in light,0.7959031
+MGI:1350926,Etv3,C52BL,Early adult,CCP_LDT_008_001,Percent time in light,0.1846097
+MGI:106925,Cldn11,C57BL,Middle aged adult,JAX_OFD_012_001,Periphery permanence time,0.446024
+MGI:2441837,Adgrb3,C57BL,Early adult,ESLIM_013_001_004,Left retina pigmentation,0.5830536
+MGI:3588216,Ube2u,C57BL,Early adult,IMPC_EYE_070_001,Left outer nuclear layer,0.4772223
+MGI:1914210,Mindy3,C57BL,Early adult,IMPC_CSD_033_001,Gait,0.4356596
+MGI:1095412,Unc5c,C57BL,Early adult,IMPC_ECG_006_001,PR,0.5002963
+MGI:101813,Coq3,C57BL,E9.5,IMPC_CBC_012_001,Aspartate aminotransferase,0.5925408
+MGI:97850,Raly,C57BL,Early adult,IMPC_FEA_105_001,Difference in Context and Conditioning Baseline % Freezing,0.3353451
+MGI:2685869,Dpy19l4,C57BL,Early adult,MGP_MLN_066_001,Effector CD4+ T helper cells - % of CD45+,0.9629662
+MGI:1916428,Snx5,C57BL,Early adult,UCDLA_EYE_083_001,Vitreous,0.1157714
+MGI:102844,Mybpc3,C57BL,Early adult,ESLIM_020_001_002,Heart weight,2.129977e-10
+MGI:1351315,Eloa,C57BL,Early adult,M-G-P_009_001_003,Body weight,0.5635794
+MGI:3588202,Garin4,C57BL,Early adult,MGP_IMM_007_001,Resting CD4+ T helper cells - % of CD4+ T helper cells,0.9403885
+MGI:97324,Nhlh2,C57BL,Early adult,IMPC_HEM_006_001,Mean corpuscular hemoglobin,0.3994714
+MGI:2140592,Slc44a1,C57BL,Early adult,IMPC_DXA_003_001,Lean mass,0.4452287
+MGI:106637,Slc30a2,C57BL,Early adult,IMPC_HWT_002_001,Tibia length,0.911078
+MGI:97898,Ren1,C57BL,Early adult,UCD_OWT_003_001,Spleen weight,0.9242312
+MGI:2442177,Pced1a,C57BL,Early adult,CCP_LFO_001_001,Weight,0.9022464
+MGI:1913420,Chchd5,C57BL,Early adult,CCP_XRY_062_001,Polysyndactylism,0.5206074
+MGI:1921263,Rftn2,C57BL,Early adult,IMPC_GRS_009_001,Forelimb and hindlimb grip strength measurement mean,0.7707044
+MGI:2685260,Otol1,C57BL,Early adult,IMPC_GEM_069_001,Hindbrain morphology,0.714824
+MGI:97803,Ptma,C57BL,E12.5,JAX_OFD_022_001,Percentage center time,0.158321
+MGI:1332243,Ugcg,C57BL,Early adult,JAX_PLC_004_001,Glucose,0.3048777
+MGI:1922423,Tex38,C57BL,Early adult,IMPC_CAL_017_001,Respiratory Exchange Ratio,0.5098811
+MGI:1201673,Shox2,C57BL,E9.5,IMPC_ABR_004_001,6kHz-evoked ABR Threshold,0.8957423
+MGI:1916987,Ttl,C57BL,E12.5,IMPC_ACS_034_001,% Pre-pulse inhibition - PPI2,0.9564172
+MGI:2443925,Thsd7b,C57BL,Early adult,JAX_OFD_014_001,Center distance travelled,0.1843497
+MGI:1351315,Eloa,C57BL,E9.5,MGP_IMM_010_001,Effector Treg cells - % of Treg,0.8057939
+MGI:1917120,Polr3gl,C57BL,E18.5,IMPC_EYE_064_001,Right outer nuclear layer,0.2247854
+MGI:1916413,Mrpl44,C57BL,E9.5,IMPC_DXA_005_001,Bone Mineral Content (excluding skull),0.2860818
+MGI:1916413,Mrpl44,C57BL,E9.5,IMPC_GEP_026_001,Outer ear morpholgy,0.3930227
+MGI:104708,Cct3,C57BL,E9.5,ESLIM_011_001_002,PP1 startle magnitude,0.6567732
+MGI:97565,Pgm1,C57BL,E9.5,HRWL_OWT_001_001,Spleen weight,0.3064401
+MGI:1913420,Chchd5,C57BL,Early adult,IMPC_CSD_033_001,Gait,0.1920391
+MGI:1309469,Casq2,C57BL,E12.5,IMPC_HEM_019_001,Mean platelet volume,0.5259785
+MGI:109424,Abca4,C57BL,Early adult,IMPC_CSD_005_001,Coat - color - back,0.8350714
+MGI:2444508,Fitm2,C57BL,Early adult,IMPC_HEM_038_001,Basophil differential count,0.5363426
+MGI:2387617,Obp2a,C57BL,Early adult,IMPC_EYE_068_001,Left total retinal thickness,0.9892487
+MGI:102844,Mybpc3,C57BL,Early adult,IMPC_HEM_003_001,Hemoglobin,0.4125754
+MGI:1923953,Cpb1,C57BL,Early adult,IMPC_EYE_012_001,Pupil Shape,0.7024822
+MGI:1922423,Tex38,C57BL,Early adult,KMPCLA_GRS_011_001,Forelimb and hindlimb grip strength normalised against body weight,0.7608204
+MGI:106637,Slc30a2,C57BL,E9.5,IMPC_CBC_002_001,Potassium,0.9003205
+MGI:2140361,Slc35d1,C57BL,E18.5,ESLIM_016_001_007,Mean cell haemoglobin concentration,0.8757561
+MGI:1923304,Prrc2b,C57BL,Early adult,IMPC_HEM_019_001,Mean platelet volume,0.1063782
+MGI:104899,Mob4,C57BL,Early adult,MGP_IMM_108_001,Marginal zone B cells - % of CD45+,0.1984933
+MGI:108429,Lpar1,C57BL,E12.5,IMPC_CBC_003_001,Chloride,0.9294091
+MGI:104793,Runx1t1,C57BL,Early adult,IMPC_GRS_010_001,Forelimb grip strength normalised against body weight,0.5643023
+MGI:1931054,Slc43a3,C57BL,Early adult,JAX_SLW_013_001,Breath rate during sleep mean,0.3385767
+MGI:97850,Raly,C57BL,Early adult,IMPC_IMM_014_002,Treg cells - % of live leukocytes (Panel A),0.4111109
+MGI:1927580,Bloc1s6,C57BL,Early adult,MGP_IMM_079_001,KLRG1+ Treg cells - % of CD45+,0.5655698
+MGI:3576049,Ugt1a2,C57BL,Early adult,MGP_IMM_083_001,Naive CD8+ T cells - % of CD45+,0.907521
+MGI:1096385,Bcan,C57BL,Middle aged adult,MGP_IMM_077_001,Effector Treg cells - % of CD45+,0.2946006
+MGI:1346342,Clca1,C57BL,Early adult,IMPC_GPO_002_001,Placenta Morphology,0.6192496
+MGI:1927241,Wdr12,C57BL,Early adult,IMPC_GRS_010_001,Forelimb grip strength normalised against body weight,0.5470079
+MGI:2385213,Pdik1l,C57BL,Late adult,IMPC_CSD_061_001,Skin color - tail,0.7330816
+MGI:3588216,Ube2u,C57BL,Early adult,CCP_XRY_001_001,Skull shape,0.5684368
+MGI:1891259,Lrat,C57BL,Early adult,IMPC_GEL_063_001,Delayed embryonic development,0.5605914
+MGI:108429,Lpar1,C57BL,Early adult,MGP_IMM_127_001,Plasmacytoid DC - % of CD45+,0.5512868
+MGI:2685260,Otol1,C57BL,Early adult,MGP_IMM_009_001,Total Treg cells - % of CD4+,0.7778038
+MGI:106637,Slc30a2,C57BL,E9.5,IMPC_OFD_012_001,Periphery permanence time,0.7961556
+MGI:1337072,Ier5,C57BL,Late adult,IMPC_CSD_061_001,Skin color - tail,0.2472121
+MGI:1346086,Aplnr,C57BL,Early adult,MGP_CSD_008_001,Startle response,0.2784129
+MGI:102519,Cst3,C57BL,E15.5,MGP_PBI_015_001,IgD+ mature B cell percentage,0.1613854
+MGI:1915247,Ddx59,C57BL,E9.5,IMPC_CBC_013_001,Alanine aminotransferase,0.5293128
+MGI:1341907,Fjx1,C57BL,Early adult,MGP_IMM_013_001,Total CD8+ T cells - % of ab T cells,0.8540598
+MGI:98960,Wnt6,C57BL,E15.5,IMPC_IPG_012_001,Area under glucose response curve,0.1127016
+MGI:104793,Runx1t1,C57BL,Early adult,IMPC_GEO_019_001,Embryo Size,0.9696556
+MGI:1915862,Ube2c,C59BL,E18.5,IMPC_GEM_019_001,Embryo Size,0.1484322
+MGI:87867,Acadm,C57BL,Early adult,IMPC_OFD_050_001,Percentage center movement time,0.9742884
+MGI:1923304,Prrc2b,C57BL,Early adult,IMPC_CSD_006_001,Coat - color - head,0.06372258
+MGI:2444681,Hhat,C57BL,Early adult,IMPC_CBC_023_001,Alpha-amylase,0.4059363
+MGI:2443564,Ambra1,C57BL,E18.5,JAX_OFD_050_001,Percentage center movement time,0.9419525
+MGI:1919128,Fam83d,C57BL,Early adult,MGP_MLN_076_001,Naive CD8+ T cells - % of CD45+,0.3942577
+MGI:1918142,Ttll7,C57BL,Early adult,UCDLA_HEM_002_001,Red blood cell count,0.9677075
+MGI:98386,Sptan1,C57BL,E9.5,IMPC_CBC_013_001,Alanine aminotransferase,0.1284962
+MGI:1913746,Ppdpf,C57BL,Early adult,JAX_ROT_002_001,Average duration,0.7856844
+MGI:1921607,Efhd1,C57BL,Early adult,ESLIM_020_001_002,Heart weight,0.9222536
+MGI:3576049,Ugt1a2,C57BL,Early adult,IMPC_GEO_017_002,Facial Cleft,0.1788115
+MGI:1920199,Ccnt2,C57BL,E18.5,IMPC_OFD_011_001,Periphery resting time,0.4320602
+MGI:1919369,Tpx2,C57BL,E9.5,IMPC_XRY_027_001,Joints,0.06986615
+MGI:2384297,Map7d1,C57BL,E12.5,IMPC_GEL_011_001,Embryo turning,0.6593767
+MGI:2444631,Bltp1,C57BL,E15.5,IMPC_GEM_069_001,Hindbrain morphology,0.5068005
+MGI:1919128,Fam83d,C57BL,Early adult,M-G-P_026_001_003,Coat intact,0.8147652
+MGI:97850,Raly,C57BL,Early adult,UCDLA_HEM_002_001,Red blood cell count,0.0722159
+MGI:101813,Coq3,C57BL,Early adult,IMPC_IPG_010_001,Fasted blood glucose concentration,0.9802191
+MGI:1309469,Casq2,C57BL,E15.5,IMPC_HEM_008_001,Platelet count,0.3691458
+MGI:2685195,Zbtb34,C57BL,Early adult,IMPC_CBC_025_001,LDL-cholesterol,0.6909561
+MGI:2153070,Synpo2,C57BL,Early adult,MGP_MLN_078_001,Total gd T cells - % of CD45+,0.2057633
+MGI:1919369,Tpx2,C57BL,E9.5,CCP_LDT_004_001,Dark side time spent,0.07876831
+MGI:2158201,Acot8,C57BL,Early adult,IMPC_XRY_023_001,Ulna,0.0854867
+MGI:97324,Nhlh2,C57BL,Early adult,IMPC_CBC_015_001,Total cholesterol,0.8875533
+MGI:3611233,Tox2,C57BL,Early adult,IMPC_CBC_014_001,Alkaline phosphatase,0.4870158
+MGI:2385213,Pdik1l,C57BL,Late adult,IMPC_CSD_005_001,Coat - color - back,0.3621844
+MGI:97565,Pgm1,C57BL,Early adult,IMPC_EYE_092_001,Retina (combined),0.6173981
+MGI:1919300,Poglut2,C57BL,Early adult,IMPC_XRY_033_001,Tibia length,0.7400456
+MGI:104559,Rcn1,C57BL,Early adult,IMPC_DXA_007_001,BMC/Body weight,0.7811353
+MGI:1927753,Inpp5e,C57BL,E15.5,MGP_IMM_077_001,Effector Treg cells - % of CD45+,0.7347005
+MGI:2385213,Pdik1l,C57BL,Late adult,JAX_SLW_003_001,Sleep light phase percent,0.5191794
+MGI:1927753,Inpp5e,C57BL,Early adult,IMPC_HEM_004_001,Hematocrit,0.2051965
+MGI:2654325,Gba2,C57BL,Early adult,MGP_MLN_076_001,Naive CD8+ T cells - % of CD45+,0.3946984
+MGI:1923304,Prrc2b,C57BL,Early adult,MGP_IMM_086_001,CD5+ gd T cells - % of CD45+,0.8658585
+MGI:106637,Slc30a2,C57BL,Early adult,MGP_MLN_079_001,CD5+ gd T cells - % of CD45+,0.974508
+MGI:97324,Nhlh2,C57BL,Early adult,UCDLA_CSD_012_001,Coat - hair distribution - head,0.2582658
+MGI:1915599,Ndufs3,C57BL,Early adult,CCP_XRY_020_001,Processes on vertebrae,0.7155781
+MGI:1914199,Trim59,C57BL,E12.5,IMPC_GEM_029_001,Tail Morphology,0.1823368
+MGI:1201673,Shox2,C57BL,E9.5,MGP_MLN_115_001,Plasmacytoid DC - % of CD45+,0.4214263
+MGI:1916428,Snx5,129SV,Early adult,IMPC_EYE_024_001,Retinal Blood Vessels,0.334089
+MGI:107363,Stxbp1,C57BL,Early adult,IMPC_OFD_019_001,Number of center entries,0.2167843
+MGI:1923953,Cpb1,C57BL,Early adult,MGP_MLN_066_001,Effector CD4+ T helper cells - % of CD45+,0.5200642
+MGI:1927753,Inpp5e,C57BL,E15.5,IMPC_HEM_029_001,Neutrophil differential count,0.9792219
+MGI:1341898,Nmur1,C57BL,Early adult,M-G-P_025_001_005,Potassium,0.3622665
+MGI:2385213,Pdik1l,C57BL,Late adult,IMPC_EYE_082_001,Iris transilumination,0.3938943
+MGI:1916330,Gmppa,C57BL,Early adult,IMPC_DXA_004_001,Bone Mineral Density (excluding skull),0.2279314
+MGI:2448514,R3hdm1,C57BL,Early adult,IMPC_CSD_015_001,Coat - hair texture / appearance - head,0.9941163
+MGI:1919471,Cimip1,C57BL,Early adult,IMPC_CBC_005_001,Creatinine,0.4656688
+MGI:1913692,Spc25,C57BL,Early adult,JAX_OFD_020_001,Distance travelled - total,0.3631378
+MGI:1921735,Lrrc71,C57BL,Early adult,IMPC_ABR_012_001,30kHz-evoked ABR Threshold,0.296197
+MGI:101770,Bfsp1,C57BL,Early adult,IMPC_GEM_019_001,Embryo Size,0.8717588
+MGI:2441837,Adgrb3,C57BL,E18.5,IMPC_CBC_025_001,LDL-cholesterol,0.9302523
+MGI:95975,Ifi44l,C57BL,Early adult,M-G-P_005_001_003,Lean Mass,0.2049722
+MGI:104899,Mob4,C57BL,E9.5,IMPC_OFD_021_001,Number of rears - total,0.6353976
+MGI:2442704,Frrs1l,C57BL,Early adult,JAX_OFD_017_001,Center average speed,0.7469031
+MGI:98397,Src,129SV,Early adult,IMPC_CBC_012_001,Aspartate aminotransferase,0.5533782
+MGI:1919084,Zbtb43,C57BL,Early adult,IMPC_HEM_037_001,Basophil cell count,0.2823578
+MGI:1917120,Polr3gl,C57BL,E18.5,IMPC_XRY_022_001,Radius,0.6080441
+MGI:2684789,Lrsam1,C57BL,Early adult,MGP_MLN_011_001,KLRG1+ Treg cells - % of Treg,0.4289863
+MGI:3606212,Rbbp8nl,C57BL,Early adult,MGP_CSD_027_001,Ventral coat/hair colour pattern,0.1315181
+MGI:2444508,Fitm2,C57BL,E15.5,IMPC_OFD_014_001,Center distance travelled,0.5807512
+MGI:1917770,Glipr2,C57BL,Early adult,IMPC_ABR_004_001,6kHz-evoked ABR Threshold,0.3096981
+MGI:107674,Cd1d1,C57BL,Early adult,IMPC_HEM_038_001,Basophil differential count,0.414515
+MGI:1923304,Prrc2b,C57BL,Early adult,IMPC_DXA_008_001,Lean/Body weight,0.4315021
+MGI:1309469,Casq2,C57BL,E15.5,IMPC_CSD_025_001,Head size,0.5976438
+MGI:1890510,Atp6v0b,C57BL,Early adult,IMPC_DXA_006_001,Body length,0.5985954
+MGI:98960,Wnt6,C57BL,Early adult,IMPC_CAL_017_001,Respiratory Exchange Ratio,0.3806586
+MGI:2384297,Map7d1,C57BL,E9.5,JAX_OFD_009_001,Whole arena average speed,0.2181865
+MGI:1926106,Fam163b,C57BL,Early adult,MGP_PBI_009_001,CD4+ CD44+ CD62L- alpha beta effector T cell percentage,0.5678827
+MGI:97565,Pgm1,C57BL,Early adult,IMPC_CSD_025_001,Head size,0.306437
+MGI:97803,Ptma,C57BL,E15.5,MGP_IMM_010_001,Effector Treg cells - % of Treg,0.2696894
+MGI:1913721,Anp32e,C57BL,Early adult,MGP_MLN_115_001,Plasmacytoid DC - % of CD45+,0.7163055
+MGI:109424,Abca4,C57BL,Early adult,IMPC_CSD_079_001,Aggression,0.8430131
+MGI:1913790,Fam107b,129SV,Early adult,IMPC_ECG_028_001,QT,0.5289449
+MGI:2443564,Ambra1,C57BL,E18.5,IMPC_GEM_025_002,Pallor,0.09134023
+MGI:1922387,Rprd2,C57BL,E9.5,IMPC_OFD_021_001,Number of rears - total,0.5462195
+MGI:104793,Runx1t1,C57BL,Early adult,MGP_MLN_079_001,CD5+ gd T cells - % of CD45+,0.2595416
+MGI:2685195,ZBTB34,C57BL,Early adult,ESLIM_011_001_002,PP1 startle magnitude,0.9337051
+MGI:2444631,Bltp1,C57BL,E12.5,IMPC_GEO_043_002,spina bifida,0.6508001
+MGI:1927753,Inpp5e,C57BL,Early adult,IMPC_EYE_088_001,Left vitreous humour thickness,0.6192319
+MGI:2445096,Dhtkd1,C57BL,Early adult,IMPC_CSD_037_001,Unexpected behaviors,0.6807993
+MGI:1918066,Rpusd2,C57BL,Early adult,IMPC_ECH_018_001,Respiration Rate,0.1137948
+MGI:1915282,Emc4,C57BL,Early adult,IMPC_OFD_021_001,Number of rears - total,0.6030688
+MGI:1350926,Etv3,C57BL,Early adult,IMPC_CBC_017_001,Triglycerides,0.1541018
+MGI:97565,Pgm1,C57BL,E9.5,IMPC_CSD_041_002,Hindpaw - size,0.1482029
+MGI:1913790,Fam107b,C57BL,Early adult,MGP_IMM_004_001,Total CD4+ T cells - % of ab T cells,0.1913227
+MGI:3590554,FIRRM,C57BL,Early adult,MGP_IMM_011_001,Resting Treg cells - % of Treg,0.1058655
+MGI:3650206,Gm12695,C57BL,Early adult,MGP_IMM_006_001,Effector CD4+ T helper cells - % of CD4+ T helper cells,0.1293033
+MGI:1917770,Glipr2,C57BL,Early adult,MGP_IMM_013_001,Total CD8+ T cells - % of ab T cells,0.8181753
+MGI:3649135,Gm7694,C57BL,Early adult,JAX_OFD_017_001,Center average speed,0.8069032
+MGI:104899,Mob4,C57BL,E9.5,JAX_OFD_007_001,Whole arena resting time,0.7415616
+MGI:107191,Bmpr1b,C57BL,Early adult,IMPC_EYE_061_001,Right anterior chamber depth,0.06327715
+MGI:3606212,Rbbp8nl,C57BL,Early adult,IMPC_GEO_064_001,Edema,0.3425343
+MGI:2138198,D630023F18Rik,C57BL,Early adult,JAX_OFD_022_001,Percentage center time,0.2787287
+MGI:1924955,Cstdc2,C57BL,Early adult,CCP_LDT_004_001,Dark side time spent,0.941269
+MGI:1913882,Dph6,C57BL,Early adult,IMPC_GEM_075_001,Delayed embryonic development,0.1409493
+MGI:1351315,Eloa,C57BL,Early adult,ESLIM_011_001_003,PP2 startle magnitude,0.4783291
+MGI:3650206,Gm12695,C57BL,Early adult,ESLIM_021_001_002,Total cholesterol,0.1042413
+MGI:1919051,Plekhf2,C57BL,Early adult,MGP_MLN_076_001,Naive CD8+ T cells - % of CD45+,0.8316915
+MGI:1915599,Ndufs3,C57BL,Early adult,IMPC_CBC_001_001,Sodium,0.9600968
+MGI:1095412,Unc5c,C57BL,Early adult,CCP_XRY_031_001,Digit integrity,0.9870447
+MGI:1916987,Ttl,C57BL,E12.5,IMPC_GRS_010_001,Forelimb grip strength normalised against body weight,0.6925274
+MGI:107191,BMPR1B,C57BL,Early adult,IMPC_DXA_005_001,Bone Mineral Content (excluding skull),0.5395488
+MGI:1916987,Ttl,C57BL,E15.5,IMPC_GRS_009_001,Forelimb and hindlimb grip strength measurement mean,0.3136928
+MGI:2677271,Slc24a5,C57BL,Early adult,MGP_IMM_116_001,Plasma cells - % of CD45+,0.4321807
+MGI:1924265,Mpped2,C57BL,Early adult,IMPC_CSD_030_001,Tremor,0.7384785
+MGI:2444631,Bltp1,C57BL,E12.5,IMPC_CBC_002_001,Potassium,0.5482114
+MGI:104708,Cct3,C57BL,E9.5,IMPC_ECG_003_001,CV,0.457016
+MGI:1916987,Ttl,C57BL,E15.5,KMPCLA_GRS_010_001,Forelimb grip strength normalised against body weight,0.1967715
+MGI:1918066,Rpusd2,C57BL,Early adult,CCP_XRY_005_001,Teeth,0.1544156
+MGI:2385213,Pdik1l,C57BL,Early adult,MGP_MLN_014_001,Resting CD8+ T cells - % of CD8+,0.5062928
+MGI:1350930,Srp9,C57BL,Early adult,IMPC_CBC_001_001,Sodium,0.9478496
+MGI:1919051,Plekhf2,C57BL,Early adult,IMPC_OFD_016_001,Center permanence time,0.680873
+MGI:1923073,Fam227b,C57BL,Early adult,CCP_XRY_004_001,Mandibles,0.2782802
+MGI:2135283,Igsf9,C57BL,Early adult,IMPC_GEP_017_001,Facial Morphology,0.1304617
+MGI:1349164,Sdc4,C57BL,Early adult,CCP_XRY_062_001,Polysyndactylism,0.1388028
+MGI:1095412,Unc5c,C57BL,Early adult,IMPC_IMM_032_002,Effector CD8+ T cells - % of live leukocytes (Panel A),0.4846429
+MGI:1201673,Shox2,C57BL,E9.5,IMPC_EYE_068_001,Left total retinal thickness,0.4947482
+MGI:2385213,PDIK1L,C57BL,Middle aged adult,IMPC_XRY_063_001,Cervical processes,0.807811
+MGI:1918142,Ttll7,C57BL,Early adult,MGP_PBI_009_001,CD4+ CD44+ CD62L- alpha beta effector T cell percentage,0.4436921
+MGI:1921735,Lrrc71,C57BL,Early adult,IMPC_GEO_015_001,Head shape,0.9931864
+MGI:1917770,Glipr2,C57BL,Early adult,M-G-P_026_001_003,Coat intact,0.694687
+MGI:2676312,Abca12,C57BL,Early adult,IMPC_CBC_001_001,Sodium,0.9077374
+MGI:1098604,Rragd,C57BL,Early adult,IMPC_EYE_003_001,Eye Hemorrhage or Blood Presence,0.2958813
+MGI:97565,Pgm1,C57BL,E9.5,IMPC_GEM_070_001,Midbrain morphology,0.3350869
+MGI:2385213,Pdik1l,C57BL,Middle aged adult,JAX_LDT_008_001,Percent time in dark,0.8784945
+MGI:1914542,Pigc,C57BL,Early adult,IMPC_CSD_014_001,Coat - hair texture / appearance - back,0.3304473
+MGI:107674,Cd1d1,C57BL,Early adult,IMPC_CBC_004_001,Urea (Blood Urea Nitrogen - BUN),0.8919275
+MGI:107191,Bmpr1b,C57BL,Early adult,IMPC_GRS_010_001,Forelimb grip strength normalised against body weight,0.9348993
+MGI:1350930,Srp9,C57BL,E9.5,IMPC_OFD_012_001,Periphery permanence time,0.3794327
+MGI:98397,Src,C57BL,Early adult,IMPC_EYE_065_001,Right posterior chamber depth,0.5102281
+MGI:97565,Pgm1,C57BL,Early adult,MGP_IMM_019_001,CD5+ gd T cells - % of gd T cells,0.8822697
+MGI:1350930,Srp9,C57BL,E12.5,IMPC_IPG_010_001,Fasted blood glucose concentration,0.9363435
+MGI:3045320,Mgat4f,C57BL,Early adult,JAX_LDT_003_001,Time mobile light side,0.836332
+MGI:1859866,Cdc20,C57BL,E12.5,ESLIM_011_001_002,PP1 startle magnitude,0.629944
+MGI:1922423,Tex38,C57BL,Early adult,CCP_XRY_004_001,Mandibles,0.6217416
+MGI:2140361,Slc35d1,C57BL,Early adult,IMPC_ECG_004_001,RR,0.2991767
+MGI:1914210,Mindy3,C57BL,Early adult,MGP_IMM_052_001,Plasma cells - % of B2 cells,0.1361533
+MGI:99218,Cdh4,C57BL,Early adult,IMPC_FEA_003_001,Conditioning Baseline % Freezing Time,0.9228694
+MGI:2676312,Abca12,C57BL,E18.5,IMPC_HEM_003_001,Hemoglobin,0.06271728
+MGI:2158201,Acot8,C57BL,Early adult,IMPC_CBC_005_001,Creatinine,0.8301091
+MGI:106925,Cldn11,C57BL,Late adult,IMPC_EYE_003_001,Eye Hemorrhage or Blood Presence,0.1020165
+MGI:101813,Coq3,C57BL,Early adult,IMPC_CSD_040_002,Forepaw - size,0.9022041
+MGI:2443564,Ambra1,C57BL,E12.5,ESLIM_015_001_004,Sodium,0.3654595
+MGI:2385213,Pdik1l,C57BL,Early adult,MGP_IMM_011_001,Resting Treg cells - % of Treg,0.2737627
+MGI:2443805,Bnc2,C57BL,Early adult,IMPC_ACS_037_001,% Pre-pulse inhibition - Global,0.7995246
+MGI:1921607,Efhd1,C57BL,Early adult,UCD_OWT_029_001,Body length,0.4222624
+MGI:1926106,Fam163b,C57BL,Early adult,ESLIM_020_001_004,Visual abnormality,0.7228101
+MGI:2445096,DHTKD1,C57BL,Early adult,ESLIM_005_001_005,Bone Mineral Content,0.3400448
+MGI:106637,Slc30a2,C57BL,E9.5,IMPC_HWT_002_001,Tibia length,0.7146863
+MGI:2441837,Adgrb3,C57BL,Early adult,IMPC_OFD_012_001,Periphery permanence time,0.9263592
+MGI:2444631,Bltp1,C57BL,Early adult,IMPC_XRY_027_001,Joints,0.4797915
+MGI:102844,Mybpc3,C57BL,Early adult,ESLIM_021_001_005,HDL-cholesterol,0.8509901
+MGI:107363,Stxbp1,C57BL,E18.5,IMPC_CBC_006_001,Total protein,0.9280501
+MGI:1920199,Ccnt2,C57BL,Early adult,IMPC_CSD_036_001,Startle response,0.3107446
+MGI:98386,Sptan1,C57BL,E9.5,IMPC_XRY_063_001,Cervical processes,0.157809
+MGI:95777,Gnas,129SV,Early adult,IMPC_GEM_025_002,Pallor,0.9013863
+MGI:107363,Stxbp1,C57BL,E9.5,MGP_IMM_130_001,CD11b-low cDC - % of CD45+,0.3320006
+MGI:3590554,Firrm,C57BL,Early adult,IMPC_CSD_014_001,Coat - hair texture / appearance - back,0.1085565
+MGI:2677271,Slc24a5,C57BL,Early adult,MGP_CSD_068_001,Vibrissae,0.8357568
+MGI:103300,Rbl1,C57BL,Early adult,JAX_HBD_001_001,Total holepokes,0.3458721
+MGI:1914454,Eif2s2,C57BL,Early adult,MGP_IMM_007_001,Resting CD4+ T helper cells - % of CD4+ T helper cells,0.7854664
+MGI:99218,Cdh4,C57BL,Early adult,CCP_XRY_062_001,Polysyndactylism,0.07968266
+MGI:1926106,Fam163b,C57BL,Early adult,IMPC_CBC_008_001,Total bilirubin,0.8323955
+MGI:2443100,Bend7,C57BL,Early adult,M-G-P_025_001_005,Potassium,0.4782589
+MGI:1921263,Rftn2,C57BL,Early adult,IMPC_CSD_024_001,Vibrissae - appearance,0.8291832
+MGI:107191,Bmpr1b,C54BL,Early adult,MGP_IMM_128_001,Conventional DC (cDC) - % of CD45+,0.6237332
+MGI:97565,Pgm1,C57BL,Early adult,IMPC_CBC_005_001,Creatinine,0.3785204
+MGI:1917120,Polr3gl,C57BL,Early adult,ESLIM_005_001_701,BMC/Body weight,0.2580332
+MGI:3576049,Ugt1a2,C57BL,Early adult,MGP_MLN_078_001,Total gd T cells - % of CD45+,0.8597944
+MGI:2444631,Bltp1,C57BL,E15.5,IMPC_XRY_006_001,Scapulae,0.06973749
+MGI:1916987,Ttl,C57BL,Early adult,MGP_IMM_083_001,Naive CD8+ T cells - % of CD45+,0.5940664
+MGI:1916330,Gmppa,C57BL,Early adult,UCDLA_EYE_083_001,Vitreous,0.2760842
+MGI:1860511,Heyl,C57BL,Early adult,IMPC_EYE_069_001,Left inner nuclear layer,0.9369347
+MGI:2679420,Pak6,C57BL,Early adult,IMPC_CSD_030_001,Tremor,0.2270251
+MGI:2444824,Sirpb1a,C57BL,Early adult,IMPC_GEP_005_002,Responsive to tactile stimuli,0.1970049
+MGI:2140259,Zmynd12,C57BL,Early adult,MGP_IMM_013_001,Total CD8+ T cells - % of ab T cells,0.4212204
+MGI:2153070,Synpo2,C57BL,Early adult,IMPC_EYE_064_001,Right outer nuclear layer,0.1804909
+MGI:1927753,Inpp5e,C57BL,Early adult,JAX_OFD_009_001,Whole arena average speed,0.172445
+MGI:107674,Cd1d1,C57BL,Early adult,CCP_XRY_004_001,Mandibles,0.8322341
+MGI:97324,Nhlh2,C57BL,Early adult,IMPC_HEM_005_001,Mean cell volume,2.345439e-05
+MGI:97803,Ptma,C57BL,E9.5,IMPC_GRS_010_001,Forelimb grip strength normalised against body weight,0.6610879
+MGI:101813,Coq3,C57BL,Early adult,MGP_IMM_086_001,CD5+ gd T cells - % of CD45+,0.6814163
+MGI:1096385,Bcan,C57BL,Late adult,IMPC_CSD_029_001,Activity (body position),0.4886278
+MGI:1913721,Anp32e,C57BL,Early adult,ESLIM_011_001_005,PP4 startle magnitude,0.6170878
+MGI:87879,Aco1,C57BL,Early adult,MGP_IMM_076_001,Total Treg cells - % of CD45+,0.4129635
+MGI:1098604,Rragd,C57BL,Early adult,ESLIM_005_001_701,BMC/Body weight,0.469748
+MGI:1914199,Trim59,C57BL,Early adult,MGP_MLN_018_001,CD5+ gd T cells - % of gd T cells,0.6970273
+MGI:2384297,Map7d1,C57BL,Early adult,IMPC_CSD_014_001,Coat - hair texture / appearance - back,0.9590291
+MGI:107674,Cd1d1,C57BL,Early adult,IMPC_ECG_014_001,rMSSD,0.4406266
+MGI:1346086,Aplnr,C57BL,Early adult,MGP_CSD_008_001,Startle response,0.7135637
+MGI:2681832,Cspp1,C57BL,Early adult,IMPC_CSD_041_002,Hindpaw - size,0.1994778
+MGI:1919369,Tpx2,C57BL,E9.5,MGP_IMM_126_001,Total DC - % of CD45+,0.6063027
+MGI:1924467,Rspo4,C57BL,Early adult,IMPC_XRY_033_001,Tibia length,0.3217672
+MGI:2444508,Fitm2,C57BL,Early adult,IMPC_HEM_030_001,Neutrophil cell count,0.8390431
+MGI:2444391,Slc25a44,C57BL,Early adult,ESLIM_008_001_022,Vocalisation,0.1272455
+MGI:1351315,Eloa,C57BL,E9.5,IMPC_DXA_008_001,Lean/Body weight,0.894999
+MGI:1913746,Ppdpf,C57BL,Early adult,IMPC_CBC_020_001,Fructosamine,0.2060705
+MGI:1353665,Usp21,C57BL,Early adult,ESLIM_013_001_004,Left retina pigmentation,0.8112209
+MGI:97850,Raly,C57BL,Early adult,CCP_XRY_061_001,Fusion of processes,0.0944305
+MGI:97565,Pgm1,C57BL,E12.5,IMPC_OFD_021_001,Number of rears - total,0.7926665
+MGI:1350930,Srp9,C57BL,E12.5,IMPC_EYE_023_001,Optic Disc,0.6145449
+MGI:2444631,Bltp1,C57BL,Early adult,IMPC_GEO_064_001,Edema,0.2679445
+MGI:2140259,Zmynd12,C57BL,Early adult,MGP_IMM_076_001,Total Treg cells - % of CD45+,0.9261569
+MGI:2676312,Abca12,C57BL,Early adult,IMPC_XRY_023_001,Ulna,0.8536833
+MGI:1919051,Plekhf2,C57BL,Early adult,CCP_XRY_062_001,Polysyndactylism,0.6351669
+MGI:3646006,Gm5148,C57BL,Early adult,JAX_PLC_004_001,Glucose,0.8150471
+MGI:2384297,Map7d1,C57BL,E12.5,IMPC_CBC_015_001,Total cholesterol,0.638482
+MGI:1920484,Snorc,C57BL,Early adult,MGP_MLN_015_001,Naive CD8+ T cells - % of CD8+,0.461412
+MGI:1921735,Lrrc71,C57BL,Early adult,CCP_XRY_004_001,Mandibles,0.6898114
+MGI:2151053,Serpinb7,C57BL,Early adult,MGP_CSD_027_001,Ventral coat/hair colour pattern,0.2768573
+MGI:1922423,Tex38,C57BL,Early adult,IMPC_GEO_017_002,Facial Cleft,0.3699605
+MGI:1201673,Shox2,C57BL,Early adult,IMPC_FEA_003_001,Conditioning Baseline % Freezing Time,0.4432819
+MGI:3650206,Gm12695,C57BL,Early adult,IMPC_EYE_092_002,Retina (combined),0.3427935
+MGI:1924232,Vxn,C57BL,Early adult,IMPC_HEM_031_001,Lymphocyte differential count,0.9835894
+MGI:1278321,Epc2,C57BL,Early adult,IMPC_CSD_041_002,Hindpaw - size,0.6412936
+MGI:1918142,Ttll7,C57BL,Early adult,MGP_MLN_003_001,Total CD4+ T cells - % of ab T cells,0.3058855
+MGI:2140050,Ints3,C57BL,E9.5,MGP_IMM_127_001,Plasmacytoid DC - % of CD45+,0.1525652
+MGI:1309469,Casq2,C57BL,Early adult,M-G-P_025_001_005,Potassium,0.208461
+MGI:1353435,Fbxw2,C57BL,Early adult,IMPC_HEM_037_001,Basophil cell count,0.7186832
+MGI:1927753,Inpp5e,C57BL,E12.5,UCDLA_EYE_083_001,Vitreous,0.7017097
+MGI:101784,Nes,C57BL,Early adult,IMPC_GEL_027_001,Neural tube closure,0.3789146
+MGI:107363,Stxbp1,C57BL,E9.5,ESLIM_015_001_004,Sodium,0.8488772
+MGI:2441837,Adgrb3,C57BL,Early adult,IMPC_XRY_006_001,Scapulae,0.5422067
+MGI:1915862,Ube2c,C57BL,E12.5,IMPC_CBC_018_001,Glucose,0.08509226
+MGI:97565,Pgm1,C57BL,E12.5,IMPC_HWT_002_001,Tibia length,0.6464639
+MGI:3045320,Mgat4f,C57BL,Early adult,M-G-P_026_001_010,Mouth morphology,0.4269704
+MGI:1915862,Ube2c,C57BL,E18.5,IMPC_IMM_040_002,Effector CD4+ NKT cells - % of live leukocytes (Panel A),0.7221093
+MGI:1920199,Ccnt2,C57BL,E12.5,MGP_IMM_086_001,CD5+ gd T cells - % of CD45+,0.278994
+MGI:105383,Il18r1,C57BL,Early adult,IMPC_FEA_003_001,Conditioning Baseline % Freezing Time,0.7556026
+MGI:2442704,Frrs1l,C57BL,Early adult,IMPC_GEM_068_001,Forebrain morphology,0.1651716
+MGI:101784,Nes,C57BL,Early adult,IMPC_EYE_003_001,Eye Hemorrhage or Blood Presence,0.5599266
+MGI:2138198,D630023F18Rik,C57BL,Early adult,IMPC_FEA_003_001,Conditioning Baseline % Freezing Time,0.09472511
+MGI:1916987,Ttl,C57BL,E15.5,IMPC_XRY_063_001,Cervical processes,0.8106443
+MGI:101813,Coq3,C57BL,Early adult,IMPC_GEL_060_001,Neural tube morphology,0.8671597
+MGI:1916732,Nup35,C57BL,Early adult,IMPC_XRY_022_001,Radius,0.6881936
+MGI:3650206,Gm12695,C57BL,Early adult,JAX_LDT_002_001,Light side time spent,0.06166193
+MGI:103300,Rbl1,C57BL,Early adult,IMPC_EYE_068_001,Left total retinal thickness,0.9166186
+MGI:1921607,Efhd1,C57BL,Early adult,IMPC_XRY_012_001,Pelvis,0.08023867
+MGI:104688,Col4a3,C57BL,Early adult,IMPC_HWT_002_001,Tibia length,0.5107003
+MGI:2384297,Map7d1,C57BL,Early adult,ESLIM_005_001_005,Bone Mineral Content,0.9545154
+MGI:2444989,Spg11,C57BL,Early adult,UCDIP_CSD_014_001,Coat - hair texture / appearance - back,0.3051662
+MGI:1201673,Shox2,C57BL,E12.5,ESLIM_011_001_002,PP1 startle magnitude,0.1929522
+MGI:1921263,Rftn2,C57BL,Early adult,IMPC_CBC_002_001,Potassium,0.3899253
+MGI:1921722,Stpg3,C57BL,Early adult,IMPC_DXA_003_001,Lean mass,0.126475
+MGI:1920199,Ccnt2,C59BL,E12.5,IMPC_GEL_011_001,Embryo turning,0.09782392
+MGI:1309469,Casq2,C57BL,Early adult,IMPC_ACS_034_001,% Pre-pulse inhibition - PPI2,0.1476033
+MGI:1096385,Bcan,C57BL,Middle aged adult,MGP_CSD_027_001,Ventral coat/hair colour pattern,0.9785672
+MGI:2443100,Bend7,C57BL,Early adult,IMPC_GEM_007_001,Pericardium Morphology,0.8668437
+MGI:1913420,Chchd5,C57BL,Early adult,UCDLA_CSD_012_001,Coat - hair distribution - head,0.2492477
+MGI:1922387,Rprd2,C57BL,Early adult,ESLIM_008_001_012,Tail elevation,0.8733125
+MGI:1927753,Inpp5e,C57BL,Early adult,IMPC_OFD_013_001,Periphery average speed,0.06923445
+MGI:1915862,Ube2c,C57BL,E18.5,IMPC_CSD_061_001,Skin color - tail,0.7169257
+MGI:2442704,Frrs1l,C57BL,Early adult,IMPC_HEM_004_001,Hematocrit,0.1705775
+MGI:2444508,Fitm2,C57BL,E15.5,CCP_XRY_005_001,Teeth,0.9717753
+MGI:1918066,Rpusd2,C57BL,Early adult,IMPC_CBC_005_001,Creatinine,0.1879073
+MGI:97898,Ren1,C57BL,Early adult,MGP_IMM_116_001,Plasma cells - % of CD45+,0.9485641
+MGI:2685195,Zbtb34,C57BL,E9.5,IMPC_CBC_018_001,Glucose,0.2104304
+MGI:2444631,Bltp1,C57BL,Early adult,IMPC_EYE_070_001,Left outer nuclear layer,0.2329561
+MGI:2444631,Bltp1,C57BL,E12.5,IMPC_XRY_021_001,Humerus,0.9211174
+MGI:1924486,Sccpdh,C57BL,Early adult,IMPC_IMM_032_002,Effector CD8+ T cells - % of live leukocytes (Panel A),0.6271366
+MGI:1346069,Cdh20,C57BL,Early adult,IMPC_CAL_017_001,Respiratory Exchange Ratio,0.2836197
+MGI:1920199,Ccnt2,C57BL,E12.5,IMPC_ACS_033_001,% Pre-pulse inhibition - PPI1,0.8259907
+MGI:1920484,Snorc,C57BL,Early adult,MGP_IMM_040_001,Ly6C+ mature NK cells - % of mature NK cells,0.3960981
+MGI:98397,Src,129SV,Early adult,ESLIM_020_001_002,Heart weight,0.2099187
+MGI:1914454,Eif2s2,C57BL,Early adult,IMPC_GEP_022_001,Embryo Size,0.8734209
+MGI:1913692,Spc25,C57BL,Early adult,IMPC_OFD_020_001,Distance travelled - total,0.3186312
+MGI:99218,Cdh4,C57BL,Early adult,IMPC_GEL_027_001,Neural tube closure,0.6381218
+MGI:2685869,Dpy19l4,C57BL,Early adult,IMPC_CSD_061_001,Skin color - tail,0.8917282
+MGI:1201673,Shox2,C57BL,E9.5,IMPC_CSD_036_001,Startle response,0.5870352
+MGI:2444508,Fitm2,C57BL,E15.5,IMPC_EYE_087_001,Right vitreous humor thickness,0.3626204
+MGI:1927241,Wdr12,C57BL,E9.5,ESLIM_011_001_004,PP3 startle magnitude,0.2522058
+MGI:2685195,Zbtb34,C57BL,Early adult,IMPC_GEO_017_002,Facial Cleft,0.3106594
+MGI:104559,Rcn1,C57BL,Early adult,ESLIM_016_001_005,Mean cell volume,0.9958906
+MGI:2448514,R3hdm1,C57BL,Early adult,HMGULA_DYS_016_001,Coat - hair texture / appearance - abdomen,0.2191541
+MGI:1353665,Usp21,C57BL,Early adult,MGP_IMM_128_001,Conventional DC (cDC) - % of CD45+,0.831167
+MGI:1916413,Mrpl44,C57BL,Early adult,IMPC_CBC_013_001,Alanine aminotransferase,0.3739549
+MGI:1914454,Eif2s2,C57BL,E12.5,ESLIM_011_001_002,PP1 startle magnitude,0.8974038
+MGI:102519,Cst3,C57BL,E12.5,IMPC_ECG_010_001,HRV,0.6113617
+MGI:1353435,Fbxw2,C57BL,Early adult,IMPC_GEL_027_001,Neural tube closure,0.7120641
+MGI:1922776,Eppin,C57BL,Early adult,IMPC_GEM_019_001,Embryo Size,0.2638804
+MGI:2443805,Bnc2,C57BL,Early adult,MGP_MLN_012_001,Total CD8+ T cells - % of ab T cells,0.49786
+MGI:1918066,Rpusd2,C57BL,Early adult,IMPC_CSD_030_001,Tremor,0.3716816
+MGI:106925,Cldn11,C57BL,Middle aged adult,IMPC_GEL_058_001,Heart morphology,0.6450764
+MGI:1860511,Heyl,C57BL,Early adult,IMPC_CBC_015_001,Total cholesterol,0.9705637
+MGI:2676312,Abca12,C57BL,E18.5,IMPC_OFD_050_001,Percentage center movement time,0.4280825
+MGI:1921520,Usp20,C57BL,Early adult,IMPC_GEL_011_001,Embryo turning,0.7366299
+MGI:107674,Cd1d1,C57BL,Early adult,IMPC_CBC_009_001,Calcium,0.7186722
+MGI:1341898,Nmur1,C57BL,Early adult,IMPC_GEP_022_001,Embryo Size,0.2779479
+MGI:1309469,Casq2,C57BL,Early adult,IMPC_EYE_088_001,Left vitreous humour thickness,0.5741228
+MGI:1921722,Stpg3,C57BL,Early adult,IMPC_HEM_001_001,White blood cell count,0.4921107
+MGI:2443564,Ambra1,C57BL,E15.5,MGP_IMM_080_001,Total CD8+ T cells - % of CD45+,0.6394653
+MGI:1914210,Mindy3,C57BL,Early adult,IMPC_CBC_005_001,Creatinine,0.2961441
+MGI:1913692,Spc25,C57BL,E9.5,MGP_CSD_008_001,Startle response,0.4217011
+MGI:1337072,Ier5,C57BL,Late adult,IMPC_CBC_017_001,Triglycerides,0.1911637
+MGI:109424,Abca4,C57BL,Early adult,IMPC_IMM_028_002,Effector CD4+ T helper cells - % of live leukocytes (Panel A),0.6891206
+MGI:2654325,Gba2,C57BL,Early adult,IMPC_XRY_057_001,Kyphosis,0.6106982
+MGI:1922828,Fggy,C57BL,Early adult,IMPC_HEM_032_001,Lymphocyte cell count,0.6626164
+MGI:1923676,Fam209,C57BL,Early adult,ESLIM_008_001_016,Trunk curl,0.7105137
+MGI:98960,Wnt6,C57BL,Early adult,JAX_HBD_001_001,Total holepokes,0.857259
+MGI:2677271,Slc24a5,C57BL,Early adult,IMPC_CBC_014_001,Alkaline phosphatase,0.4841956
+MGI:1913692,Spc25,C57BL,E9.5,IMPC_GRS_010_001,Forelimb grip strength normalised against body weight,0.6514621
+MGI:107363,Stxbp1,C57BL,E9.5,IMPC_XRY_021_001,Humerus,0.5506148
+MGI:1916987,Ttl,C57BL,E12.5,IMPC_XRY_012_001,Pelvis,0.9446969
+MGI:1919128,Fam83d,C57BL,Early adult,MGP_MLN_075_001,Resting CD8+ T cells - % of CD45+,0.4670005
+MGI:1920199,Ccnt2,C57BL,Early adult,IMPC_CSD_030_001,Tremor,0.1750292
+MGI:1924256,Ddrgk1,C57BL,Early adult,ESLIM_013_001_004,Left retina pigmentation,0.6329256
+MGI:1917120,Polr3gl,C57BL,Early adult,IMPC_CSD_032_001,Locomotor activity,0.3585894
+MGI:2443564,Ambra1,C57BL,E12.5,IMPC_CSD_036_001,Startle response,0.1098502
+MGI:1914454,Eif2s2,C57BL,E12.5,MGP_MLN_075_001,Resting CD8+ T cells - % of CD45+,0.4135894
+MGI:1915862,Ube2c,C57BL,Early adult,KMPCLA_GRS_010_001,Forelimb grip strength normalised against body weight,0.2427265
+MGI:97850,Raly,C57BL,Early adult,ESLIM_015_001_011,Iron,0.06790835
+MGI:1927580,Bloc1s6,C57BL,Early adult,IMPC_HEM_004_001,Hematocrit,0.7216687
+MGI:97850,Raly,C57BL,Early adult,IMPC_ECH_013_001,HR,0.907332
+MGI:2443564,Ambra1,C57BL,Early adult,UCD_OWT_029_001,Body length,0.9817191
+MGI:1916987,Ttl,C57BL,Early adult,CCP_XRY_003_001,Maxilla/Pre-maxilla,0.7939008
+MGI:1353665,Usp21,C57BL,Early adult,MGP_CSD_008_001,Startle response,0.3972058
+MGI:1913746,Ppdpf,C57BL,Early adult,ESLIM_015_001_002,Urea,0.9434201
+MGI:1919880,Hspa12b,C57BL,Early adult,IMPC_HEM_031_001,Lymphocyte differential count,0.2162341
+MGI:2685195,Zbtb34,C57BL,Early adult,IMPC_IMM_028_002,Effector CD4+ T helper cells - % of live leukocytes (Panel A),0.9217623
+MGI:2140259,Zmynd12,C57BL,Early adult,ESLIM_008_001_007,Transfer arousal,0.7136538
+MGI:1339968,Cth,C57BL,Early adult,MGP_IMM_009_001,Total Treg cells - % of CD4+,0.1802822
+MGI:3588202,Garin4,C57BL,Early adult,IMPC_HEM_030_001,Neutrophil cell count,0.8913558
+MGI:1859866,Cdc20,C57BL,E12.5,IMPC_EYE_027_001,Persistence of hyaloid vascular system,0.8604207
+MGI:1920199,Ccnt2,C57BL,E18.5,JAX_LDT_002_001,Light side time spent,0.3927324
+MGI:1201673,Shox2,C57BL,E9.5,IMPC_XRY_019_001,Fusion of vertebrae,0.6689866
+MGI:107171,Ppp3r2,C57BL,Early adult,MGP_IMM_116_001,Plasma cells - % of CD45+,0.6657961
+MGI:1924817,Tram2,C57BL,Early adult,JAX_OFD_022_001,Percentage center time,0.09599577
+MGI:107191,Bmpr1b,C57BL,Early adult,ESLIM_011_001_002,PP1 startle magnitude,0.5897107
+MGI:1346086,Aplnr,C57BL,Early adult,IMPC_CSD_023_001,Vibrissae - presence,0.2980649
+MGI:1351315,Eloa,C57BL,Early adult,M-G-P_026_001_003,Coat intact,0.4528414
+MGI:97565,Pgm1,C57BL,E12.5,IMPC_XRY_033_001,Tibia length,0.6655523
+MGI:1921263,Rftn2,C59BL,Early adult,IMPC_HEM_005_001,Mean cell volume,0.5123047
+MGI:1890510,Atp6v0b,C57BL,Early adult,IMPC_GRS_010_001,Forelimb grip strength normalised against body weight,0.06770778
+MGI:1919369,Tpx2,C57BL,Early adult,IMPC_HEM_037_001,Basophil cell count,0.8713923
+MGI:1922423,Tex38,C57BL,Early adult,IMPC_HEM_002_001,Red blood cell count,0.09664575
+MGI:107363,Stxbp1,C57BL,E18.5,IMPC_CBC_001_001,Sodium,0.1252744
+MGI:2448514,R3hdm1,C57BL,Early adult,IMPC_FEA_106_001,Difference in Cue Tone and Cue Baseline % Freezing,0.6971886
+MGI:97565,Pgm1,C57BL,E12.5,JAX_ROT_002_001,Average duration,0.727308
+MGI:1924817,Tram2,C57BL,Early adult,IMPC_CBC_014_001,Alkaline phosphatase,3.403112e-06
+MGI:2676312,Abca12,C57BL,E18.5,IMPC_GEM_029_001,Tail Morphology,0.07926188
+MGI:95777,Gnas,129SV,Early adult,IMPC_EYE_083_001,Vitreous,0.6321528
+MGI:2444631,Bltp1,C57BL,E15.5,M-G-P_026_001_003,Coat intact,0.9194759
+MGI:1353435,Fbxw2,C57BL,Early adult,IMPC_EYE_068_001,Left total retinal thickness,0.8258598
+MGI:1860511,Heyl,C57BL,Early adult,CCP_XRY_004_001,Mandibles,0.561857
+MGI:1922387,Rprd2,C57BL,E12.5,IMPC_OFD_010_001,Periphery distance travelled,0.7330954
+MGI:103300,Rbl1,C57BL,Early adult,ESLIM_005_001_005,Bone Mineral Content,0.7807405
+MGI:3617846,Ankrd34a,C57BL,Early adult,IMPC_CSD_024_001,Vibrissae - appearance,0.6903691
+MGI:2443564,Ambra1,C57BL,E12.5,IMPC_OFD_014_001,Center distance travelled,0.6281299
+MGI:1914199,Trim59,C57BL,E18.5,MGP_IMM_128_001,Conventional DC (cDC) - % of CD45+,0.9095517
+MGI:1914542,Pigc,C57BL,Early adult,IMPC_OFD_013_001,Periphery average speed,0.1674366
+MGI:98386,Sptan1,C57BL,E9.5,JAX_LDT_002_001,Light side time spent,0.2738471
+MGI:2444681,Hhat,C57BL,Early adult,M-G-P_025_001_005,Potassium,0.7987898
+MGI:1927753,Inpp5e,C57BL,Early adult,IMPC_OFD_020_001,Distance travelled - total,0.5695881
+MGI:1920484,Snorc,C57BL,Early adult,IMPC_GEO_019_001,Embryo Size,0.2163953
+MGI:104899,Mob4,C57BL,E9.5,IMPC_ABR_012_001,30kHz-evoked ABR Threshold,0.6705067
+MGI:1927753,Inpp5e,C57BL,E15.5,JAX_PLC_004_001,Glucose,0.5644783
+MGI:1919369,Tpx2,C57BL,E9.5,MGP_IMM_077_001,Effector Treg cells - % of CD45+,0.4136491
+MGI:2685195,Zbtb34,C57BL,E9.5,MGP_IMM_077_001,Effector Treg cells - % of CD45+,0.1680776
+MGI:1922776,Eppin,C57BL,Early adult,IMPC_IMM_028_002,Effector CD4+ T helper cells - % of live leukocytes (Panel A),0.5702068
+MGI:1859866,Cdc20,C57BL,E9.5,CCP_XRY_004_001,Mandibles,0.09423866
+MGI:97565,Pgm1,C57BL,Early adult,IMPC_FEA_003_001,Conditioning Baseline % Freezing Time,0.07618972
+MGI:1341907,Fjx1,C57BL,Early adult,JAX_HBD_001_001,Total holepokes,0.8606
+MGI:107363,Stxbp1,C57BL,Early adult,IMPC_ECH_012_001,LVPWs,0.5078944
+MGI:3590554,Firrm,C57BL,Early adult,IMPC_GEP_005_002,Responsive to tactile stimuli,0.8243842
+MGI:2684789,Lrsam1,C57BL,Early adult,ESLIM_020_001_002,Heart weight,0.7078772
+MGI:1341898,Nmur1,C57BL,Early adult,IMPC_CSD_033_001,Gait,0.8530477
+MGI:106925,Cldn11,C57BL,Early adult,IMPC_GEL_058_001,Heart morphology,0.3463776
+MGI:1919300,Poglut2,C57BL,Early adult,JAX_HBD_001_001,Total holepokes,0.9014667
+MGI:1916987,Ttl,C57BL,Early adult,IMPC_EYE_023_001,Optic Disc,0.6912475
+MGI:3588202,Garin4,C56BL,Early adult,CCP_XRY_004_001,Mandibles,0.5147733
+MGI:101770,Bfsp1,C57BL,Early adult,MGP_IMM_086_001,CD5+ gd T cells - % of CD45+,0.6600564
+MGI:98386,Sptan1,C57BL,Early adult,IMPC_FEA_106_001,Difference in Cue Tone and Cue Baseline % Freezing,0.646405
+MGI:2385213,Pdik1l,C57BL,Early adult,IMPC_ECG_010_001,HRV,0.893679
+MGI:98960,Wnt6,C57BL,E12.5,JAX_LDT_003_001,Time mobile light side,0.214748
+MGI:1924933,Ehmt1,C57BL,Early adult,M-G-P_016_001_006,Mean-corpuscular-haemoglobin,0.5684209
+MGI:98386,Sptan1,C57BL,E9.5,IMPC_GRS_008_001,Forelimb grip strength measurement mean,0.9120494
+MGI:95777,Gnas,129SV,Early adult,IMPC_HEM_027_001,Red blood cell distribution width,0.1283134
+MGI:107341,Ctss,C57BL,Early adult,CCP_XRY_020_001,Processes on vertebrae,0.7730073
+MGI:1914210,Mindy3,C57BL,Early adult,CCP_LDT_003_001,Time mobile light side,0.202969
+MGI:1916732,Nup35,C57BL,Early adult,IMPC_OFD_013_001,Periphery average speed,0.5899252
+MGI:1919051,Plekhf2,C57BL,Early adult,IMPC_EYE_088_001,Left vitreous humour thickness,0.7552174
+MGI:1913423,Ccdc107,C57BL,Early adult,IMPC_GEM_075_001,Delayed embryonic development,0.1017358
+MGI:1922946,Prpf6,C57BL,Early adult,IMPC_OFD_012_001,Periphery permanence time,0.356036
+MGI:88015,Ampd1,C57BL,E15.5,IMPC_HEM_003_001,Hemoglobin,0.1243791
+MGI:1859866,Cdc20,C57BL,Early adult,IMPC_XRY_060_001,Transitional vertebrae,0.2382011
+MGI:2140361,Slc35d1,C57BL,E18.5,UCDLA_EYE_083_001,Vitreous,0.8792187
+MGI:1920199,Ccnt2,C57BL,Early adult,MGP_CSD_026_001,Ventral coat/hair colour,0.171183
+MGI:106637,Slc30a2,C57BL,E9.5,IMPC_XRY_033_001,Tibia length,0.9847978
+MGI:97565,Pgm1,C57BL,E9.5,ESLIM_011_001_005,PP4 startle magnitude,0.4542368
+MGI:1916428,Snx5,C57BL,Early adult,ESLIM_008_001_002,Tremor,0.3720762
+MGI:1914199,Trim59,C57BL,E18.5,JAX_HBD_001_001,Total holepokes,0.9211662
+MGI:1919471,Cimip1,C57BL,Early adult,IMPC_OFD_013_001,Periphery average speed,0.5000785
+MGI:3045320,Mgat4f,C57BL,Early adult,IMPC_IMM_032_002,Effector CD8+ T cells - % of live leukocytes (Panel A),0.5609391
+MGI:107341,Ctss,C57BL,Early adult,IMPC_GRS_010_001,Forelimb grip strength normalised against body weight,0.2284542
+MGI:1309469,Casq2,C57BL,E12.5,IMPC_IMM_014_002,Treg cells - % of live leukocytes (Panel A),0.5064764
+MGI:1346086,Aplnr,C57BL,Early adult,IMPC_CSD_023_001,Vibrissae - presence,0.2980649
+MGI:88015,Ampd1,C57BL,Early adult,CCP_XRY_061_001,Fusion of processes,0.6683464
+MGI:1096385,Bcan,C57BL,Late adult,IMPC_HEM_031_001,Lymphocyte differential count,0.7395155
+MGI:2442792,Cdh7,C57BL,Early adult,ESLIM_021_001_005,HDL-cholesterol,0.7944066
+MGI:1916428,Snx5,C57BL,Early adult,ESLIM_015_001_004,Sodium,0.7141345
+MGI:3617846,Ankrd34a,C57BL,Early adult,CCP_XRY_019_001,Fusion of vertebrae,0.1035312
+MGI:1919084,Zbtb43,C57BL,Early adult,MGP_CSD_068_001,Vibrissae,0.9680995
+MGI:2444631,Bltp1,C57BL,E12.5,IMPC_GEO_017_002,Facial Cleft,0.4569733
+MGI:2153070,Synpo2,C57BL,Early adult,IMPC_DXA_010_001,Bone Area,0.9299895
+MGI:1920199,Ccnt2,C57BL,E12.5,MGP_IMM_004_001,Total CD4+ T cells - % of ab T cells,0.3799016
+MGI:98960,Wnt6,C57BL,E12.5,MGP_MLN_012_001,Total CD8+ T cells - % of ab T cells,0.6603265
+MGI:2139461,Tmem62,C57BL,Early adult,IMPC_OFD_022_001,Percentage center time,0.544266
+MGI:1919300,Poglut2,C57BL,Early adult,IMPC_GRS_008_001,Forelimb grip strength measurement mean,0.1791136
+MGI:97898,Ren1,C57BL,Early adult,M-G-P_026_001_003,Coat intact,0.9617187
+MGI:1095412,Unc5c,C57BL,Early adult,IMPC_GEP_030_002,Edema,0.6017967
+MGI:3590554,Firrm,C57BL,Early adult,MGP_IMM_019_001,CD5+ gd T cells - % of gd T cells,0.1596012
+MGI:1919369,Tpx2,C57BL,E9.5,IMPC_CBC_023_001,Alpha-amylase,0.3518725
+MGI:98397,Src,129SV,Early adult,IMPC_XRY_022_001,Radius,0.3940247
+MGI:97803,Ptma,C57BL,E12.5,MGP_CSD_008_001,Startle response,0.4658631
+MGI:101770,Bfsp1,C57BL,Early adult,IMPC_GPO_002_001,Placenta Morphology,0.7482478
+MGI:1343489,Mpdz,C57BL,Early adult,MGP_IMM_005_001,CD4+ T helper cells - % of CD4+,0.2290564
+MGI:107341,Ctss,C57BL,Early adult,JAX_OFD_010_001,Periphery distance travelled,0.191113
+MGI:1351315,Eloa,C57BL,Early adult,JAX_OFD_009_001,Whole arena average speed,0.3544137
+MGI:1923676,Fam209,C57BL,Early adult,IMPC_HWT_002_001,Tibia length,0.7820551
+MGI:1347355,Slc7a11,C57BL,Early adult,IMPC_IMM_040_002,Effector CD4+ NKT cells - % of live leukocytes (Panel A),0.6202942
+MGI:2443925,Thsd7b,C57BL,Early adult,JAX_LDT_009_001,Percent time in light,0.4415124
+MGI:2684789,Lrsam1,C57BL,Early adult,JAX_OFD_016_001,Center permanence time,0.2992131
+MGI:88015,Ampd1,C57BL,Early adult,IMPC_EYE_008_001,Corneal opacity,0.2400157
+MGI:1339968,Cth,C57BL,Early adult,MGP_IMM_093_001,Resting CD4- NKT cells - % of CD45+,0.6888772
+MGI:98960,Wnt6,C57BL,E12.5,IMPC_XRY_006_001,Scapulae,0.9228384
+MGI:1309469,Casq2,C57BL,E12.5,IMPC_GEM_025_002,Pallor,0.1065407
+MGI:1924265,Mpped2,C57BL,Early adult,IMPC_GEP_030_002,Edema,0.4641273
+MGI:1924232,Vxn,C57BL,Early adult,IMPC_GRS_010_001,Forelimb grip strength normalised against body weight,0.132297
+MGI:1915862,Ube2c,C57BL,Early adult,IMPC_XRY_022_001,Radius,0.1763052
+MGI:1891259,Lrat,C57BL,Early adult,IMPC_HEM_005_001,Mean cell volume,0.1942452
+MGI:2443564,Ambra1,C57BL,E12.5,IMPC_XRY_060_001,Transitional vertebrae,0.93592
+MGI:1915599,Ndufs3,C57BL,Early adult,ESLIM_008_001_016,Trunk curl,0.5053524
+MGI:1337072,Ier5,C57BL,Late adult,CCP_XRY_005_001,Teeth,0.9274098
+MGI:1913882,Dph6,C57BL,Early adult,IMPC_CSD_029_001,Activity (body position),0.9137527
+MGI:1913420,Chchd5,C57BL,Early adult,IMPC_OFD_022_001,Percentage center time,1.45246
+MGI:109424,Abca4,C57BL,Early adult,M-G-P_025_001_001,Glucose,0.5481506
+MGI:2444681,Hhat,C57BL,Early adult,JAX_OFD_022_001,Percentage center time,0.05447352
+MGI:1309469,Casq2,C57BL,E12.5,IMPC_OFD_007_001,Whole arena resting time,0.5381204
+MGI:3611233,Tox2,C57BL,Early adult,MGP_IMM_128_001,Conventional DC (cDC) - % of CD45+,0.5236906
+MGI:1916428,Snx5,129SV,Early adult,ESLIM_005_001_004,Bone Mineral Density (excluding skull),0.775622
+MGI:1916732,Nup35,C57BL,Early adult,MGP_IMM_077_001,Effector Treg cells - % of CD45+,0.3527985
+MGI:1913491,Tmem9,C57BL,Early adult,IMPC_XRY_021_001,Humerus,0.7023583
+MGI:2387617,Obp2a,C57BL,Early adult,IMPC_GEL_011_001,Embryo turning,0.5120156
+MGI:1343489,Mpdz,C57BL,Early adult,ESLIM_016_001_005,Mean cell volume,0.8171846
+MGI:1916987,Ttl,C57BL,E12.5,IMPC_CSD_038_001,Trunk curl,0.9461346
+MGI:98960,Wnt6,C57BL,E15.5,IMPC_DXA_003_001,Lean mass,0.5360749
+MGI:1891259,Lrat,C57BL,Early adult,JAX_OFD_009_001,Whole arena average speed,0.3102131
+MGI:1920199,Ccnt2,C57BL,E12.5,IMPC_HWT_002_001,Tibia length,0.8310057
+MGI:3611233,Tox2,C57BL,Early adult,IMPC_FEA_003_001,Conditioning Baseline % Freezing Time,0.2197486
+MGI:97383,Ntrk1,C57BL,Early adult,ESLIM_008_001_007,Transfer arousal,0.8759582
+MGI:1923073,Fam227b,C57BL,Early adult,CCP_XRY_002_001,Zygomatic bone,0.8249332
+MGI:104899,Mob4,C57BL,E9.5,IMPC_GEM_069_001,Hindbrain morphology,0.1460221
+MGI:1927241,Wdr12,C57BL,E12.5,ESLIM_020_001_002,Heart weight,0.8200514
+MGI:1918066,Rpusd2,C57BL,Early adult,IMPC_GEO_017_002,Facial Cleft,0.8934641
+MGI:99218,Cdh4,C57BL,Early adult,IMPC_OFD_009_001,Whole arena average speed,0.6050016
+MGI:1915643,Mogat1,C57BL,Late adult,IMPC_DXA_005_001,Bone Mineral Content (excluding skull),0.8585063
+MGI:2685195,Zbtb34,C57BL,Early adult,IMPC_CBC_020_001,Fructosamine,0.3414773
+MGI:1915643,Mogat1,C57BL,Late adult,CCP_LDT_007_001,Percent time in dark,0.8872302
+MGI:1891259,Lrat,C57BL,Early adult,IMPC_GEO_017_002,Facial Cleft,0.8542065
+MGI:102519,Cst3,C57BL,E12.5,MGP_MLN_079_001,CD5+ gd T cells - % of CD45+,0.447663
+MGI:98960,WNT6,C57BL,E12.5,MGP_CSD_008_001,Startle response,0.4502938
+MGI:1917120,Polr3gl,C57BL,E18.5,IMPC_DXA_006_001,Body length,0.7519874
+MGI:104708,Cct3,C57BL,E9.5,MGP_IMM_077_001,Effector Treg cells - % of CD45+,0.3148828
+MGI:2444824,Sirpb1a,C57BL,Early adult,IMPC_CSD_079_001,Aggression,0.627786
+MGI:1927580,Bloc1s6,C57BL,Early adult,IMPC_XRY_022_001,Radius,0.5313699
+MGI:2679420,Pak6,C57BL,Early adult,IMPC_GEM_068_001,Forebrain morphology,0.606177
+MGI:3588202,Garin4,C57BL,Early adult,IMPC_GEO_064_001,Edema,0.2265123
+MGI:1915599,Ndufs3,C57BL,Early adult,IMPC_EYE_082_001,Iris transilumination,0.6709086
+MGI:95777,Gnas,129SV,Early adult,JAX_LDT_009_001,Percent time in light,0.188334
+MGI:2139461,Tmem62,C57BL,Early adult,IMPC_HEM_032_001,Lymphocyte cell count,0.8000219
+MGI:3617846,Ankrd34a,C57BL,Early adult,ESLIM_008_001_007,Transfer arousal,0.9138568
+MGI:107171,Ppp3r2,C57BL,Early adult,UCDLA_HEM_002_001,Red blood cell count,0.1725158
+MGI:1095412,Unc5c,C57BL,Late adult,IMPC_ECH_012_001,LVPWs,0.8054769
+MGI:2151053,Serpinb7,C57BL,Early adult,MGP_MLN_076_001,Naive CD8+ T cells - % of CD45+,0.6099115
+MGI:2158201,Acot8,C57BL,Early adult,IMPC_GEO_015_001,Head shape,0.05454005
+MGI:1918316,Hsfy2,C57BL,Early adult,IMPC_CBC_025_001,LDL-cholesterol,0.9953036
+MGI:1343489,Mpdz,C57BL,Early adult,IMPC_OFD_009_001,Whole arena average speed,0.7209207
+MGI:1931071,Sec61a2,C57BL,Early adult,ESLIM_008_001_007,Transfer arousal,0.5677272
+MGI:104899,Mob4,C57BL,Early adult,UCD_OWT_003_001,Spleen weight,0.9324211
+MGI:1353665,Usp21,C57BL,Early adult,IMPC_ECH_013_001,HR,0.7464515
+MGI:98397,Src,C57BL,Early adult,ESLIM_008_001_022,Vocalisation,0.2491656
+MGI:1914199,Trim59,C57BL,E18.5,IMPC_OFD_011_001,Periphery resting time,0.5689619
+MGI:1913790,Fam107b,C57BL,Early adult,IMPC_ACS_006_001,Response amplitude - S,0.4320234
+MGI:1095412,Unc5c,C57BL,Late adult,IMPC_DXA_003_001,Lean mass,0.09328701
+MGI:1096385,Bcan,C57BL,Late adult,IMPC_ECH_013_001,HR,0.9483151
+MGI:104899,Mob4,C57BL,Early adult,M-G-P_012_001_005,Body Weight,0.1137561
+MGI:101813,Coq3,C57BL,Early adult,IMPC_CBC_003_001,Chloride,0.4837709
+MGI:101813,Coq3,C57BL,E9.5,IMPC_GRS_011_001,Forelimb and hindlimb grip strength normalised against body weight,0.9177084
+MGI:1922946,Prpf6,C57BL,Early adult,IMPC_CBC_058_001,Cholesterol ratio,0.05806424
+MGI:1914199,Trim59,C57BL,Early adult,IMPC_EYE_070_001,Left outer nuclear layer,0.2694335
+MGI:102844,Mybpc3,C57BL,Early adult,IMPC_EYE_016_001,Lens,0.4962399
+MGI:1922776,Eppin,C57BL,Middle aged adult,IMPC_EYE_016_001,Lens,0.8415497
+MGI:1919880,Hspa12b,C57BL,Early adult,IMPC_CBC_004_001,Urea (Blood Urea Nitrogen - BUN),0.5902072
+MGI:1927753,Inpp5e,C57BL,Early adult,IMPC_CSD_078_001,Vocalization,0.2032958
+MGI:97324,Nhlh2,C57BL,Early adult,CCP_XRY_019_001,Fusion of vertebrae,0.07016369
+MGI:2140361,Slc35d1,C53BL,Early adult,CCP_LDT_004_001,Dark side time spent,0.1571635
+MGI:1347355,Slc7a11,C57BL,Early adult,MGP_IMM_116_001,Plasma cells - % of CD45+,0.1798851
+MGI:2139018,Olah,C57BL,Early adult,KMPCLA_GRS_011_001,Forelimb and hindlimb grip strength normalised against body weight,0.3106878
+MGI:1922946,Prpf6,C57BL,Early adult,MGP_CSD_068_001,Vibrissae,1.250128
+MGI:1919128,Fam83d,C57BL,Early adult,IMPC_HEM_008_001,Platelet count,0.07118272
+MGI:2684789,Lrsam1,C57BL,Early adult,IMPC_OFD_010_001,Periphery distance travelled,0.2095382
+MGI:2384297,Map7d1,C57BL,E9.5,MGP_MLN_066_001,Effector CD4+ T helper cells - % of CD45+,0.1140389
+MGI:2443564,Ambra1,C57BL,E12.5,MGP_IMM_116_001,Plasma cells - % of CD45+,0.5002271
+MGI:3588202,Garin4,C57BL,Early adult,CCP_LFO_001_001,Weight,0.8058138
+MGI:104559,Rcn1,C57BL,Early adult,IMPC_IMM_014_002,Treg cells - % of live leukocytes (Panel A),0.7643221
+MGI:97898,Ren1,C57BL,Early adult,IMPC_XRY_055_001,Shape of spine,0.243233
+MGI:2444508,Fitm2,C57BL,Early adult,MGP_IMM_130_001,CD11b-low cDC - % of CD45+,0.7403462
+MGI:3611233,Tox2,C57BL,Early adult,JAX_LDT_003_001,Time mobile light side,0.3938269
+MGI:1922423,Tex38,C57BL,Early adult,ESLIM_016_001_004,Haematocrit,0.4507893
+MGI:1919369,Tpx2,C57BL,E9.5,JAX_LDT_002_001,Light side time spent,0.5082716
+MGI:3646006,Gm5148,C57BL,Early adult,ESLIM_011_001_005,PP4 startle magnitude,0.7920815
+MGI:97565,Pgm1,C57BL,E12.5,IMPC_ECG_006_001,PR,0.4178027
+MGI:99218,Cdh4,C57BL,Early adult,MGP_MLN_066_001,Effector CD4+ T helper cells - % of CD45+,0.2215215
+MGI:87879,Aco1,C57BL,Early adult,CCP_LDT_003_001,Time mobile light side,0.3237072
+MGI:2443564,Ambra1,C57BL,E18.5,IMPC_ECG_003_001,CV,0.2917001
+MGI:1353665,Usp21,C57BL,Early adult,MGP_IMM_007_001,Resting CD4+ T helper cells - % of CD4+ T helper cells,0.6047669
+MGI:1920484,Snorc,C57BL,Early adult,IMPC_GEP_030_002,Edema,0.09980947
+MGI:1924933,Ehmt1,C57BL,Early adult,JAX_OFD_050_001,Percentage center movement time,0.3079046
+MGI:1919128,Fam83d,C50BL,Early adult,MGP_MLN_072_001,KLRG1+ Treg cells - % of CD45+,0.4303062
+MGI:108429,Lpar1,C57BL,E12.5,IMPC_GEL_011_001,Embryo turning,0.5378221
+MGI:97803,Ptma,C57BL,E15.5,IMPC_CSD_006_001,Coat - color - head,0.2924215
+MGI:1919163,Tmem79,C57BL,Early adult,MGP_IMM_016_001,Naive CD8+ T cells - % of CD8+,0.9158946
+MGI:1913721,Anp32e,C57BL,Early adult,IMPC_EYE_023_001,Optic Disc,0.5243351
+MGI:2684896,Maneal,C57BL,Early adult,ESLIM_008_001_007,Transfer arousal,0.440341
+MGI:103559,Sox18,C57BL,Early adult,IMPC_CSD_038_001,Trunk curl,0.8519236
+MGI:1927241,Wdr12,C57BL,E9.5,IMPC_DXA_002_001,Fat mass,0.2758196
+MGI:1918142,Ttll7,C57BL,Early adult,MGP_IMM_093_001,Resting CD4- NKT cells - % of CD45+,0.8435739
+MGI:1918066,Rpusd2,C57BL,Early adult,IMPC_OFD_016_001,Center permanence time,0.3989418
+MGI:1346086,Aplnr,C57BL,Early adult,CCP_XRY_019_001,Fusion of vertebrae,0.5287501
+MGI:1915862,Ube2c,C57BL,Early adult,MGP_MLN_078_001,Total gd T cells - % of CD45+,0.1297852
+MGI:2654325,Gba2,C57BL,Early adult,IMPC_CSD_061_001,Skin color - tail,0.7182733
+MGI:1920199,Ccnt2,C57BL,E18.5,IMPC_ACS_006_001,Response amplitude - S,0.7478106
+MGI:1913790,Fam107b,129SV,Early adult,IMPC_GEM_075_001,Delayed embryonic development,0.4279199
+MGI:1201673,Shox2,C57BL,E9.5,IMPC_OFD_021_001,Number of rears - total,0.2285679
+MGI:1309469,Casq2,C57BL,Early adult,IMPC_GPO_002_001,Placenta Morphology,0.09528326
+MGI:1913761,Chtop,C57BL,Early adult,IMPC_IMM_014_002,Treg cells - % of live leukocytes (Panel A),0.1417523
+MGI:106637,Slc30a2,C57BL,E9.5,IMPC_ABR_008_001,18kHz-evoked ABR Threshold,0.8798529
+MGI:106925,Cldn11,C57BL,Early adult,IMPC_CSD_061_001,Skin color - tail,0.5205393
+MGI:2444274,Cfap65,C57BL,Early adult,IMPC_CBC_017_001,Triglycerides,0.4334
+MGI:1927753,Inpp5e,C57BL,E12.5,IMPC_XRY_016_001,Number of pelvic vertebrae,0.9270647
+MGI:2679420,Pak6,C57BL,Early adult,ESLIM_005_001_005,Bone Mineral Content,0.8669409
+MGI:107363,Stxbp1,C57BL,Early adult,IMPC_HEM_038_001,Basophil differential count,0.9469864
+MGI:2442177,Pced1a,C57BL,Early adult,M-G-P_016_001_006,Mean-corpuscular-haemoglobin,0.6676386
+MGI:1921735,Lrrc71,C57BL,Early adult,MGP_CSD_008_001,Startle response,0.9496556
+MGI:3045320,Mgat4f,C57BL,Early adult,IMPC_EYE_027_001,Persistence of hyaloid vascular system,0.7036208
+MGI:104559,Rcn1,C57BL,Early adult,IMPC_FEA_105_001,Difference in Context and Conditioning Baseline % Freezing,0.9581723
+MGI:2151053,Serpinb7,C57BL,Early adult,MGP_IMM_052_001,Plasma cells - % of B2 cells,0.4383867
+MGI:2135283,Igsf9,C57BL,Early adult,CCP_XRY_002_001,Zygomatic bone,0.9657186
+MGI:1920199,Ccnt2,C57BL,E12.5,UCDLA_CSD_012_001,Coat - hair distribution - head,0.2977911
+MGI:106925,Cldn11,C57BL,Middle aged adult,ESLIM_005_001_701,BMC/Body weight,0.65409
+MGI:1931071,Sec61a2,C57BL,Early adult,IMPC_ECG_003_001,CV,0.08551174
+MGI:2442704,Frrs1l,C57BL,Early adult,IMPC_ACS_006_001,Response amplitude - S,0.857348
+MGI:2441837,Adgrb3,C57BL,Early adult,IMPC_GEP_030_002,Edema,0.757818
+MGI:2443564,Ambra1,C57BL,E18.5,JAX_OFD_007_001,Whole arena resting time,0.9008626
+MGI:1914199,Trim59,C57BL,Early adult,IMPC_ABR_004_001,6kHz-evoked ABR Threshold,0.9490241
+MGI:1921263,Rftn2,C57BL,Early adult,IMPC_HEM_030_001,Neutrophil cell count,0.3340367
+MGI:1913746,Ppdpf,C57BL,Early adult,JAX_PLC_001_001,Total cholesterol,0.9573307
+MGI:109424,Abca4,C57BL,Early adult,IMPC_HWT_002_001,Tibia length,0.4267377
+MGI:2676312,Abca12,C57BL,Early adult,IMPC_CBC_023_001,Alpha-amylase,0.2790185
+MGI:1913692,Spc25,C57BL,Early adult,MGP_MLN_014_001,Resting CD8+ T cells - % of CD8+,0.2503542
+MGI:1914454,Eif2s2,C57BL,E12.5,IMPC_OFD_014_001,Center distance travelled,0.7761859
+MGI:1915599,Ndufs3,129SV,Early adult,IMPC_XRY_060_001,Transitional vertebrae,0.3899334
+MGI:99218,Cdh4,C57BL,Early adult,IMPC_CBC_016_001,HDL-cholesterol,0.9703771
+MGI:1918066,Rpusd2,C57BL,Early adult,MGP_MLN_115_001,Plasmacytoid DC - % of CD45+,0.8228181
+MGI:1919471,Cimip1,C57BL,Early adult,MGP_IMM_127_001,Plasmacytoid DC - % of CD45+,0.3441224
+MGI:1916428,Snx5,C57BL,Early adult,IMPC_OFD_012_001,Periphery permanence time,0.5002146
+MGI:1913761,Chtop,C57BL,Early adult,MGP_IMM_093_001,Resting CD4- NKT cells - % of CD45+,0.4812267
+MGI:1915247,Ddx59,C57BL,Early adult,JAX_OFD_012_001,Periphery permanence time,0.3358837
+MGI:1924933,Ehmt1,C57BL,Early adult,MGP_IMM_130_001,CD11b-low cDC - % of CD45+,0.2956213
+MGI:2654325,Gba2,C57BL,Early adult,M-G-P_005_001_003,Lean Mass,0.5009744
+MGI:98386,Sptan1,C57BL,Early adult,IMPC_GEP_026_001,Outer ear morpholgy,0.1279118
+MGI:1915247,Ddx59,C57BL,E9.5,IMPC_EYE_069_001,Left inner nuclear layer,0.3940607
+MGI:2384297,Map7d1,C57BL,E12.5,IMPC_ACS_036_001,% Pre-pulse inhibition - PPI4,0.4264327
+MGI:1913692,Spc25,C57BL,E9.5,IMPC_CSD_006_001,Coat - color - head,0.5618739
+MGI:1921607,Efhd1,C57BL,Early adult,JAX_LDT_004_001,Dark side time spent,0.07003466
+MGI:1919369,Tpx2,C57BL,Early adult,IMPC_ABR_004_001,6kHz-evoked ABR Threshold,0.9177858
+MGI:104899,Mob4,C57BL,Early adult,ESLIM_011_001_001,BN startle magnitude,0.2271379
+MGI:1919880,Hspa12b,C57BL,Early adult,IMPC_GEP_017_001,Facial Morphology,0.2087893
+MGI:3041190,Skint7,C57BL,Early adult,CCP_XRY_018_001,Shape of vertebrae,0.5443629
+MGI:108429,Lpar1,C57BL,Early adult,IMPC_GRS_011_001,Forelimb and hindlimb grip strength normalised against body weight,0.4050551
+MGI:1923073,Fam227b,C57BL,Early adult,IMPC_ECG_006_001,PR,0.7537875
+MGI:98397,Src,129SV,Early adult,IMPC_CSD_029_001,Activity (body position),0.6343732
+MGI:1913761,Chtop,C57BL,Early adult,IMPC_EYE_026_001,Retinal Blood Vessels Pattern,0.2267601
+MGI:106925,Cldn11,C57BL,Middle aged adult,MGP_IMM_076_001,Total Treg cells - % of CD45+,0.4374108
+MGI:3650206,Gm12695,C57BL,Early adult,IMPC_GEO_064_001,Edema,0.9918968
+MGI:104294,Tyro3,C57BL,Early adult,IMPC_HEM_008_001,Platelet count,0.5235016
+MGI:1095412,Unc5c,C57BL,Late adult,IMPC_GEP_026_001,Outer ear morpholgy,0.4210635
+MGI:1891259,Lrat,C57BL,Early adult,ESLIM_008_001_002,Tremor,0.6846258
+MGI:2443925,Thsd7b,C57BL,Early adult,IMPC_CSD_032_001,Locomotor activity,0.1205072
+MGI:95777,Gnas,129SV,Early adult,IMPC_CSD_026_001,Head morphology,0.8581016
+MGI:97565,Pgm1,C57BL,Early adult,IMPC_IMM_011_002,CD4+ NKT cells - % of live leukocytes (Panel A),0.7689158
+MGI:1891259,Lrat,C57BL,Early adult,IMPC_ABR_010_001,24kHz-evoked ABR Threshold,0.1548256
+MGI:107171,Ppp3r2,C57BL,Early adult,CCP_XRY_062_001,Polysyndactylism,0.4767237
+MGI:104516,Slc23a3,C57BL,Early adult,IMPC_OFD_021_001,Number of rears - total,0.6974508
+MGI:3649135,Gm7694,C57BL,Early adult,CCP_XRY_018_001,Shape of vertebrae,0.8731221
+MGI:3588202,Garin4,C57BL,Early adult,IMPC_ECG_010_001,HRV,0.4777027
+MGI:1920199,Ccnt2,C57BL,E18.5,IMPC_HEM_019_001,Mean platelet volume,0.619086
+MGI:1860511,Heyl,C57BL,Early adult,IMPC_EYE_012_001,Pupil Shape,0.868106
+MGI:2679420,Pak6,C57BL,Early adult,IMPC_CBC_015_001,Total cholesterol,0.6287721
+MGI:2140361,Slc35d1,C57BL,E12.5,IMPC_XRY_063_001,Cervical processes,0.3797483
+MGI:1919880,Hspa12b,C57BL,Early adult,IMPC_CSD_030_001,Tremor,0.2526414
+MGI:105383,Il18r1,C57BL,Early adult,MGP_IMM_007_001,Resting CD4+ T helper cells - % of CD4+ T helper cells,0.34376
+MGI:1337072,Ier5,C57BL,Early adult,IMPC_CBC_002_001,Potassium,0.2840938
+MGI:102844,Mybpc3,C57BL,Early adult,JAX_OFD_009_001,Whole arena average speed,0.8240557
+MGI:1916413,Mrpl44,C57BL,Early adult,IMPC_XRY_060_001,Transitional vertebrae,0.07355706
+MGI:1925835,Jade1,C57BL,Early adult,IMPC_GEL_063_001,Delayed embryonic development,0.438599
+MGI:1922423,Tex38,C57BL,Early adult,IMPC_ACS_033_001,% Pre-pulse inhibition - PPI1,0.8908166
+MGI:1859866,Cdc20,C57BL,E9.5,IMPC_CSD_033_001,Gait,0.5515366
+MGI:97565,Pgm1,C57BL,E12.5,KMPCLA_GRS_010_001,Forelimb grip strength normalised against body weight,0.1508687
+MGI:107363,Stxbp1,C57BL,E9.5,MGP_IMM_128_001,Conventional DC (cDC) - % of CD45+,0.6742373
+MGI:1096385,Bcan,C57BL,Early adult,IMPC_IMM_040_002,Effector CD4+ NKT cells - % of live leukocytes (Panel A),0.9064936
+MGI:1918398,Mier1,C57BL,Early adult,JAX_OFD_022_001,Percentage center time,0.06271843
+MGI:2684896,Maneal,C57BL,Early adult,ESLIM_011_001_004,PP3 startle magnitude,0.0730294
+MGI:102519,Cst3,C57BL,Early adult,IMPC_CBC_020_001,Fructosamine,0.2897458
+MGI:2443564,Ambra1,C57BL,E12.5,IMPC_XRY_021_001,Humerus,0.4948605
+MGI:1859866,Cdc20,C57BL,Early adult,IMPC_GEM_007_001,Pericardium Morphology,0.3741499
+MGI:98386,Sptan1,C57BL,E15.5,IMPC_CSD_025_001,Head size,0.7034609
+MGI:1095412,Unc5c,C57BL,Late adult,IMPC_GEP_011_002,Hemorrhage,0.261661
+MGI:1351315,Eloa,C57BL,Early adult,ESLIM_008_001_002,Tremor,0.7366091
+MGI:107341,Ctss,C57BL,Early adult,IMPC_XRY_021_001,Humerus,0.6603586
+MGI:2444508,Fitm2,C57BL,E15.5,IMPC_CBC_008_001,Total bilirubin,0.51731
+MGI:1913790,Fam107b,C57BL,Early adult,IMPC_DXA_005_001,Bone Mineral Content (excluding skull),0.488487
+MGI:1920199,Ccnt2,C57BL,Early adult,IMPC_EYE_092_001,Retina (combined),0.6390208
+MGI:1922387,Rprd2,C57BL,E12.5,MGP_MLN_080_001,Effector gd cells - % of CD45+,0.2399648
