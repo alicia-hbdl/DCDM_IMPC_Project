@@ -42,8 +42,6 @@ Though we had access to the zip file of our data, we had no permissions on it so
 # Data Cleaning
 
 ```{r}
-#| warning: false
-
 # Clear workspace
 rm(list = ls())
 
