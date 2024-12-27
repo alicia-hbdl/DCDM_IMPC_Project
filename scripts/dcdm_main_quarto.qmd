@@ -1025,14 +1025,25 @@ The goal is to group parameters by naming or phenotype test similarity, reducing
 The `group_patterns` table defines group names (e.g., "weight," "images," "brain") with regex patterns to match parameter names, forming the basis for identifying and categorizing parameters.
 
 ```{r}
+
 group_patterns <- tibble(
-  group_name = c("weight", "images", "brain", "cardiovascular", "eye"),
+  group_name = c(
+    "weight", "images", "brain", "cardiovascular", "eye", 
+    "metabolic", "morphology", "audiology", 
+    "reproductive", "toxicology", "experimental_identifiers"
+  ),
   regex_pattern = c(
     "weight|density|fat|lean|BMI|BMC|mass|composition|bone|length|adipose|lipid|body size|size|growth|skeletal|area|volume",
     "image|screenshot|microscope|pdf|lacz|waveform|ogram|resolution|visual|pixel|scan|photo|imaging|bit depth|microscopy|contrast",
     "brain|cortex|hippo|thalamus|amygdala|lobe|cere|spinal|pituitary|striatum|hypothal|neural|neuronal|pons|medulla|ganglion|nerve|enceph|ventricle|choroid",
     "heart|cardiac|vascular|blood|vein|aort|arter|HR|stroke|ejection|QT|circulation|pulse|pressure|rate|systolic|diastolic|respiration|ECG|cardio|valve",
-    "eye|retina|cornea|lens|eyelid|iris|optic|ocular|vision|acuity|photoreceptor|brightness|scheimpflug|nuclear|macula|pupil|color|refraction|sclera|vitreous"
+    "eye|retina|cornea|lens|eyelid|iris|optic|ocular|vision|acuity|photoreceptor|brightness|scheimpflug|nuclear|macula|pupil|color|refraction|sclera|vitreous",
+    "glucose|insulin|cholesterol|lipid|fasting|diet|energy|metabolism|metabolic|AUC|glycemic|resistance|glucagon|carbohydrate|diabetes|calories|homeostasis",
+    "morphology|shape|size|growth|length|hypoplasia|syndactyly|microcephaly|anatomy|limb|edema|facial|cleft|dysmorphic|developmental|pattern|CRL|development|blebs",
+    "ABR|hearing|audiometry|waveform|tone|decibel|audiogram|stimulus|frequency|click|response|threshold|sound|ear",
+    "reproductive|fertility|embryo|ovary|sperm|testis|testicular|gestation|ovulation|pregnancy|CRL|zygote|oocyte|gonad",
+    "anesthetic|drug|agent|dosage|administration|route|exposure|chemical|toxic|compound|biomarkers|toxicology|medication",
+    "experimenter|ID|lot|kit|manufacturer|model|calibration|SOP|genotype|mutation|allele|strain|batch|control|sample|label|protocol|method"
   )
 )
 ```
