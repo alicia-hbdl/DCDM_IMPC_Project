@@ -47,27 +47,35 @@ rm(list = ls())
 library(tidyverse)
 library(janitor)
 library(fs)
-
-# ADD DIRECTORY STRUCTURE HERE 
 ```
 
 ```{r}
-# Define the working directory path in r
+#| warning: false
+
+# Define the working directory path in R
 # Alicia
-rootDir = "/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/"
+rootDir <- "/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/"
 # Sanj 
-#rootDir = "/Users/sanjanasrinivasan/Desktop/DCDM_IMPC_Project/"
+# rootDir <- "/Users/sanjanasrinivasan/Desktop/DCDM_IMPC_Project/"
 # Ella
-# rootDir = "/Users/ellajadealex/Desktop/applied_bioinformatics/DCDM/group_project/DCDM_IMPC_Project/"
+# rootDir <- "/Users/ellajadealex/Desktop/applied_bioinformatics/DCDM/group_project/DCDM_IMPC_Project/"
 # Sama
-#rootDir = "/Users/sama/Desktop/DCDM_Proj2/"
+# rootDir <- "/Users/sama/Desktop/DCDM_Proj2/"
 # Esta
-# rootDir = "~/Desktop/working_directory/DCDM_project"
+# rootDir <- "~/Desktop/working_directory/DCDM_project"
+
+# Create directories
+dir.create(file.path(rootDir, "data/metadata"), recursive = TRUE)      # Directory for procedure, parameter, disease files, query genes, and SOP documents
+dir.create(file.path(rootDir, "data/raw_data"), recursive = TRUE)      # Directory for storing raw analysis data files
+dir.create(file.path(rootDir, "data/updated_data"), recursive = TRUE)  # Directory for storing raw data files with corrected field names
+dir.create(file.path(rootDir, "data/cleaned"), recursive = TRUE)       # Directory for cleaned metadata tables and a single combined table of all analyses
+dir.create(file.path(rootDir, "data/collated"), recursive = TRUE)      # Directory for tables ready to be uploaded into the database
+dir.create(file.path(rootDir, "data/database"), recursive = TRUE)      # Directory for the database dump file
 ```
 
 ## Cleaning the Raw Data Files
 
-### Quality Control/Cleaning Using the SOP (Esta)
+### Quality Control/Cleaning Using the SOP
 
 The experiment data includes an SOP that defines constraints for each field, such as data type, minimum and maximum values for numerical fields, string lengths, and specific allowable values. Data quality is assessed by comparing the raw data against these constraints.
 
@@ -1151,75 +1159,27 @@ SHOW WARNINGS;
 **Test R/Shiny 1:** They want the ability to select a particular knockout mouse and visualise the statistical scores of all phenotypes tested.
 
 ```{sql}
--- Select p-values and corresponding parameter names for specific genes
-SELECT 
-    Analyses.p_value, 
-    Parameters.parameter_name
-FROM 
-    Analyses
-JOIN 
-    Parameters ON Analyses.parameter_id = Parameters.parameter_id
-WHERE 
-    Analyses.gene_accession_id IN (
-        -- Subquery to find gene_accession_id for specific gene symbols
-        SELECT 
-            gene_accession_id 
-        FROM 
-            Genes 
-        WHERE 
-            gene_symbol IN ('Ifi204', 'Mettl21c', 'Ier5', 'Abca4')
-    )
-ORDER BY 
-    Analyses.p_value ASC; -- Sort results by p_value in ascending order
-
+SELECT Analyses.p_value, Parameters.parameter_name FROM Analyses 
+JOIN Parameters ON Analyses.parameter_id = Parameters.parameter_id 
+WHERE Analyses.gene_accession_id IN (
+    SELECT gene_accession_id FROM Genes WHERE gene_symbol IN ('Ifi204', 'Mettl21c', 'Ier5', 'Abca4')) 
+ORDER BY Analyses.p_value ASC;
 ```
-
-![](images/Screenshot%202024-12-21%20at%2016.21.52.png)
 
 **Test R/Shiny 2:** The collaborator also wishes to visualise the statistical scores of all knockout mice for a selected phenotype.
 
 ```{sql}
 #| eval: false
-SELECT 
-    Analyses.p_value, 
-    Genes.gene_symbol
-FROM 
-    Analyses
-JOIN 
-    Parameters ON Analyses.parameter_id = Parameters.parameter_id
-JOIN 
-    Genes ON Analyses.gene_accession_id = Genes.gene_accession_id
-WHERE 
-    Parameters.parameter_name IN (
-        'Facial Cleft',
-        'Lens Opacity',
-        'Triglycerides',
-        'Skin color - tail',
-        'Potassium',
-        'HRV',
-        'Hindbrain morphology',
-        'Aspartate aminotransferase',
-        'Tibia length',
-        'Left total retinal thickness',
-        'Embryo Size',
-        'Effector CD4+ T helper cells - % of live leukocytes (Panel A)',
-        'Limb morphology',
-        'Coat - color - back',
-        'Aggression',
-        'Joints'
-    )
-ORDER BY 
-    Analyses.p_value ASC;
+SELECT Analyses.p_value, Genes.gene_symbol FROM Analyses 
+JOIN Parameters ON Analyses.parameter_id = Parameters.parameter_id 
+JOIN Genes ON Analyses.gene_accession_id = Genes.gene_accession_id 
+WHERE Parameters.parameter_name IN ("Fusion of vertebrae", "Hindbrain morphology", "Limb morphology") 
+ORDER BY Analyses.p_value ASC;
 ```
-
-![](images/Screenshot%202024-12-21%20at%2016.22.09.png)
 
 **Test R/Shiny 3:** The collaborator would like to visualise clusters of genes with similar phenotype scores.  
 
 ```{sql}
 #| eval: false
-
 SELECT Genes.gene_symbol, Parameters.parameter_name, Analyses.p_value FROM Analyses JOIN Parameters ON Analyses.parameter_id = Parameters.parameter_id JOIN Genes ON Analyses.gene_accession_id = Genes.gene_accession_id; 
 ```
-
-![](images/Screenshot%202024-12-21%20at%2016.22.33.png)
