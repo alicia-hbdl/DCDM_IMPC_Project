@@ -301,7 +301,7 @@ log_message(if (nrow(invalid_ids) == 0) {
 
 Check if `gene_accession_id` values are all between 9-11 characters long - According to the SOP they should all be unique but our script shows over 190,000 duplicated results. We have chosen to consider duplicated gene_accession_ids valid.
 
-###### basically when you create a knockout mouse, you knock out a specific gene, but then that gene goes through a workflow of procedures (like electrocardiogram) and then within an ecg, multiple parameters are measured (qrs, heart rate, ejection fraction, etc e.g), so for each gene, you automatically have many files because each file is a single parameter. so it’s totally normal to have duplicate IDs in teh analysis file, however, the unique in this case in the sop means taht the gene ids are specific ways to refer to a unique gene, so they are already used in some way as foreign key in teh analysis table# {style="color: red"}
+###### basically when you create a knockout mouse, you knock out a specific gene, but then that gene goes through a workflow of procedures (like electrocardiogram) and then within an ecg, multiple parameters are measured (qrs, heart rate, ejection fraction, etc e.g), so for each gene, you automatically have many files because each file is a single parameter. so it’s totally normal to have duplicate IDs in teh analysis file, however, the unique in this case in the sop means taht the gene ids are specific ways to refer to a unique gene, so they are already used in some way as foreign key in teh analysis table {style="color: red"}
 
 ```{r}
 ### Validate 'gene_accession_id'
