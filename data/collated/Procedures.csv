@@ -1,52 +1,52 @@
-procedure_id,procedure_name,procedure_description,is_mandatory
-1,Acoustic Startle and Pre-pulse Inhibition (PPI),"The acoustic startle response is characterized by an exaggerated flinching response to an unexpected strong auditory stimulus (pre-pulse). This response can be attenuated when it is preceded by a weaker stimulus (pre-pulse) and is the principle underlying pre-pulse inhibition (PPI). PPI has been described in numerous species, including mice and humans and provides an operational measure of sensorimotor gating reflecting the ability of an animal to successfully integrate and inhibit sensory information. Several clinical studies have shown that a number of human disorders have impaired PPI including: schizophrenia, Huntington&rsquo;s disease, fragile X syndrome, and autism. The acoustic startle and PPI paradigm is therefore largely used to assess sensorimotor gating and the effects of a number of treatment modalities such as putative anti-psychotics, and to explore genetic and neurobiological mechanisms underlying behaviors of relevance to psychosis (Geyer, 1999; Ouagazzal et al., 2001).Ontological description: MP:0002067 - abnormal sensory capabilities/reflexes/nociception.",TRUE
-2,Adult LacZ,"To stain adult mutant  and control tissues for bacterial beta-galactosidase (LacZ) activity in order to assess the adult organ, tissue, substructure and cell type of gene expression of IKMC alleles utilizing a LacZ reporter.  Description: Adult mouse tissues are scored for presence of LacZ staining which is distinct from either nonspecific staining observed in wildtype control mice, or is too faint to score as present.  Intensity of staining is not required but can be reported.   Anatomical terms to localize staining to the organ, structure, substructure, or cell type will use standard mouse anatomy ontology terms.",FALSE
-3,Auditory Brain Stem Response,Auditory brainstem response test determines hearing sensitivity and other physiological parameters using evoked potential recordings in anesthetized mice.Ontological description: MP:0004738 - abnormal brainstem auditory evoked potential.,TRUE
-4,Body Composition (DEXA lean/fat),Measure bone mineral content and density as well as body composition in mice using the DEXA (Dual Energy X-ray Absorptiometry) analyser.,TRUE
-5,Body Weight,"The body weight test measures the weight of the mouse in a time series, allowing monitoring of its evolution; also, it is required in many other procedures.",TRUE
-6,Challenge Whole Body Plethysmography,"The purpose of this procedure is to record the respiratory function of mice, when submitted to methacholine or hypoxia challenge. Other similar protocols, for allergen sensitization and for LPS challenges, will also be available. Ontological description:  MP:0002327 - abnormal respiratory function",FALSE
-7,Clinical Chemistry,"Clinical chemistry determines biochemical parameters in plasma including enzymatic activity, specific substrates and electrolytes. Ontological description: MP:0001545 &ndash; blood physiology abnormalities.",TRUE
-8,Combined SHIRPA and Dysmorphology,"SHIRPA and dysmorphology were originally always separate assessments.  However they have recently been combined as assessments, so that they take place at the same time.The purpose of the assessments is to examine mice for obvious physical characteristics, behaviors and morphological abnormalities.Descriptions include abnormal locomotion/appearance/behavior/reflex reactions.",TRUE
-9,Echo,To assess the functionality of the heart in order to determine the presence of a mutant phenotype.,FALSE
-10,Electrocardiogram (ECG),To provide a high throughput method to obtain Electrocardiograms in a conscious mouse.,TRUE
-11,Embryo LacZ,embryo_lacz,FALSE
-12,Experimental design,experimental_design,FALSE
-13,Eye Morphology,To detect abnormalities in eye morphology.,TRUE
-14,Fear Conditioning,Fear Conditioning test assesses aversive learning and memory,FALSE
-15,Fertility of Homozygous Knock-out Mice,To assess the fertility of homozygous knockout mice.,TRUE
-16,Formalin Test,formalin_test,FALSE
-17,Grip Strength,"The grip strength test is used to measure the neuromuscular function as maximal muscle strength of forelimbs and combined forelimbs and hind limbs. These are assessed by the grasping applied by the mouse on a grid that is connected to a sensor. Three trials are carried out in succession measuring forelimb-strength only, followed by three successive trials measuring the combined forelimb/hindlimb grip strength. All grip strength values obtained are normalized against mouse body weight.Ontological description: MP:0001515 - abnormal grip strength.",TRUE
-18,Gross Morphology Embryo E12.5,gross_morphology_embryo_e12.5,FALSE
-19,Gross Morphology Embryo E14.5-E15.5,gross_morphology_embryo_e14.5-e15.5,FALSE
-20,Gross Morphology Embryo E18.5,gross_morphology_embryo_e18.5,FALSE
-21,Gross Morphology Embryo E9.5,gross_morphology_embryo_e9.5,FALSE
-22,Gross Morphology Placenta E12.5,gross_morphology_placenta_e12.5,FALSE
-23,Gross Morphology Placenta E14.5-E15.5,gross_morphology_placenta_e14.5-e15.5,FALSE
-24,Gross Morphology Placenta E18.5,gross_morphology_placenta_e18.5,FALSE
-25,Gross Morphology Placenta E9.5,gross_morphology_placenta_e9.5,FALSE
-26,Gross Pathology and Tissue Collection,"To perform a complete necropsy to detect and record abnormal external findings and macroscopic alterations in internal and external organs, record body and heart weights (see IMPC Heart Weight SOP), and collect a standardized list of tissues for fixation with or without further processing (see non-mandatory IMPC Tissue Embedding & Block Banking SOP).",TRUE
-27,Heart Weight,To evaluate cardiac size using heart weight and body weight.,TRUE
-28,Hematology,"Hematological assessment of blood determines blood cell counts (white blood cells, red blood cells, hemoglobin, and platelets) and additional hematological parameters (hematocrit, mean cell volume, mean corpuscular hemoglobin, mean cell hemoglobin concentration) can be derived using these indices. These tests will indicate abnormalities in the production of blood and its components (blood cells and hemoglobin) as well as in the associated blood-forming organs. Ontological description: MP:0002429 - abnormal blood cell morphology/development.",TRUE
-29,Histopathology,histopathology,FALSE
-30,Housing and Husbandry,housing_and_husbandry,FALSE
-31,Immunophenotyping,Immunophenotyping of immune system cells,TRUE
-32,Indirect Calorimetry,"Indirect calorimetry provides detailed information on the energy metabolism of mutant mice. Energy expenditure is evaluated through indirect calorimetry by measuring oxygen consumption with an open flow respirometric system. CO2 and O2 sensors measure the difference in CO2 and O2 concentrations in air volumes flowing through control or animal cages. The amount of oxygen consumed over a given period of time can thus be calculated, as far as the air flow through the cage is known. Data are expressed as ml O2 h-1animal-1. The system also monitors CO2 production, therefore, the respiratory exchange ratio (RER) and heat production can be calculated. An activity and food and water intake monitoring system can also be integrated into the set up in order to investigate circadian pattern and behaviour.Ontological description: MP:0005266 - abnormal metabolism.",FALSE
-33,Insulin Blood Level,The insulin concentration in the blood is an important indicator of diabetes.Ontological description: abnormal circulating insulin level [MP:0001560]; increased circulating insulin level [MP:0002079]; decreased circulating insulin level [MP:0002727].,FALSE
-34,Intraperitoneal glucose tolerance test (IPGTT),"The glucose tolerance test measures the clearance of an intraperitoneally injected glucose load from the body. It is used to detect disturbances in glucose metabolism that can be linked to human conditions such as diabetes or metabolic syndrome. Animals are fasted for approximately 16 hours, fasted blood glucose levels are determined before a solution of glucose is administered by intra-peritoneal (IP) injection. Subsequently, the blood glucose level is measured at different time points during the following 2 hours.Ontological description: MP:0005559 - increased circulating glucose level, MP:0005560 - decreased circulating glucose level, MP:0005293 - impaired glucose tolerance, MP:0005292 - improved glucose tolerance, MP:0005291           abnormal glucose tolerance, MP:0000188 - abnormal circulating glucose level.",TRUE
-35,Light-Dark Test,Light-Dark test monitors the anxiety-related behaviour of mice,FALSE
-36,MicroCT E14.5-E15.5,microct_e14.5-e15.5,FALSE
-37,MicroCT E14.5-E15.5 Analysis,microct_e14.5-e15.5_analysis,FALSE
-38,MicroCT E18.5,microct_e18.5,FALSE
-39,MicroCT E9.5,microct_e9.5,FALSE
-40,OPT E9.5,opt_e9.5,FALSE
-41,Open Field,The Open Field test is used to assess anxiety and exploratory behaviors. It is based on the natural tendency of an animal to explore and to protect itself using avoidance which translates to a normal animal spending more time in the periphery of the Open Field arena than in the center (the most anxiogenic area).,TRUE
-42,Organ Weight,Organ weights from different tissues collected for IMPC,FALSE
-43,Tissue Embedding and Block Banking,Collect and fix a standard list of tissues from the complete necropsy (see IMPC Gross Pathology & Tissue Collection SOP)Trim the fixed tissues into cassettes for processingEmbed the tissues in paraffin in a standard orientation,FALSE
-44,Viability E12.5 Secondary Screen,viability_e12.5_secondary_screen,FALSE
-45,Viability E14.5-E15.5 Secondary Screen,viability_e14.5-e15.5_secondary_screen,FALSE
-46,Viability E18.5 Secondary Screen,viability_e18.5_secondary_screen,FALSE
-47,Viability E9.5 Secondary Screen,viability_e9.5_secondary_screen,FALSE
-48,Viability Primary Screen,Assess the viability of mutant mice of each sex and zygosity.,TRUE
-49,Welfare Observations,The Welfare Observations procedure is used for the recording of welfare issues as and when they occur.,FALSE
-50,X-ray,Construct and analyse digital X-ray images in immobilised mice using a Faxitron X-Ray system or NTB digital X-ray scanner.,TRUE
-51,Y-maze,Y-maze assesses learning and memory; it can be used instead/in parallel of Fear Conditioning,FALSE
+"procedure_id","procedure_name","procedure_description","is_mandatory"
+1,"Acoustic Startle and Pre-pulse Inhibition (PPI)","The acoustic startle response is characterized by an exaggerated flinching response to an unexpected strong auditory stimulus (pre-pulse). This response can be attenuated when it is preceded by a weaker stimulus (pre-pulse) and is the principle underlying pre-pulse inhibition (PPI). PPI has been described in numerous species, including mice and humans and provides an operational measure of sensorimotor gating reflecting the ability of an animal to successfully integrate and inhibit sensory information. Several clinical studies have shown that a number of human disorders have impaired PPI including: schizophrenia, Huntington&rsquo;s disease, fragile X syndrome, and autism. The acoustic startle and PPI paradigm is therefore largely used to assess sensorimotor gating and the effects of a number of treatment modalities such as putative anti-psychotics, and to explore genetic and neurobiological mechanisms underlying behaviors of relevance to psychosis (Geyer, 1999; Ouagazzal et al., 2001).Ontological description: MP:0002067 - abnormal sensory capabilities/reflexes/nociception.",1
+2,"Adult LacZ","To stain adult mutant  and control tissues for bacterial beta-galactosidase (LacZ) activity in order to assess the adult organ, tissue, substructure and cell type of gene expression of IKMC alleles utilizing a LacZ reporter.  Description: Adult mouse tissues are scored for presence of LacZ staining which is distinct from either nonspecific staining observed in wildtype control mice, or is too faint to score as present.  Intensity of staining is not required but can be reported.   Anatomical terms to localize staining to the organ, structure, substructure, or cell type will use standard mouse anatomy ontology terms.",0
+3,"Auditory Brain Stem Response","Auditory brainstem response test determines hearing sensitivity and other physiological parameters using evoked potential recordings in anesthetized mice.Ontological description: MP:0004738 - abnormal brainstem auditory evoked potential.",1
+4,"Body Composition (DEXA lean/fat)","Measure bone mineral content and density as well as body composition in mice using the DEXA (Dual Energy X-ray Absorptiometry) analyser.",1
+5,"Body Weight","The body weight test measures the weight of the mouse in a time series, allowing monitoring of its evolution; also, it is required in many other procedures.",1
+6,"Challenge Whole Body Plethysmography","The purpose of this procedure is to record the respiratory function of mice, when submitted to methacholine or hypoxia challenge. Other similar protocols, for allergen sensitization and for LPS challenges, will also be available. Ontological description:  MP:0002327 - abnormal respiratory function",0
+7,"Clinical Chemistry","Clinical chemistry determines biochemical parameters in plasma including enzymatic activity, specific substrates and electrolytes. Ontological description: MP:0001545 &ndash; blood physiology abnormalities.",1
+8,"Combined SHIRPA and Dysmorphology","SHIRPA and dysmorphology were originally always separate assessments.  However they have recently been combined as assessments, so that they take place at the same time.The purpose of the assessments is to examine mice for obvious physical characteristics, behaviors and morphological abnormalities.Descriptions include abnormal locomotion/appearance/behavior/reflex reactions.",1
+9,"Echo","To assess the functionality of the heart in order to determine the presence of a mutant phenotype.",0
+10,"Electrocardiogram (ECG)","To provide a high throughput method to obtain Electrocardiograms in a conscious mouse.",1
+11,"Embryo LacZ","embryo_lacz",0
+12,"Experimental design","experimental_design",0
+13,"Eye Morphology","To detect abnormalities in eye morphology.",1
+14,"Fear Conditioning","Fear Conditioning test assesses aversive learning and memory",0
+15,"Fertility of Homozygous Knock-out Mice","To assess the fertility of homozygous knockout mice.",1
+16,"Formalin Test","formalin_test",0
+17,"Grip Strength","The grip strength test is used to measure the neuromuscular function as maximal muscle strength of forelimbs and combined forelimbs and hind limbs. These are assessed by the grasping applied by the mouse on a grid that is connected to a sensor. Three trials are carried out in succession measuring forelimb-strength only, followed by three successive trials measuring the combined forelimb/hindlimb grip strength. All grip strength values obtained are normalized against mouse body weight.Ontological description: MP:0001515 - abnormal grip strength.",1
+18,"Gross Morphology Embryo E12.5","gross_morphology_embryo_e12.5",0
+19,"Gross Morphology Embryo E14.5-E15.5","gross_morphology_embryo_e14.5-e15.5",0
+20,"Gross Morphology Embryo E18.5","gross_morphology_embryo_e18.5",0
+21,"Gross Morphology Embryo E9.5","gross_morphology_embryo_e9.5",0
+22,"Gross Morphology Placenta E12.5","gross_morphology_placenta_e12.5",0
+23,"Gross Morphology Placenta E14.5-E15.5","gross_morphology_placenta_e14.5-e15.5",0
+24,"Gross Morphology Placenta E18.5","gross_morphology_placenta_e18.5",0
+25,"Gross Morphology Placenta E9.5","gross_morphology_placenta_e9.5",0
+26,"Gross Pathology and Tissue Collection","To perform a complete necropsy to detect and record abnormal external findings and macroscopic alterations in internal and external organs, record body and heart weights (see IMPC Heart Weight SOP), and collect a standardized list of tissues for fixation with or without further processing (see non-mandatory IMPC Tissue Embedding & Block Banking SOP).",1
+27,"Heart Weight","To evaluate cardiac size using heart weight and body weight.",1
+28,"Hematology","Hematological assessment of blood determines blood cell counts (white blood cells, red blood cells, hemoglobin, and platelets) and additional hematological parameters (hematocrit, mean cell volume, mean corpuscular hemoglobin, mean cell hemoglobin concentration) can be derived using these indices. These tests will indicate abnormalities in the production of blood and its components (blood cells and hemoglobin) as well as in the associated blood-forming organs. Ontological description: MP:0002429 - abnormal blood cell morphology/development.",1
+29,"Histopathology","histopathology",0
+30,"Housing and Husbandry","housing_and_husbandry",0
+31,"Immunophenotyping","Immunophenotyping of immune system cells",1
+32,"Indirect Calorimetry","Indirect calorimetry provides detailed information on the energy metabolism of mutant mice. Energy expenditure is evaluated through indirect calorimetry by measuring oxygen consumption with an open flow respirometric system. CO2 and O2 sensors measure the difference in CO2 and O2 concentrations in air volumes flowing through control or animal cages. The amount of oxygen consumed over a given period of time can thus be calculated, as far as the air flow through the cage is known. Data are expressed as ml O2 h-1animal-1. The system also monitors CO2 production, therefore, the respiratory exchange ratio (RER) and heat production can be calculated. An activity and food and water intake monitoring system can also be integrated into the set up in order to investigate circadian pattern and behaviour.Ontological description: MP:0005266 - abnormal metabolism.",0
+33,"Insulin Blood Level","The insulin concentration in the blood is an important indicator of diabetes.Ontological description: abnormal circulating insulin level [MP:0001560]; increased circulating insulin level [MP:0002079]; decreased circulating insulin level [MP:0002727].",0
+34,"Intraperitoneal glucose tolerance test (IPGTT)","The glucose tolerance test measures the clearance of an intraperitoneally injected glucose load from the body. It is used to detect disturbances in glucose metabolism that can be linked to human conditions such as diabetes or metabolic syndrome. Animals are fasted for approximately 16 hours, fasted blood glucose levels are determined before a solution of glucose is administered by intra-peritoneal (IP) injection. Subsequently, the blood glucose level is measured at different time points during the following 2 hours.Ontological description: MP:0005559 - increased circulating glucose level, MP:0005560 - decreased circulating glucose level, MP:0005293 - impaired glucose tolerance, MP:0005292 - improved glucose tolerance, MP:0005291           abnormal glucose tolerance, MP:0000188 - abnormal circulating glucose level.",1
+35,"Light-Dark Test","Light-Dark test monitors the anxiety-related behaviour of mice",0
+36,"MicroCT E14.5-E15.5","microct_e14.5-e15.5",0
+37,"MicroCT E14.5-E15.5 Analysis","microct_e14.5-e15.5_analysis",0
+38,"MicroCT E18.5","microct_e18.5",0
+39,"MicroCT E9.5","microct_e9.5",0
+40,"OPT E9.5","opt_e9.5",0
+41,"Open Field","The Open Field test is used to assess anxiety and exploratory behaviors. It is based on the natural tendency of an animal to explore and to protect itself using avoidance which translates to a normal animal spending more time in the periphery of the Open Field arena than in the center (the most anxiogenic area).",1
+42,"Organ Weight","Organ weights from different tissues collected for IMPC",0
+43,"Tissue Embedding and Block Banking","Collect and fix a standard list of tissues from the complete necropsy (see IMPC Gross Pathology & Tissue Collection SOP)Trim the fixed tissues into cassettes for processingEmbed the tissues in paraffin in a standard orientation",0
+44,"Viability E12.5 Secondary Screen","viability_e12.5_secondary_screen",0
+45,"Viability E14.5-E15.5 Secondary Screen","viability_e14.5-e15.5_secondary_screen",0
+46,"Viability E18.5 Secondary Screen","viability_e18.5_secondary_screen",0
+47,"Viability E9.5 Secondary Screen","viability_e9.5_secondary_screen",0
+48,"Viability Primary Screen","Assess the viability of mutant mice of each sex and zygosity.",1
+49,"Welfare Observations","The Welfare Observations procedure is used for the recording of welfare issues as and when they occur.",0
+50,"X-ray","Construct and analyse digital X-ray images in immobilised mice using a Faxitron X-Ray system or NTB digital X-ray scanner.",1
+51,"Y-maze","Y-maze assesses learning and memory; it can be used instead/in parallel of Fear Conditioning",0

@@ -319,20 +319,7 @@ Check & format `gene_symbol` so all values are in title format.
 
 # Convert all gene_symbols to title format
 analysis <- analysis %>%   mutate(
-    gene_symbol = str_to_title(gene_symbol)) %>%
-  mutate(# Convert to title case 
-    gene_symbol = case_when(
-      gene_accession_id == "MGI:98967" ~ "Wt",
-      gene_accession_id == "MGI:96090" ~ "Asmt",
-      gene_accession_id == "MGI:98266" ~ "Sord",
-      gene_accession_id == "MGI:1928271" ~ "Malrd1",
-      gene_accession_id == "MGI:109279" ~ "Nnt",
-      gene_accession_id == "MGI:3665157" ~ "Rsxr",
-      gene_accession_id == "MGI:1345961" ~ "Coro1a",
-      gene_accession_id == "MGI:87868" ~ "Acads",
-      gene_accession_id == "MGI:1351634" ~ "Abcc6",
-      gene_accession_id == "MGI:104511" ~ "Tnfsf4",
-      TRUE ~ gene_symbol)) %>% 
+    gene_symbol = str_to_title(gene_symbol))  %>% 
   distinct()
 
 # Check length of gene_symbol values
@@ -845,7 +832,7 @@ In addition to the data provided, each group must  find at least 3 other parame
 groupings_table <- data.frame(group_id = 1:6,group_name = c("weight", "brain", "images", "cardiovascular", "eye", "neuro"))
 
 # Save the table as CSV 
-write_csv(groupings_table, paste0(rootDir, "/data/collated/GroupingsTable.csv"))
+write_csv(groupings_table, paste0(rootDir, "/data/collated/GroupingsTable.csv"), quote = "all")
 ```
 
 This step subsets the data from the metadata table according to the database schema decide dupon:
@@ -863,11 +850,13 @@ disease <- read_csv(paste0(rootDir, "data/cleaned/cleaned_Disease_information.cs
 
 ```{r}
 procedures_table <- procedure %>%
-  select(procedure_id, procedure_name, procedure_description, is_mandatory) %>%  # Select specific columns
+  select(procedure_id, procedure_name, procedure_description, is_mandatory) %>%   mutate(is_mandatory = as.integer(is_mandatory))  %>% # needed for sql that needs 0 and 1 for booleans 
+
+  # Select specific columns
   distinct() # Keep only unique rows (this is needed due to the parameter_mapping field)
 
 # Save the table as CSV 
-write_csv(procedures_table, paste0(rootDir, "/data/collated/Procedures.csv"))
+write_csv(procedures_table, paste0(rootDir, "/data/collated/Procedures.csv"), quote = "all")
 ```
 
 ### Genes
@@ -876,49 +865,23 @@ write_csv(procedures_table, paste0(rootDir, "/data/collated/Procedures.csv"))
 genes_table <- analysis %>% select(gene_accession_id, gene_symbol) %>% # Select desired columns
   bind_rows(disease %>% 
       select(gene_accession_id) %>%
-      filter(!gene_accession_id %in% analysis$gene_accession_id)) 
-
-write_csv(genes_table, paste0(rootDir, "/data/collated/Genes.csv"))
-```
-
-# Parameters
-
-```{r}
-parameters_table <- left_join(parameter, procedure, by = join_by(parameter_mapping)) %>% 
-  distinct(parameter_id, parameter_name, parameter_description, procedure_id)%>%
-  mutate(parameter_group = case_when(
-    str_detect(parameter_name, regex(
-      "weight|density|fat|lean|BMI|BMC|mass|composition|bone|length|adipose|lipid|body size|size|growth|skeletal|area|volume", 
-      ignore_case = TRUE)) ~ groupings_table$group_id[groupings_table$group_name == "weight"],
-        str_detect(parameter_name, regex(
-        "image|screenshot|microscope|pdf|lacz|waveform|ogram|resolution|visual|pixel|scan|photo|imaging|bit depth|microscopy|contrast", 
-      ignore_case = TRUE)) ~ groupings_table$group_id[groupings_table$group_name == "images"],
-    str_detect(parameter_name, regex(
-        "brain|cortex|hippo|thalamus|amygdala|lobe|cere|spinal|pituitary|striatum|hypothal|neural|neuronal|pons|medulla|ganglion|nerve|enceph|ventricle|choroid",
-        ignore_case = TRUE)) ~ groupings_table$group_id[groupings_table$group_name == "brain"],
-    str_detect(parameter_name, regex(
-        "heart|cardiac|vascular|blood|vein|aort|arter|HR|stroke|ejection|QT|circulation|pulse|pressure|rate|systolic|diastolic|respiration|ECG|cardio|valve",       ignore_case = TRUE)) ~ groupings_table$group_id[groupings_table$group_name == "cardiovascular"]))
-
-write_csv(parameters_table, paste0(rootDir, "/data/collated/Parameters.csv")) 
-```
-
-# Diseases
-
-```{r}
-diseases_table <- disease %>%
-  select(disease_id, disease_term) %>% 
+      filter(!gene_accession_id %in% analysis$gene_accession_id)) %>%
+  mutate(# Convert to title case 
+    gene_symbol = case_when(
+      gene_accession_id == "MGI:98967" ~ "Wt",
+      gene_accession_id == "MGI:96090" ~ "Asmt",
+      gene_accession_id == "MGI:98266" ~ "Sord",
+      gene_accession_id == "MGI:1928271" ~ "Malrd1",
+      gene_accession_id == "MGI:109279" ~ "Nnt",
+      gene_accession_id == "MGI:3665157" ~ "Rsxr",
+      gene_accession_id == "MGI:1345961" ~ "Coro1a",
+      gene_accession_id == "MGI:87868" ~ "Acads",
+      gene_accession_id == "MGI:1351634" ~ "Abcc6",
+      gene_accession_id == "MGI:104511" ~ "Tnfsf4",
+      TRUE ~ gene_symbol)) %>% 
   distinct()
 
-write_csv(diseases_table, paste0(rootDir, "/data/collated/Diseases.csv"))
-```
-
-### PhenoDigm
-
-```{r}
-phenodigm_scores <- disease %>%
-  select(disease_id, gene_accession_id, phenodigm_score) 
-
-write_csv(phenodigm_scores, paste0(rootDir, "/data/collated/PhenodigmScores.csv")) 
+write_csv(genes_table, paste0(rootDir, "/data/collated/Genes.csv"), quote = "all")
 ```
 
 ### Analyses
@@ -928,7 +891,73 @@ analyses_table <- analysis %>%
   select(analysis_id, gene_accession_id, mouse_strain, mouse_life_stage, parameter_id, pvalue)   %>%  
     distinct()
 
-write_csv(analyses_table, paste0(rootDir, "/data/collated/Analyses.csv"))
+write_csv(analyses_table, paste0(rootDir, "/data/collated/Analyses.csv"), quote = "all")
+```
+
+### Parameters
+
+```{r}
+# Join parameter table with procedure table by the appropriate column
+parameters_table <- left_join(parameter, procedure, by = join_by(parameter_mapping)) %>%
+  # Add rows from analyses_table where parameter_id is not already in the parameter table
+  bind_rows(
+    analyses_table %>%
+      select(parameter_id) %>%
+      filter(!parameter_id %in% parameter$parameter_id)
+  ) %>%
+  distinct(parameter_id, parameter_name, parameter_description, procedure_id)
+
+# Write the final table to a CSV file with all fields quoted
+write_csv(parameters_table, paste0(rootDir, "/data/collated/Parameters.csv"), quote = "all")
+
+```
+
+### Diseases
+
+```{r}
+diseases_table <- disease %>%
+  select(disease_id, disease_term) %>% 
+  distinct()
+
+write_csv(diseases_table, paste0(rootDir, "/data/collated/Diseases.csv"), quote = "all")
+```
+
+### PhenoDigm
+
+```{r}
+phenodigm_scores <- disease %>%
+  select(disease_id, gene_accession_id, phenodigm_score) 
+
+write_csv(phenodigm_scores, paste0(rootDir, "/data/collated/PhenodigmScores.csv"), quote = "all") 
+```
+
+### Groupings
+
+```{r}
+# Define a lookup table for group names and regex patterns
+group_patterns <- tibble(
+  group_name = c("weight", "images", "brain", "cardiovascular", "eye"),
+  regex_pattern = c( # patterns to match specific parameter names
+    "weight|density|fat|lean|BMI|BMC|mass|composition|bone|length|adipose|lipid|body size|size|growth|skeletal|area|volume",
+    "image|screenshot|microscope|pdf|lacz|waveform|ogram|resolution|visual|pixel|scan|photo|imaging|bit depth|microscopy|contrast",
+    "brain|cortex|hippo|thalamus|amygdala|lobe|cere|spinal|pituitary|striatum|hypothal|neural|neuronal|pons|medulla|ganglion|nerve|enceph|ventricle|choroid",
+    "heart|cardiac|vascular|blood|vein|aort|arter|HR|stroke|ejection|QT|circulation|pulse|pressure|rate|systolic|diastolic|respiration|ECG|cardio|valve",
+    "eye|retina|cornea|lens|eyelid|iris|optic|ocular|vision|acuity|photoreceptor|brightness|scheimpflug|nuclear|macula|pupil|color|refraction|sclera|vitreous"
+  )
+)
+
+groupXparameter_table <- parameter %>%
+  select(parameter_id, parameter_name) %>%  # Select relevant columns
+  # Matches each parameter_name against regex_pattern, retrieves matching group_name values, and creates a group_name column with a list of matches for each parameter.
+  mutate(group_name = map(parameter_name, ~ group_patterns$group_name[
+    str_detect(.x, regex(group_patterns$regex_pattern, ignore_case = TRUE))
+  ])) %>%
+  unnest_longer(group_name) %>%  # Expand rows for each matched group
+  left_join(groupings_table, by = "group_name") %>%   # Add group_id from groupings_table
+  select(parameter_id, group_id) %>% # Select relevant columns
+  distinct() # Remove duplicates
+
+write_csv(groupXparameter_table, paste0(rootDir, "/data/collated/ParameterGroupings.csv"), quote = "all")
 ```
 
 # MySQL Database
@@ -957,78 +986,77 @@ USE IMPCDb;
 ```
 
 ```{sql}
-#| eval: false
-
 -- Create tables without foreign keys first
 
--- Table: Gene
+-- Table: Genes
 CREATE TABLE Genes (
-    gene_accession_id VARCHAR(11) PRIMARY KEY,           -- SOP: 9 to 11 alphanumeric characters
-    gene_symbol VARCHAR(13)                    -- SOP: 1 to 13 alphanumeric characters
+    gene_accession_id VARCHAR(11) PRIMARY KEY,   -- Unique ID for each gene, 9-11 alphanumeric characters as per SOP
+    gene_symbol VARCHAR(13)                      -- Gene symbol, 1-13 alphanumeric characters as per SOP
 ) COMMENT = 'Stores gene identifiers and symbols. Referenced by Analyses and PhenodigmScores (one-to-many).';
 
+-- Table: ProceduresTable (avoids reserved keyword "Procedure")
+CREATE TABLE ProceduresTable (
+    procedure_id INT PRIMARY KEY,                -- Unique ID for each procedure
+    procedure_name VARCHAR(47),                  -- Procedure name, max 47 characters
+    procedure_description VARCHAR(1090),         -- Procedure description, max 1090 characters
+    is_mandatory BOOLEAN NOT NULL DEFAULT FALSE  -- Mandatory flag, TRUE/FALSE; defaults to FALSE
+) COMMENT = 'Stores procedure details (name, description, mandatory flag). Linked to Parameters via a one-to-many relationship.';
 
--- Table: ProcedureTable (Procedure is a reserved keyword in SQL)
-CREATE TABLE Procedures (
-    procedure_id INT PRIMARY KEY,              -- Unique identifier for each procedure (impcParameterOrigId)
-    procedure_name VARCHAR(47),                -- Max length: 47 characters
-    procedure_description VARCHAR(1090),       -- Max length: 1090 characters
-    procedure_isMandatory BOOLEAN NOT NULL     -- No missing values; TRUE/FALSE
-        DEFAULT FALSE
-) COMMENT = 'Stores procedure details (name, description, mandatory). Linked to Parameters via a many-to-many join.';
-
-
--- Table: Disease
+-- Table: Diseases
 CREATE TABLE Diseases (
-    disease_id VARCHAR(50) PRIMARY KEY,        -- Unique identifier for each disease
-    disease_term VARCHAR(150)                  -- Descriptive term for the disease
-) COMMENT = 'Stores disease identifiers and terms. Linked to Genes in PhenodigmScores (many-to-many).';
+    disease_id VARCHAR(50) PRIMARY KEY,          -- Unique ID for each disease, max 50 characters
+    disease_term VARCHAR(150)                    -- Descriptive term for the disease, max 150 characters
+) COMMENT = 'Stores disease identifiers and terms. Referenced in PhenodigmScores (many-to-many relationship with Genes).';
 
-
--- Table: GroupingsTable
-CREATE TABLE GroupingsTable (
-    group_id INT PRIMARY KEY ,   -- Automatically increments for each new row
-    group_name VARCHAR(50)                     -- Name of the parameter group
-) COMMENT = 'Defines groups of parameters_table. Linked to Parameters via a one-to-many join.';
-
+-- Table: Groupings
+CREATE TABLE Groupings (
+    group_id INT AUTO_INCREMENT PRIMARY KEY,     -- Auto-incrementing unique ID for each group
+    group_name VARCHAR(50)                       -- Group name, max 50 characters
+) COMMENT = 'Defines parameter groups. Linked to Parameters via a many-to-many relationship.';
 
 -- Create tables with foreign keys
 
--- Table: Parameter
+-- Table: Parameters
 CREATE TABLE Parameters (
-    parameter_id VARCHAR(18) PRIMARY KEY,          -- SOP: 15 to 18 characters
-    parameter_name VARCHAR(74),                    -- SOP: 2 to 74 characters
-    parameter_description VARCHAR(1000),           -- Descriptive field for the parameter
-    procedure_id INT,                              -- Foreign key to ProcedureTable
-    group_id INT,                              -- Foreign key to GroupingsTable
-    FOREIGN KEY (procedure_id) REFERENCES Procedures(procedure_id),
-    FOREIGN KEY (group_id) REFERENCES GroupingsTable(group_id)
-) COMMENT = 'Stores parameter metadata. References Procedures (many-to-one), links to GroupingsTable (many-to-one) and referenced by Analyses (one-to-many).';
+    parameter_id VARCHAR(18) PRIMARY KEY,          -- Unique ID for each parameter, 15-18 alphanumeric characters as per SOP
+    parameter_name VARCHAR(74),                    -- Parameter name, 2-74 characters as per SOP
+    parameter_description VARCHAR(1000),           -- Parameter description, max 1000 characters
+    procedure_id INT,                              -- Foreign key to ProceduresTable
+    FOREIGN KEY (procedure_id) REFERENCES ProceduresTable(procedure_id)
+) COMMENT = 'Stores parameter metadata. References ProceduresTable (many-to-one) and referenced by Analyses (one-to-many).';
 
-
--- Table: Analysis
+-- Table: Analyses
 CREATE TABLE Analyses (
-    analysis_id VARCHAR(15) PRIMARY KEY,           -- SOP: 15 alphanumeric character string
-    gene_accession_id VARCHAR(11),                           -- SOP: 9 to 11 alphanumeric characters
-    mouse_life_stage VARCHAR(17),                  -- SOP: 4 to 17 characters
-    mouse_strain VARCHAR(5),                       -- SOP: 3 to 5 alphanumeric characters
-    parameter_id VARCHAR(18),                      -- Foreign key to Parameter table
-    p_value FLOAT,                                 -- SOP: Float from 0 to 1
+    analysis_id VARCHAR(15) PRIMARY KEY,           -- Unique ID for each analysis, 15 alphanumeric characters as per SOP
+    gene_accession_id VARCHAR(11),                 -- Foreign key to Genes, 9-11 alphanumeric characters as per SOP
+    mouse_strain VARCHAR(5),                       -- Mouse strain, 3-5 alphanumeric characters as per SOP
+    mouse_life_stage VARCHAR(17),                  -- Mouse life stage, 4-17 characters as per SOP
+    parameter_id VARCHAR(18),                      -- Foreign key to Parameters
+    p_value FLOAT,                                 -- P-value, float between 0 and 1 as per SOP
     FOREIGN KEY (gene_accession_id) REFERENCES Genes(gene_accession_id),
     FOREIGN KEY (parameter_id) REFERENCES Parameters(parameter_id)
-) COMMENT = 'Stores analysis results linking Genes and Parameters (many-to-one), including p-values and strain info.';
-
+) COMMENT = 'Stores analysis results linking Genes and Parameters (many-to-one), including p-values, mouse strain, and life stage.';
 
 -- Table: PhenodigmScores
 CREATE TABLE PhenodigmScores (
-    phenodigm_id INT AUTO_INCREMENT PRIMARY KEY,
-
-    disease_id VARCHAR(50),                        -- Foreign key to Disease table
-    gene_accession_id VARCHAR(11),                           -- Foreign key to Gene table
-    phenodigm_score FLOAT,                         -- Phenodigm association score
+    phenodigm_id INT AUTO_INCREMENT PRIMARY KEY,   -- Auto-incrementing unique ID for each record
+    disease_id VARCHAR(50),                        -- Foreign key to Diseases
+    gene_accession_id VARCHAR(11),                 -- Foreign key to Genes
+    phenodigm_score FLOAT,                         -- Phenodigm association score, float value
     FOREIGN KEY (disease_id) REFERENCES Diseases(disease_id),
     FOREIGN KEY (gene_accession_id) REFERENCES Genes(gene_accession_id)
-) COMMENT = 'Stores gene-disease association scores (many-to-many) linking Genes and Diseases.';
+) COMMENT = 'Stores gene-disease association scores, linking Genes and Diseases in a many-to-many relationship.';
+
+-- Table: ParameterGroupings
+CREATE TABLE ParameterGroupings (
+    parameter_id VARCHAR(18),                      -- Foreign key to Parameters
+    group_id INT,                                  -- Foreign key to Groupings
+    PRIMARY KEY (parameter_id, group_id),          -- Composite primary key for the many-to-many relationship
+    FOREIGN KEY (parameter_id) REFERENCES Parameters(parameter_id),
+    FOREIGN KEY (group_id) REFERENCES Groupings(group_id)
+) COMMENT = 'Links Parameters and Groupings in a many-to-many relationship.';
+
+# Consider adding indexes for frequently queried foreign key columns to improve performance.
 ```
 
 ## Populate Database
@@ -1037,92 +1065,84 @@ To populate the database, the schema should first be examined to identify which 
 
 Once a CSV file has been created for each table, the data can be loaded directly into MySQL using the `LOAD DATA INFILE` command.
 
--   **`FIELDS TERMINATED BY ','`**: Indicates that fields are separated by commas.
-
--   **`OPTIONALLY ENCLOSED BY '"'`**: Handles strings enclosed in double quotes.
-
--   **`IGNORE 1 LINES`**: Skips the header row in the CSV, if present.
-
-### 
-
 ```{sql}
-#| eval: false
--- Path to tables 
+-- Load data into tables using the base path
 LOAD DATA LOCAL INFILE '/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/collated/Procedures.csv'
-INTO TABLE Procedures
-FIELDS TERMINATED BY ',' 
-OPTIONALLY ENCLOSED BY '"'
-IGNORE 1 LINES;
-```
+INTO TABLE ProceduresTable
+FIELDS TERMINATED BY ','      -- Fields separated by commas
+OPTIONALLY ENCLOSED BY '"'    -- Fields (optionally) enclosed in double quotes
+IGNORE 1 LINES;               -- Skip the header row in the CSV file
 
-```{sql}
-#| eval: false
+SHOW WARNINGS;
+
 LOAD DATA LOCAL INFILE '/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/collated/Genes.csv'
 INTO TABLE Genes
 FIELDS TERMINATED BY ',' 
-OPTIONALLY ENCLOSED BY '"'
-IGNORE 1 LINES; 
-```
-
-*\*Some of the IDs appeared to be duplicated, but upon inspection, the rows contained equivalent values (e.g., for IMPC_HIS_010_001: "Eye with optic nerve - Severity score" and "Eye - Severity score"). Given the same identifier and the similarity of these terms, it is reasonable to assume that they refer to the same parameter, and only one of the duplicates was uploaded to the database.*
-
-![](images/Screenshot%202024-12-18%20at%2015.27.00.png)
-
-*Some values are truncated, which aligns with the SOP specifying a maximum of 74 characters. However, the maximum number of characters in the dataset is 88, exceeding the allowed limit.*
-
-![](images/Screenshot%202024-12-18%20at%2015.26.12.png)
-
-```{sql}
-#| eval: false
-LOAD DATA LOCAL INFILE '/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/collated/Groupings.csv'
-INTO TABLE GroupingsTable
-FIELDS TERMINATED BY ',' 
-OPTIONALLY ENCLOSED BY '"'
+OPTIONALLY ENCLOSED BY '"' 
 IGNORE 1 LINES;
 
+SHOW WARNINGS;
+
+LOAD DATA LOCAL INFILE '/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/collated/Groupings.csv'
+INTO TABLE Groupings
+FIELDS TERMINATED BY ',' 
+OPTIONALLY ENCLOSED BY '"' 
+IGNORE 1 LINES;
+
+SHOW WARNINGS;
 
 LOAD DATA LOCAL INFILE '/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/collated/Parameters.csv'
 INTO TABLE Parameters
 FIELDS TERMINATED BY ',' 
-OPTIONALLY ENCLOSED BY '"'
+OPTIONALLY ENCLOSED BY '"' 
 IGNORE 1 LINES;
-```
 
-```{sql}
-#| eval: false
+SHOW WARNINGS;
+
 LOAD DATA LOCAL INFILE '/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/collated/Diseases.csv'
 INTO TABLE Diseases
 FIELDS TERMINATED BY ',' 
-OPTIONALLY ENCLOSED BY '"'
+OPTIONALLY ENCLOSED BY '"' 
 IGNORE 1 LINES;
-```
 
-```{sql}
-#| eval: false
+SHOW WARNINGS;
+
 LOAD DATA LOCAL INFILE '/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/collated/PhenodigmScores.csv'
 INTO TABLE PhenodigmScores
 FIELDS TERMINATED BY ',' 
 OPTIONALLY ENCLOSED BY '"' 
-LINES TERMINATED BY '\n' 
 IGNORE 1 LINES
-(disease_id, gene_accession_id, phenodigm_score); -- so that the phenodigm_id is created dynamically
-```
+(disease_id, gene_accession_id, phenodigm_score); -- Explicitly map columns (phenodigm_id is auto-generated)
 
-```{sql}
-#| eval: false
+SHOW WARNINGS;
+
 LOAD DATA LOCAL INFILE '/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/collated/Analyses.csv'
 INTO TABLE Analyses
 FIELDS TERMINATED BY ',' 
 OPTIONALLY ENCLOSED BY '"' 
-LINES TERMINATED BY '\n'
-IGNORE 1 LINES; -- so that the phenodigm_id is created dynamically
+IGNORE 1 LINES;
+
+SHOW WARNINGS;
+
+LOAD DATA LOCAL INFILE '/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/collated/ParameterGroupings.csv'
+INTO TABLE ParameterGroupings
+FIELDS TERMINATED BY ','               
+OPTIONALLY ENCLOSED BY '"'                   
+IGNORE 1 LINES;  
+
+SHOW WARNINGS;
 ```
 
-## Create dump
+##### A total of 143 parameters corresponding to 83,712 analysis files have non-IMPC identifiers, meaning they are not linked to any procedure. This violates the foreign key constraints in the database, resulting in the following issues: {style="color: red"}
+
+1.  During the loading of the `Parameters` table, missing or invalid `procedure_id` values (e.g., `NA`) cause errors, such as "Incorrect integer value: 'NA' for column 'procedure_id' at row 3601." Additionally, foreign key violations occur when `procedure_id` values are not linked to `ProceduresTable`.
+
+2.  During the loading of the `Analyses` table, non-IMPC `parameter_id` values prevent rows from referencing the `Parameters` table, resulting in foreign key constraint failures.
+
+### Create dump
 
 ```{bash}
 #| eval: false
-
 /opt/homebrew/bin/mysqldump IMPCDb -u root -p > /Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/database/IMPCDb.dump
 ```
 
@@ -1131,16 +1151,27 @@ IGNORE 1 LINES; -- so that the phenodigm_id is created dynamically
 **Test R/Shiny 1:** They want the ability to select a particular knockout mouse and visualise the statistical scores of all phenotypes tested.
 
 ```{sql}
-#| eval: false
-SELECT Analyses.p_value, Parameters.parameter_name 
-FROM Analyses 
-JOIN Parameters ON Analyses.parameter_id = Parameters.parameter_id 
-WHERE Analyses.gene_accession_id IN (
-    SELECT gene_accession_id 
-    FROM Genes 
-    WHERE gene_symbol IN ('Ifi204', 'Mettl21c', 'Ier5', 'Abca4')
-)
-ORDER BY Analyses.p_value ASC;
+-- Select p-values and corresponding parameter names for specific genes
+SELECT 
+    Analyses.p_value, 
+    Parameters.parameter_name
+FROM 
+    Analyses
+JOIN 
+    Parameters ON Analyses.parameter_id = Parameters.parameter_id
+WHERE 
+    Analyses.gene_accession_id IN (
+        -- Subquery to find gene_accession_id for specific gene symbols
+        SELECT 
+            gene_accession_id 
+        FROM 
+            Genes 
+        WHERE 
+            gene_symbol IN ('Ifi204', 'Mettl21c', 'Ier5', 'Abca4')
+    )
+ORDER BY 
+    Analyses.p_value ASC; -- Sort results by p_value in ascending order
+
 ```
 
 ![](images/Screenshot%202024-12-21%20at%2016.21.52.png)
@@ -1149,29 +1180,36 @@ ORDER BY Analyses.p_value ASC;
 
 ```{sql}
 #| eval: false
-SELECT Analyses.p_value, Genes.gene_symbol 
-FROM Analyses 
-JOIN Parameters ON Analyses.parameter_id = Parameters.parameter_id 
-JOIN Genes ON Analyses.gene_accession_id = Genes.gene_accession_id 
-WHERE Parameters.parameter_name IN (
-    'Facial Cleft',
-    'Lens Opacity',
-    'Triglycerides',
-    'Skin color - tail',
-    'Potassium',
-    'HRV',
-    'Hindbrain morphology',
-    'Aspartate aminotransferase',
-    'Tibia length',
-    'Left total retinal thickness',
-    'Embryo Size',
-    'Effector CD4+ T helper cells - % of live leukocytes (Panel A)',
-    'Limb morphology',
-    'Coat - color - back',
-    'Aggression',
-    'Joints'
-)
-ORDER BY Analyses.p_value ASC;
+SELECT 
+    Analyses.p_value, 
+    Genes.gene_symbol
+FROM 
+    Analyses
+JOIN 
+    Parameters ON Analyses.parameter_id = Parameters.parameter_id
+JOIN 
+    Genes ON Analyses.gene_accession_id = Genes.gene_accession_id
+WHERE 
+    Parameters.parameter_name IN (
+        'Facial Cleft',
+        'Lens Opacity',
+        'Triglycerides',
+        'Skin color - tail',
+        'Potassium',
+        'HRV',
+        'Hindbrain morphology',
+        'Aspartate aminotransferase',
+        'Tibia length',
+        'Left total retinal thickness',
+        'Embryo Size',
+        'Effector CD4+ T helper cells - % of live leukocytes (Panel A)',
+        'Limb morphology',
+        'Coat - color - back',
+        'Aggression',
+        'Joints'
+    )
+ORDER BY 
+    Analyses.p_value ASC;
 ```
 
 ![](images/Screenshot%202024-12-21%20at%2016.22.09.png)
