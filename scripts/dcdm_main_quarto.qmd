@@ -29,6 +29,8 @@ format: html
 
 Though we had access to the zip file of our data, we had no permissions on it so were unable to move or copy it to our own data. This required me to download the file to my own system using scp, then re-upload the file to a our group project folder using scp. I checked the file sizes before and after using the `ls -l` command, to ensure no data was corrupted in the process.
 
+##### `ls -l` does not detect corrupted files; it lists file metadata like permissions, size, and modification date but does not verify file integrity. Use checksums like `md5sum` or `sha256sum` instead to verify file integrity. {style="color: red"}
+
 ```{bash}
 # downloading the data locally from the HPC
 # scp -i ~/.ssh/msckey  k24064085@hpc.create.kcl.ac.uk:/scratch_tmp/grp/msc_appbio/7BBG1003/CW/Group3.zip ~/Desktop/applied_bioinformatics/DCDM/group_project/raw_data/Group3
@@ -40,29 +42,29 @@ Though we had access to the zip file of our data, we had no permissions on it so
 # Data Cleaning
 
 ```{r}
+#| warning: false
+
+# Clear workspace
 rm(list = ls())
 
-# Install and load Tidyverse packages
-#install.packages(c("tidyverse", "janitor", "fs"))
-library(tidyverse)
-library(janitor)
-library(fs)
+# Install packages if needed
+# install.packages(c("tidyverse", "janitor", "fs"))
+
+# Load packages
+library(tidyverse)  # Data manipulation
+library(janitor)    # Data cleaning
+library(fs)         # File system operations
 ```
 
 ```{r}
 #| warning: false
 
-# Define the working directory path in R
-# Alicia
-rootDir <- "/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/"
-# Sanj 
-# rootDir <- "/Users/sanjanasrinivasan/Desktop/DCDM_IMPC_Project/"
-# Ella
-# rootDir <- "/Users/ellajadealex/Desktop/applied_bioinformatics/DCDM/group_project/DCDM_IMPC_Project/"
-# Sama
-# rootDir <- "/Users/sama/Desktop/DCDM_Proj2/"
-# Esta
-# rootDir <- "~/Desktop/working_directory/DCDM_project"
+# Set working directory (uncomment for other users as needed)
+rootDir <- "/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/" # Allie
+# rootDir <- "/Users/sanjanasrinivasan/Desktop/DCDM_IMPC_Project/" # Sanj
+# rootDir <- "/Users/ellajadealex/Desktop/applied_bioinformatics/DCDM/group_project/DCDM_IMPC_Project/" # Ella
+# rootDir <- "/Users/sama/Desktop/DCDM_Proj2/" # Sama
+# rootDir <- "~/Desktop/working_directory/DCDM_project" # Esta
 
 # Create directories
 dir.create(file.path(rootDir, "data/metadata"), recursive = TRUE)      # Directory for procedure, parameter, disease files, query genes, and SOP documents
@@ -125,7 +127,7 @@ validate_columns <- function(file_path) {
 }
 ```
 
-### Check and Correct the Field Names (Esta) 
+### Check and Correct the Field Names (Esta)
 
 With the correct files loaded and directories specified, we define a function to perform the following tasks:
 
@@ -212,30 +214,30 @@ rm(raw_data_dir, validation_results, summary_message, expected_row_names)
 
 ### Combining the Raw Data in a Table (Alicia)
 
-The data-set consists of thousands of CSV files with key fields: `analysis_id`, `gene_accession_id`, `gene_symbol`, `mouse_strain`, `mouse_life_stage`, `parameter_id`, `parameter_name`, and `pvalue`.
+Esta made sure all analysis files have the same field names: `analysis_id`, `gene_accession_id`, `gene_symbol`, `mouse_strain`, `mouse_life_stage`, `parameter_id`, `parameter_name`, and `pvalue`.
 
-To streamline data cleaning and enable further analysis, these files must be combined into a single table based on their shared fields.
+To make data cleaning and processing easier, these files will be combined into one table using these shared fields. This way, we can check all values for a specific field at once (vectorized), making the process faster and simpler.
 
-Below is a function that reads a file and converts its data into a row for the unified table:
+The `combine_files` function reads a file and transforms its data into a row for the unified table:
 
 ```{r}
-# Define a function to clean and process a single file
 combine_files <- function(file_path) {
-  read_csv(file_path, show_col_types = FALSE) %>%
-    t() %>%                           # Transpose the data: fields become columns, values form rows
-    as.data.frame() %>%               # Convert the transposed data into a data frame
-    setNames(.[1, ]) %>%              # Set the first row as column names
-    slice(-1) %>%                     # Remove the first row (now column names)
-    mutate(analysis_id = rownames(.), .before = 1)  # Add `analysis_id` as the first column
+  read_csv(file_path, show_col_types = FALSE) %>%  # Read the CSV file 
+    t() %>%                                        # Transpose so fields become columns and values become rows
+    as.data.frame() %>%                            # Convert the transposed data to a data frame
+    setNames(.[1, ]) %>%                           # Set analysis_id (first column) as column name 
+    slice(-1) %>%                                  # Remove the field names (first row)
+    mutate(analysis_id = rownames(.), .before = 1) # Move analysis_id as the first column
 }
+```
 
-# Process all CSV files in the updated data directory and combine into a single table
-analysis <- dir_ls(path = updated_data_dir, glob = "*.csv") %>%
-  map_dfr(combine_files) %>%            # Apply `combine_files` to each file and combine results
-  write_csv(paste0(rootDir, "data/raw_data/analysis_table.txt"))  # Save the combined table as a CSV
+The `combine_files` function is then applied to each file in the directory, combining their contents into a single table:
 
-# Display the first 6 rows of the combined analysis table
-head(analysis)
+```{r}
+# Combine all data files into a single table
+analysis <- dir_ls(path = updated_data_dir, glob = "*.csv") %>%  # List all CSV files in the directory
+  map_dfr(combine_files) %>%                                    # Apply the combine_files function to each file and combine results
+  write_csv(paste0(rootDir, "data/raw_data/analysis_table.txt")) # Save the combined table as a CSV
 ```
 
 ### QC and Cleaning the Combined Analysis Data (Esta)
@@ -466,17 +468,25 @@ rm(
 
 ## Cleaning the Metadata Files
 
-The cleaning of the procedure, parameter, and disease files involved two steps:
+Extra information about the parameters tested, the procedures they are part of, and the human diseases linked to the knockout genes is stored in separate metadata files. However, these files are not set up correctly for loading into R and have inconsistent values, so they need cleaning.
 
-1.  **Initial Processing**: Fields were clearly separated by commas, and fields containing commas were enclosed in quotes to ensure proper loading as a table. A temporary text file reflecting these changes was saved.
+The cleaning process for the procedure, parameter, and disease files had two steps:
 
-2.  **Data Cleaning**: The temporary text file was loaded as a table, and values were cleaned to remove duplicates and ensure consistent formatting.
+1.  **Initial Setup**: Fields were separated with commas, and any fields with commas inside were enclosed in quotes to make sure the file could load properly as a table. A temporary text file with these fixes was saved.
 
-After these changes were applied, a quick check was performed to ensure the fields met the SOP requirements.
+2.  **Data Cleaning**: The temporary file was loaded as a table, duplicates were removed, and formatting was made consistent.
+
+Finally, a quick check was done to confirm that the fields followed the SOP rules.
 
 ### `IMPC_procedure.txt (Alicia)`
 
 #### Formatting
+
+-   Replaced double quotes between fields with commas.
+
+-   Removed leading and trailing double quotes from each line.
+
+-   Enclosed descriptions containing commas in quotes using a regular expression.
 
 ```{r}
 # Define the path to temporarily store the formatted table before cleaning
@@ -495,6 +505,14 @@ procedure <- read_lines(paste0(rootDir, "data/metadata/IMPC_procedure.txt")) %>%
 ```
 
 #### Cleaning
+
+-   Trimmed whitespace and replaced HTML codes.
+
+-   Renamed columns for consistency.
+
+-   Standardized or filled missing/conflicting descriptions based on procedure names.
+
+-   Grouped identical procedures, assigned shared `procedure_id`s, and stored parameter IDs for integration with the parameter table.
 
 ```{r}
 # Clean and standardize the procedure information
@@ -542,23 +560,14 @@ procedure <- read_csv(temporary_path, show_col_types = FALSE, col_names = TRUE) 
   # Expand the list of parameter mappings into individual rows
  unnest(parameter_mapping)
 
+# Remove formatted file 
+file.remove(temporary_path)
+
 # Save the cleaned data to a new CSV file
 write_csv(procedure, paste0(rootDir, "data/cleaned/cleaned_IMPC_procedure.csv"))
 ```
 
-The table initially contained over 5,000 rows but only 50 distinct procedures, as each row represented a parameter tested within a procedure. To reduce redundancy:
-
--   Identical procedures with missing or conflicting descriptions were standardized by filling in or selecting the most appropriate value.
-
--   Procedures with identical names, descriptions, and mandatory values were assigned a shared `procedure_id`, with their `impcParameterOrigId` values stored as a list for integration with the parameter table.
-
-IMPC link to procedures: <https://www.mousephenotype.org/impress/PipelineInfo?id=7>
-
-```{r}
-# Remove unnecessary files and variables
-file.remove(temporary_path)
-rm(temporary_path)
-```
+The cleaned table reduced over 5,000 rows to [50 distinct procedures](https://www.mousephenotype.org/impress/PipelineInfo?id=7) and ensured all fields met SOP compliance.
 
 #### Validating
 
@@ -605,6 +614,16 @@ if (length(errors) == 0) {
 
 #### Formatting
 
+-   Removed the header line and empty lines.
+
+-   Stripped leading and trailing double quotes.
+
+-   Replaced double quotes between fields with commas.
+
+-   Replaced inconsistent newline characters with spaces.
+
+-   Corrected field separators and properly quoted descriptions using a regular expression.
+
 ```{r}
 # Define the path to temporarily store the formatted table before cleaning
 temporary_path <- paste0(rootDir, "data/cleaned/IMPC_parameter_description_table.txt")
@@ -649,6 +668,14 @@ parameter <- read_lines(paste0(rootDir, "data/metadata/IMPC_parameter_descriptio
 ```
 
 #### Cleaning
+
+-   Trimmed whitespace and replaced empty strings with `NA`.
+
+-   Renamed columns for consistency.
+
+-   Standardized parameter names and descriptions using `parameter_id` and the IMPC database, filling missing descriptions with standardized names.
+
+-   Removed duplicates to ensure one record per parameter, reducing rows from 5,325 to 3,600.
 
 ```{r}
 # Load and clean parameter data
@@ -712,14 +739,11 @@ parameter <- read_csv(temporary_path, show_col_types = FALSE) %>%
   # Ensure one record per parameter
   distinct(parameter_name, parameter_description, parameter_id, .keep_all = TRUE)  # Reduces rows from 5325 to 3600; ignore parameter_mappings for this as each parameter is part of a specific procedure 
 
+# Remove formatted file 
+file.remove(temporary_path)
+
 # Save the cleaned data to a new CSV file
 write_csv(parameter, paste0(rootDir, "data/cleaned/cleaned_IMPC_parameter_description.csv"))
-```
-
-```{r}
-# Remove unnecessary files and variables
-file.remove(temporary_path)
-rm(temporary_path)
 ```
 
 #### Validating
@@ -769,6 +793,12 @@ if (length(errors) == 0) {
 
 #### Formatting
 
+-   Removed the header line and line numbers.
+
+-   Stripped leading and trailing double quotes.
+
+-   Used a regular expression to separate fields, ensuring proper quoting and field separation.
+
 ```{r}
 temporary_path <- paste0(rootDir, "data/cleaned/Disease_information_table.txt")
   
@@ -788,6 +818,14 @@ disease <- read_lines(paste0(rootDir, "data/metadata/Disease_information.txt")) 
 
 #### Cleaning
 
+-   Trimmed white space and replaced empty strings with `NA`.
+
+-   Converted `phenodigm_score` to numeric format.
+
+-   Removed duplicate rows.
+
+##### Identified rows with the same `disease_id` and `gene_accession_id` for further discussion. {style="color: red"}
+
 ```{r}
 # Load and clean parameter data
 disease <- read_csv(temporary_path, show_col_types = FALSE) %>%
@@ -801,6 +839,9 @@ disease <- read_csv(temporary_path, show_col_types = FALSE) %>%
   )%>%
   # Remove duplicates
   distinct()
+
+# Remove formatted file 
+file.remove(temporary_path)
 
 # Save the cleaned data to a new CSV file
 write_csv(disease, paste0(rootDir, "data/cleaned/cleaned_disease_information.csv"))
@@ -820,12 +861,6 @@ if (nrow(duplicates) > 0) {
   cat("No rows with duplicate disease_id and gene_accession_id found.\n")
 }
 
-```
-
-```{r}
-# Remove unnecessary files and variables
-file.remove(temporary_path)
-rm(temporary_path)
 ```
 
 #### Validating
@@ -869,49 +904,48 @@ if (length(errors) == 0) {
 ```
 
 ```{r}
-rm(errors)
+rm(errors, temporary_path)
 ```
 
-# Collating (Alicia) 
+# Collating (Alicia)
 
-This step subsets and transforms the cleaned data to align with the agreed-upon database schema. Each section focuses on extracting specific fields, applying necessary transformations, and saving the results as CSV files ready for upload into the database.
+Although the metadata and analysis tables have been cleaned, they do not match the agreed database structure. To make them compatible, new tables are created by selecting and transforming specific fields from the cleaned data. Some tables require merging information from multiple sources. The final outputs are saved as CSV files for upload into the database.
 
-The cleaned input tables are loaded to avoid rerunning the entire script.
+To avoid rerunning the entire script, the cleaned tables are loaded:
 
 ```{r}
-# load tables to not have to run the rest of the script: 
 procedure <- read_csv(paste0(rootDir, "data/cleaned/cleaned_IMPC_procedure.csv"), show_col_types = FALSE) 
 analysis <- read_csv(paste0(rootDir, "data/cleaned/cleaned_analysis_table.txt"), show_col_types = FALSE) 
 parameter <- read_csv(paste0(rootDir, "data/cleaned/cleaned_IMPC_parameter_description.csv"), show_col_types = FALSE)
 disease <- read_csv(paste0(rootDir, "data/cleaned/cleaned_Disease_information.csv"), show_col_types = FALSE)
-
 ```
 
-### Procedures
+## **Procedures Table**
 
-The `procedures_table` is created by selecting key fields from the `procedure` table: `procedure_id`, `procedure_name`, `procedure_description`, and `is_mandatory`. The `is_mandatory` field is converted to integers (0 or 1) to meet SQL requirements for boolean fields. Duplicate rows are removed to ensure only unique entries remain. The table is saved as `Procedures.csv`.
+Key fields (`procedure_id`, `procedure_name`, `procedure_description`, `is_mandatory`) are selected, with `is_mandatory` converted to integers (0 or 1) for SQL compatibility.
 
 ```{r}
 procedures_table <- procedure %>%
-  select(procedure_id, procedure_name, procedure_description, is_mandatory) %>%   mutate(is_mandatory = as.integer(is_mandatory))  %>% # needed for sql that needs 0 and 1 for booleans 
+  select(procedure_id, procedure_name, procedure_description, is_mandatory) %>%
+  mutate(is_mandatory = as.integer(is_mandatory)) %>%
+  distinct()
 
-  # Select specific columns
-  distinct() # Keep only unique rows (this is needed due to the parameter_mapping field)
-
-# Save the table as CSV 
 write_csv(procedures_table, paste0(rootDir, "/data/collated/Procedures.csv"), quote = "all")
 ```
 
-### Genes
+## **Genes Table**
 
-The `genes_table` is built by combining `gene_accession_id` and `gene_symbol` from the `analysis` and `disease` tables. Gene symbols are converted to title case, and specific gene accessions are mapped to predefined symbols for consistency. Unique entries are retained, and the final table is saved as `Genes.csv`.
+Gene information (`gene_accession_id`, `gene_symbol`) is combined from the analysis and disease tables. Missing symbols are curated from the MGI database for about a dozen genes.
 
 ```{r}
-genes_table <- analysis %>% select(gene_accession_id, gene_symbol) %>% # Select desired columns
-  bind_rows(disease %>% 
+genes_table <- analysis %>%
+  select(gene_accession_id, gene_symbol) %>%
+  bind_rows(
+    disease %>%
       select(gene_accession_id) %>%
-      filter(!gene_accession_id %in% analysis$gene_accession_id)) %>%
-  mutate(# Convert to title case 
+      filter(!gene_accession_id %in% analysis$gene_accession_id)
+  ) %>%
+  mutate(
     gene_symbol = case_when(
       gene_accession_id == "MGI:98967" ~ "Wt",
       gene_accession_id == "MGI:96090" ~ "Asmt",
@@ -923,32 +957,32 @@ genes_table <- analysis %>% select(gene_accession_id, gene_symbol) %>% # Select 
       gene_accession_id == "MGI:87868" ~ "Acads",
       gene_accession_id == "MGI:1351634" ~ "Abcc6",
       gene_accession_id == "MGI:104511" ~ "Tnfsf4",
-      TRUE ~ gene_symbol)) %>% 
+      TRUE ~ gene_symbol
+    )
+  ) %>%
   distinct()
 
 write_csv(genes_table, paste0(rootDir, "/data/collated/Genes.csv"), quote = "all")
 ```
 
-### Analyses
+## **Analyses Table**
 
-The `analyses_table` is created by extracting relevant fields from the `analysis` table: `analysis_id`, `gene_accession_id`, `mouse_strain`, `mouse_life_stage`, `parameter_id`, and `pvalue`. Duplicate rows are removed to ensure clean data, and the table is saved as `Analyses.csv`.
+Relevant fields are selected from the analysis table.
 
 ```{r}
 analyses_table <- analysis %>%
-  select(analysis_id, gene_accession_id, mouse_strain, mouse_life_stage, parameter_id, pvalue)   %>%  
-    distinct()
+  select(analysis_id, gene_accession_id, mouse_strain, mouse_life_stage, parameter_id, pvalue) %>%
+  distinct()
 
 write_csv(analyses_table, paste0(rootDir, "/data/collated/Analyses.csv"), quote = "all")
 ```
 
-### Parameters
+## **Parameters Table**
 
-The `parameters_table` is generated by joining the `parameter` and `procedure` tables using a mapping column (`parameter_mapping`). It ensures that all `parameter_id` values present in the `analyses_table` but missing from the `parameter` table are added. The resulting table includes fields like `parameter_id`, `parameter_name`, `parameter_description`, and `procedure_id`, and is saved as `Parameters.csv`.
+The parameter table is joined with the procedure table using `parameter_mapping`, and missing `parameter_id` values from the analyses table are added.
 
 ```{r}
-# Join parameter table with procedure table by the appropriate column
 parameters_table <- left_join(parameter, procedure, by = join_by(parameter_mapping)) %>%
-  # Add rows from analyses_table where parameter_id is not already in the parameter table
   bind_rows(
     analyses_table %>%
       select(parameter_id) %>%
@@ -956,47 +990,44 @@ parameters_table <- left_join(parameter, procedure, by = join_by(parameter_mappi
   ) %>%
   distinct(parameter_id, parameter_name, parameter_description, procedure_id)
 
-# Write the final table to a CSV file with all fields quoted
 write_csv(parameters_table, paste0(rootDir, "/data/collated/Parameters.csv"), quote = "all")
-
 ```
 
-### Diseases
+## **Diseases Table**
 
-The `diseases_table` is created by selecting `disease_id` and `disease_term` from the `disease` table, ensuring only unique rows are included. The processed table is saved as `Diseases.csv`.
+Disease information (`disease_id`, `disease_term`) is extracted.
 
 ```{r}
 diseases_table <- disease %>%
-  select(disease_id, disease_term) %>% 
+  select(disease_id, disease_term) %>%
   distinct()
 
 write_csv(diseases_table, paste0(rootDir, "/data/collated/Diseases.csv"), quote = "all")
 ```
 
-### PhenoDigm
+## **Phenodigm Scores Table**
 
-The `phenodigm_scores` table is created by selecting `disease_id`, `gene_accession_id`, and `phenodigm_score` from the `disease` table. This table is saved as `PhenodigmScores.csv` for further analysis.
+Disease and gene information along with `phenodigm_score` is selected from the disease table.
 
 ```{r}
 phenodigm_scores <- disease %>%
-  select(disease_id, gene_accession_id, phenodigm_score) 
+  select(disease_id, gene_accession_id, phenodigm_score)
 
-write_csv(phenodigm_scores, paste0(rootDir, "/data/collated/PhenodigmScores.csv"), quote = "all") 
+write_csv(phenodigm_scores, paste0(rootDir, "/data/collated/PhenodigmScores.csv"), quote = "all")
 ```
 
-### Groupings
+## Parameter Groupings
 
-The goal is to group parameters based on their naming or similarity in phenotype tests. This helps reduce the parameter space and organize them into meaningful categories (e.g., `weight`, `images`, `brain`, and others). These groupings are essential for downstream analysis and database design. The collaborator requires at least three additional parameter groups beyond the initial ones provided (`weight`, `images`, `brain`).
+The goal is to group parameters by naming or phenotype test similarity, reducing parameter space and organizing them into meaningful categories (e.g., weight, images, brain). At least three new parameter groups are needed beyond the initial ones.
 
-#### Define Group Patterns
+### Define Group Patterns
 
-The `group_patterns` table is created to define group names (e.g., "weight", "images", "brain") and associated regular expression patterns. These patterns are used to match parameter names that belong to each group. For example, the "weight" group includes terms such as "weight", "density", and "BMI", while the "brain" group matches terms like "cortex", "hippo", and "neural". This table acts as the basis for identifying and categorizing parameters.
+The `group_patterns` table defines group names (e.g., "weight," "images," "brain") with regex patterns to match parameter names, forming the basis for identifying and categorizing parameters.
 
 ```{r}
-# Define a lookup table for group names and regex patterns
 group_patterns <- tibble(
   group_name = c("weight", "images", "brain", "cardiovascular", "eye"),
-  regex_pattern = c( # patterns to match specific parameter names
+  regex_pattern = c(
     "weight|density|fat|lean|BMI|BMC|mass|composition|bone|length|adipose|lipid|body size|size|growth|skeletal|area|volume",
     "image|screenshot|microscope|pdf|lacz|waveform|ogram|resolution|visual|pixel|scan|photo|imaging|bit depth|microscopy|contrast",
     "brain|cortex|hippo|thalamus|amygdala|lobe|cere|spinal|pituitary|striatum|hypothal|neural|neuronal|pons|medulla|ganglion|nerve|enceph|ventricle|choroid",
@@ -1006,55 +1037,57 @@ group_patterns <- tibble(
 )
 ```
 
-#### Create Groupings Table
+### Create Groupings Table
 
-A new `groupings_table` is generated by dynamically assigning a unique ascending ID (`group_id`) to each group name from the `group_patterns` table. Only the `group_id` and `group_name` columns are retained, and the resulting table is saved as a CSV file named `GroupingsTable.csv` in the collated data directory. This table serves as a reference for linking parameters to their respective groups in the database.
+The `groupings_table` assigns a unique ascending `group_id` to each group name from the `group_patterns` table, retaining only `group_id` and `group_name`.
 
 ```{r}
-# Create a dynamic group table with ascending IDs and group names from the lookup table
 groupings_table <- group_patterns %>%
-  mutate(group_id = row_number()) %>%   # Add ascending IDs for each group
-  select(group_id, group_name)         # Keep only group_id and group_name columns
+  mutate(group_id = row_number()) %>%  # Assign unique ascending IDs
+  select(group_id, group_name)         # Retain only group_id and group_name
 
-# Save the table as a CSV file
 write_csv(groupings_table, paste0(rootDir, "data/collated/GroupingsTable.csv"), quote = "all")
 ```
 
-#### Map Parameters to Groups
+### Map Parameters to Groups
 
-The `parameter` table is processed to associate each `parameter_id` with one or more groups based on the regex patterns defined in `group_patterns`. The `parameter_name` column is matched against the regex patterns, and matching group names are added as a new column. If a parameter matches multiple groups, the data is expanded to create a separate row for each match. The resulting table is then joined with the `groupings_table` to add the corresponding `group_id` for each group, and duplicates are removed. The final table, `groupXparameter_table`, contains only `parameter_id` and `group_id` columns and is saved as a CSV file named `ParameterGroupings.csv` in the collated data directory.
+The `parameter` table is processed to match each `parameter_id` with groups using regex patterns from `group_patterns`. Matches are expanded into separate rows for multiple groups, joined with the `groupings_table` to add `group_id`, and duplicates are removed.
 
 ```{r}
 groupXparameter_table <- parameter %>%
-  select(parameter_id, parameter_name) %>%  # Select relevant columns
-  # Matches each parameter_name against regex_pattern, retrieves matching group_name values, and creates a group_name column with a list of matches for each parameter.
-  mutate(group_name = map(parameter_name, ~ group_patterns$group_name[
-    str_detect(.x, regex(group_patterns$regex_pattern, ignore_case = TRUE))
-  ])) %>%
-  unnest_longer(group_name) %>%  # Expand rows for each matched group
-  left_join(groupings_table, by = "group_name") %>%   # Add group_id from groupings_table
-  select(parameter_id, group_id) %>% # Select relevant columns
-  distinct() # Remove duplicates
+  select(parameter_id, parameter_name) %>%                # Select relevant columns
+  mutate(group_name = map(parameter_name, ~               # Match parameter names to group patterns
+    group_patterns$group_name[
+      str_detect(.x, regex(group_patterns$regex_pattern, ignore_case = TRUE))
+    ])
+  ) %>%
+  unnest_longer(group_name) %>%                           # Expand rows for each matched group
+  left_join(groupings_table, by = "group_name") %>%       # Add group_id from groupings_table
+  select(parameter_id, group_id) %>%                      # Retain parameter_id and group_id columns
+  distinct()                                              # Remove duplicates
 
 write_csv(groupXparameter_table, paste0(rootDir, "/data/collated/ParameterGroupings.csv"), quote = "all")
 ```
 
-This code organizes parameters into groups to reduce the parameter space, aligning with the collaborator's request to group similar phenotype tests and parameter names. By dynamically creating groupings and mapping parameters to these groups, the code enables efficient data categorization for further database integration and analysis.
-
 # MySQL Database (Alicia)
+
+After creating the tables in R, the database can be set up in MySQL, and the tables can be imported directly using the `LOAD DATA LOCAL INFILE` function.
+
+This script checks if MySQL is running and connects with local file import enabled:
 
 ```{sql}
 #| eval: false
 
--- Check if MySQL is running
+# Check if MySQL is running
 ps -ef | grep mysql
 
--- Connect to MySQL
+# Connect to MySQL with local file import enabled
 mysql -u root -p --local-infile=1
--- local-infile=1 enables data import from local files using LOAD DATA LOCAL INFILE.
 ```
 
-## Create Database and Schemas
+## Create Database and Tables
+
+The first step is to create the database in MySQL, followed by creating the tables according to the agreed-upon schema.
 
 ```{sql}
 #| eval: false
@@ -1067,92 +1100,83 @@ USE IMPCDb;
 ```
 
 ```{sql}
+#| eval: false
+
 -- Create tables without foreign keys first
 
--- Table: Genes
 CREATE TABLE Genes (
-    gene_accession_id VARCHAR(11) PRIMARY KEY,   -- Unique ID for each gene, 9-11 alphanumeric characters as per SOP
-    gene_symbol VARCHAR(13)                      -- Gene symbol, 1-13 alphanumeric characters as per SOP
-) COMMENT = 'Stores gene identifiers and symbols. Referenced by Analyses and PhenodigmScores (one-to-many).';
+    gene_accession_id VARCHAR(11) PRIMARY KEY,       -- Unique ID for each gene (9-11 characters)
+    gene_symbol VARCHAR(13)                          -- Gene symbol (1-13 characters)
+) COMMENT = 'Stores gene identifiers and symbols.';
 
--- Table: ProceduresTable (avoids reserved keyword "Procedure")
 CREATE TABLE ProceduresTable (
-    procedure_id INT PRIMARY KEY,                -- Unique ID for each procedure
-    procedure_name VARCHAR(47),                  -- Procedure name, max 47 characters
-    procedure_description VARCHAR(1090),         -- Procedure description, max 1090 characters
-    is_mandatory BOOLEAN NOT NULL DEFAULT FALSE  -- Mandatory flag, TRUE/FALSE; defaults to FALSE
-) COMMENT = 'Stores procedure details (name, description, mandatory flag). Linked to Parameters via a one-to-many relationship.';
+    procedure_id INT PRIMARY KEY,                    -- Unique ID for each procedure
+    procedure_name VARCHAR(47),                      -- Procedure name (max 47 characters)
+    procedure_description VARCHAR(1090),             -- Procedure description (max 1090 characters)
+    is_mandatory BOOLEAN NOT NULL DEFAULT FALSE      -- Mandatory flag (default FALSE)
+) COMMENT = 'Stores procedure details.';
 
--- Table: Diseases
 CREATE TABLE Diseases (
-    disease_id VARCHAR(50) PRIMARY KEY,          -- Unique ID for each disease, max 50 characters
-    disease_term VARCHAR(150)                    -- Descriptive term for the disease, max 150 characters
-) COMMENT = 'Stores disease identifiers and terms. Referenced in PhenodigmScores (many-to-many relationship with Genes).';
+    disease_id VARCHAR(50) PRIMARY KEY,              -- Unique ID for each disease (max 50 characters)
+    disease_term VARCHAR(150)                        -- Descriptive term for the disease (max 150 characters)
+) COMMENT = 'Stores disease identifiers and terms.';
 
--- Table: Groupings
 CREATE TABLE Groupings (
-    group_id INT AUTO_INCREMENT PRIMARY KEY,     -- Auto-incrementing unique ID for each group
-    group_name VARCHAR(50)                       -- Group name, max 50 characters
-) COMMENT = 'Defines parameter groups. Linked to Parameters via a many-to-many relationship.';
+    group_id INT AUTO_INCREMENT PRIMARY KEY,         -- Auto-incrementing unique ID for each group
+    group_name VARCHAR(50)                           -- Group name (max 50 characters)
+) COMMENT = 'Defines parameter groups.';
 
 -- Create tables with foreign keys
 
--- Table: Parameters
 CREATE TABLE Parameters (
-    parameter_id VARCHAR(18) PRIMARY KEY,          -- Unique ID for each parameter, 15-18 alphanumeric characters as per SOP
-    parameter_name VARCHAR(74),                    -- Parameter name, 2-74 characters as per SOP
-    parameter_description VARCHAR(1000),           -- Parameter description, max 1000 characters
-    procedure_id INT,                              -- Foreign key to ProceduresTable
+    parameter_id VARCHAR(18) PRIMARY KEY,            -- Unique ID for each parameter (15-18 characters)
+    parameter_name VARCHAR(74),                      -- Parameter name (2-74 characters)
+    parameter_description VARCHAR(1000),             -- Parameter description (max 1000 characters)
+    procedure_id INT,                                -- Foreign key to ProceduresTable
     FOREIGN KEY (procedure_id) REFERENCES ProceduresTable(procedure_id)
-) COMMENT = 'Stores parameter metadata. References ProceduresTable (many-to-one) and referenced by Analyses (one-to-many).';
+) COMMENT = 'Stores parameter metadata.';
 
--- Table: Analyses
 CREATE TABLE Analyses (
-    analysis_id VARCHAR(15) PRIMARY KEY,           -- Unique ID for each analysis, 15 alphanumeric characters as per SOP
-    gene_accession_id VARCHAR(11),                 -- Foreign key to Genes, 9-11 alphanumeric characters as per SOP
-    mouse_strain VARCHAR(5),                       -- Mouse strain, 3-5 alphanumeric characters as per SOP
-    mouse_life_stage VARCHAR(17),                  -- Mouse life stage, 4-17 characters as per SOP
-    parameter_id VARCHAR(18),                      -- Foreign key to Parameters
-    p_value FLOAT,                                 -- P-value, float between 0 and 1 as per SOP
+    analysis_id VARCHAR(15) PRIMARY KEY,             -- Unique ID for each analysis (15 characters)
+    gene_accession_id VARCHAR(11),                   -- Foreign key to Genes
+    mouse_strain VARCHAR(5),                         -- Mouse strain (3-5 characters)
+    mouse_life_stage VARCHAR(17),                    -- Mouse life stage (4-17 characters)
+    parameter_id VARCHAR(18),                        -- Foreign key to Parameters
+    p_value FLOAT,                                   -- P-value (0-1)
     FOREIGN KEY (gene_accession_id) REFERENCES Genes(gene_accession_id),
     FOREIGN KEY (parameter_id) REFERENCES Parameters(parameter_id)
-) COMMENT = 'Stores analysis results linking Genes and Parameters (many-to-one), including p-values, mouse strain, and life stage.';
+) COMMENT = 'Links Genes and Parameters with analysis results.';
 
--- Table: PhenodigmScores
 CREATE TABLE PhenodigmScores (
-    phenodigm_id INT AUTO_INCREMENT PRIMARY KEY,   -- Auto-incrementing unique ID for each record
-    disease_id VARCHAR(50),                        -- Foreign key to Diseases
-    gene_accession_id VARCHAR(11),                 -- Foreign key to Genes
-    phenodigm_score FLOAT,                         -- Phenodigm association score, float value
+    phenodigm_id INT AUTO_INCREMENT PRIMARY KEY,     -- Auto-incrementing unique ID
+    disease_id VARCHAR(50),                          -- Foreign key to Diseases
+    gene_accession_id VARCHAR(11),                   -- Foreign key to Genes
+    phenodigm_score FLOAT,                           -- Association score
     FOREIGN KEY (disease_id) REFERENCES Diseases(disease_id),
     FOREIGN KEY (gene_accession_id) REFERENCES Genes(gene_accession_id)
-) COMMENT = 'Stores gene-disease association scores, linking Genes and Diseases in a many-to-many relationship.';
+) COMMENT = 'Links Genes and Diseases with association scores.';
 
--- Table: ParameterGroupings
 CREATE TABLE ParameterGroupings (
-    parameter_id VARCHAR(18),                      -- Foreign key to Parameters
-    group_id INT,                                  -- Foreign key to Groupings
-    PRIMARY KEY (parameter_id, group_id),          -- Composite primary key for the many-to-many relationship
+    parameter_id VARCHAR(18),                        -- Foreign key to Parameters
+    group_id INT,                                    -- Foreign key to Groupings
+    PRIMARY KEY (parameter_id, group_id),            -- Composite key
     FOREIGN KEY (parameter_id) REFERENCES Parameters(parameter_id),
     FOREIGN KEY (group_id) REFERENCES Groupings(group_id)
-) COMMENT = 'Links Parameters and Groupings in a many-to-many relationship.';
-
-# Consider adding indexes for frequently queried foreign key columns to improve performance.
+) COMMENT = 'Links Parameters and Groupings.';
 ```
 
-## Populate Database 
+##### Someone should review the constraints (character limits, mandatory fields, and foreign keys) to ensure they align with the data and the SOP. For fields not covered in the SOP, check the actual maximum lengths in the data to assign appropriate character limits. {style="color: red"}
 
-To populate the database, the schema should first be examined to identify which attributes correspond to each table. Data should then be organized into separate CSV or TSV files, with each file representing a single table. Each file is expected to include a header row (optional but recommended) that matches the column names defined in the database schema.
+## Populate Database
 
-Once a CSV file has been created for each table, the data can be loaded directly into MySQL using the `LOAD DATA INFILE` command.
+With the tables created and CSV files ready, data can be imported into MySQL using `LOAD DATA INFILE` with these specifications: fields separated by commas, optionally enclosed in double quotes, and skipping the header row.
 
 ```{sql}
--- Load data into tables using the base path
 LOAD DATA LOCAL INFILE '/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/collated/Procedures.csv'
 INTO TABLE ProceduresTable
-FIELDS TERMINATED BY ','      -- Fields separated by commas
-OPTIONALLY ENCLOSED BY '"'    -- Fields (optionally) enclosed in double quotes
-IGNORE 1 LINES;               -- Skip the header row in the CSV file
+FIELDS TERMINATED BY ','    
+OPTIONALLY ENCLOSED BY '"'    
+IGNORE 1 LINES;             
 
 SHOW WARNINGS;
 
@@ -1220,10 +1244,12 @@ SHOW WARNINGS;
 
 2.  During the loading of the `Analyses` table, non-IMPC `parameter_id` values prevent rows from referencing the `Parameters` table, resulting in foreign key constraint failures.
 
-### Create dump
+##### Currently, parameters and related analyses that lack a procedure are skipped during upload. To avoid this, we could assign such parameters to an 'unknown/undefined' procedure by adding a corresponding row to the procedure table, ensuring the data is loaded and associated with an unknown value instead of being omitted. {style="color: red"}
 
 ```{bash}
 #| eval: false
+
+# Create database dump 
 /opt/homebrew/bin/mysqldump IMPCDb -u root -p > /Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/database/IMPCDb.dump
 ```
 
@@ -1232,6 +1258,8 @@ SHOW WARNINGS;
 **Test R/Shiny 1:** They want the ability to select a particular knockout mouse and visualise the statistical scores of all phenotypes tested.
 
 ```{sql}
+#| eval: false
+
 SELECT Analyses.p_value, Parameters.parameter_name FROM Analyses 
 JOIN Parameters ON Analyses.parameter_id = Parameters.parameter_id 
 WHERE Analyses.gene_accession_id IN (
