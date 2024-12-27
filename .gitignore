@@ -10,6 +10,7 @@
 !data_table.csvv 
 data/raw_data*
 data/updated_data*
+data/small_data*
 
 # Ignore compressed files 
 *.zip
