@@ -1183,6 +1183,8 @@ CREATE TABLE ParameterGroupings (
 With the tables created and CSV files ready, data can be imported into MySQL using `LOAD DATA INFILE` with these specifications: fields separated by commas, optionally enclosed in double quotes, and skipping the header row.
 
 ```{sql}
+#| eval: false
+
 LOAD DATA LOCAL INFILE '/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/collated/Procedures.csv'
 INTO TABLE ProceduresTable
 FIELDS TERMINATED BY ','    
