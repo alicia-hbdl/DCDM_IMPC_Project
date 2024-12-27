@@ -907,6 +907,8 @@ rm(errors, temporary_path)
 
 # Collating (Alicia)
 
+![](images/Screenshot 2024-12-27 at 19.24.12.png)
+
 Although the metadata and analysis tables have been cleaned, they do not match the agreed database structure. To make them compatible, new tables are created by selecting and transforming specific fields from the cleaned data. Some tables require merging information from multiple sources. The final outputs are saved as CSV files for upload into the database.
 
 To avoid rerunning the entire script, the cleaned tables are loaded:
