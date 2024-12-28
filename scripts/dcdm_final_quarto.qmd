@@ -1057,7 +1057,7 @@ groupings_table <- group_patterns %>%
   mutate(group_id = row_number()) %>%  # Assign unique ascending IDs
   select(group_id, group_name)         # Retain only group_id and group_name
 
-write_csv(groupings_table, paste0(rootDir, "data/collated/GroupingsTable.csv"), quote = "all")
+write_csv(groupings_table, paste0(rootDir, "data/collated/Groupings.csv"), quote = "all")
 ```
 
 ### Map Parameters to Groups
@@ -1201,7 +1201,7 @@ IGNORE 1 LINES;
 
 SHOW WARNINGS;
 
-LOAD DATA LOCAL INFILE '/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/collated/Groupings.csv'
+LOAD DATA LOCAL INFILE '/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/collated/GroupingsTable.csv'
 INTO TABLE Groupings
 FIELDS TERMINATED BY ',' 
 OPTIONALLY ENCLOSED BY '"' 
