@@ -135,47 +135,44 @@ With the correct files loaded and directories specified, we define a function to
 
 3.  Reorder the rows to align with the SOP layout.
 
-##### Reordering is unnecessary since information is merged/joined later based on matching fields, not indices {style="color: red"}
-
 Here, I have also included the column count validation function defined above. This means the results will all be presented in the same file.
 
 ```{r}
-# Function to validate, update, complete and reorder row names in a file
+# Function to validate, update, and reorder row names
 check_files <- function(file_path) {
-  # Validate column count; skip file if it doesn't have exactly 2 columns
-  if (!validate_columns(file_path)) {
+  # Validate column count
+  if(!validate_columns(file_path)){
     message(paste("File", basename(file_path), "does not have exactly 2 columns. Skipping."))
     return(FALSE)
   }
-  
-  # Attempt to read the CSV file without headers
-  data <- tryCatch(
+  # Read the CSV file as headerless
+  analysis <- tryCatch(
     read_csv(file_path, col_names = FALSE, show_col_types = FALSE), 
-    error = function(e) return(NULL)  # Handle file reading errors gracefully
-  )
+    error = function(e) return(NULL))
   
   # If file reading fails, skip processing
-  if (is.null(data)) return(FALSE)
+  if (is.null(analysis)) return(FALSE)
   
-  # Normalize row names by converting them to lowercase
-  data[[1]] <- tolower(data[[1]])
+  # Normalize row names
+  analysis[[1]] <- tolower(analysis[[1]])
   
-  # Identify missing rows from `expected_row_names` and add them with NA values
-  missing_rows <- setdiff(expected_row_names, data[[1]])
+  # Identify missing rows and add them, input NA value for second column
+  missing_rows <- setdiff(expected_row_names, analysis[[1]])
   if (length(missing_rows) > 0) {
-    missing_data <- tibble(!!colnames(data)[1] := missing_rows)  # Create tibble with missing rows
-    for (i in 2:ncol(data)) {
-      missing_data[[colnames(data)[i]]] <- NA  # Fill other columns with NA
+    missing_data <- tibble(!!colnames(analysis)[1] := missing_rows)
+    for (i in 2:ncol(analysis)) {
+      missing_data[[colnames(analysis)[i]]] <- NA
     }
-    data <- bind_rows(data, missing_data)  # Combine original and missing rows
+    analysis <- bind_rows(analysis, missing_data)
   }
-    # Reorder rows based on expected_row_names; this is super important otherwise the collating function won't work
-  data <- arrange(data, match(data[[1]], expected_row_names))
-
-  # Save the updated file without headers to the updated data directory
-  write_csv(data, paste0(updated_data_dir, basename(file_path)), col_names = FALSE)
   
-  return(TRUE)  # Indicate successful processing
+  # Reorder rows based on expected_row_names
+  analysis <- arrange(analysis, match(analysis[[1]], expected_row_names))
+  
+  # Save the updated file as headerless
+  write_csv(analysis, paste0(updated_data_dir, basename(file_path)), col_names = FALSE)
+ 
+  return(TRUE)
 }
 ```
 
@@ -241,7 +238,7 @@ analysis <- dir_ls(path = updated_data_dir, glob = "*.csv") %>%  # List all CSV 
 # Assign expected column names to the table
 colnames(analysis) <- expected_row_names
 
-write_csv(paste0(rootDir, "data/raw_data/analysis_table.txt")) # Save the combined table as a CSV
+write_csv(analysis, paste0(rootDir, "data/raw_data/analysis_table.txt")) # Save the combined table as a CSV
 ```
 
 ### QC and Cleaning the Combined Analysis Data (Esta)
@@ -1218,40 +1215,37 @@ INTO TABLE ProceduresTable
 FIELDS TERMINATED BY ','    
 OPTIONALLY ENCLOSED BY '"'    
 IGNORE 1 LINES;             
-
-SHOW WARNINGS;
+# Records: 52  Deleted: 0  Skipped: 0  Warnings: 0
 
 LOAD DATA LOCAL INFILE '/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/collated/Genes.csv'
 INTO TABLE Genes
 FIELDS TERMINATED BY ',' 
 OPTIONALLY ENCLOSED BY '"' 
 IGNORE 1 LINES;
+# Records: 210  Deleted: 0  Skipped: 0  Warnings: 0
 
-SHOW WARNINGS;
 
-LOAD DATA LOCAL INFILE '/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/collated/GroupingsTable.csv'
+LOAD DATA LOCAL INFILE '/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/collated/Groupings.csv'
 INTO TABLE Groupings
 FIELDS TERMINATED BY ',' 
 OPTIONALLY ENCLOSED BY '"' 
 IGNORE 1 LINES;
-
-SHOW WARNINGS;
+# Records: 11  Deleted: 0  Skipped: 0  Warnings: 0
 
 LOAD DATA LOCAL INFILE '/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/collated/Parameters.csv'
 INTO TABLE Parameters
 FIELDS TERMINATED BY ',' 
 OPTIONALLY ENCLOSED BY '"' 
 IGNORE 1 LINES;
+# Records: 3743  Deleted: 0  Skipped: 0  Warnings: 0
 
-SHOW WARNINGS;
 
 LOAD DATA LOCAL INFILE '/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/collated/Diseases.csv'
 INTO TABLE Diseases
 FIELDS TERMINATED BY ',' 
 OPTIONALLY ENCLOSED BY '"' 
 IGNORE 1 LINES;
-
-SHOW WARNINGS;
+# Records: 1097  Deleted: 0  Skipped: 0  Warnings: 0
 
 LOAD DATA LOCAL INFILE '/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/collated/PhenodigmScores.csv'
 INTO TABLE PhenodigmScores
@@ -1259,24 +1253,21 @@ FIELDS TERMINATED BY ','
 OPTIONALLY ENCLOSED BY '"' 
 IGNORE 1 LINES
 (disease_id, gene_accession_id, phenodigm_score); -- Explicitly map columns (phenodigm_id is auto-generated)
-
-SHOW WARNINGS;
+# Records: 1219  Deleted: 0  Skipped: 0  Warnings: 0
 
 LOAD DATA LOCAL INFILE '/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/collated/Analyses.csv'
 INTO TABLE Analyses
 FIELDS TERMINATED BY ',' 
 OPTIONALLY ENCLOSED BY '"' 
 IGNORE 1 LINES;
-
-SHOW WARNINGS;
+# Records: 198449  Deleted: 0  Skipped: 0  Warnings: 0
 
 LOAD DATA LOCAL INFILE '/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/collated/ParameterGroupings.csv'
 INTO TABLE ParameterGroupings
 FIELDS TERMINATED BY ','               
 OPTIONALLY ENCLOSED BY '"'                   
 IGNORE 1 LINES;  
-
-SHOW WARNINGS;
+# Records: 2159  Deleted: 0  Skipped: 0  Warnings: 0
 ```
 
 ##### A total of 143 parameters corresponding to 83,712 analysis files have non-IMPC identifiers, meaning they are not linked to any procedure. This violates the foreign key constraints in the database, resulting in the following issues: {style="color: red"}
@@ -1323,26 +1314,5 @@ ORDER BY Analyses.p_value ASC;
 
 ```{sql}
 #| eval: false
-SELECT Genes.gene_symbol, Parameters.parameter_name, Analyses.p_value FROM Analyses JOIN Parameters ON Analyses.parameter_id = Parameters.parameter_id JOIN Genes ON Analyses.gene_accession_id = Genes.gene_accession_id; 
-```
-
-Important info:
-
--   the diseases and procedures_table table contains **NO** NA values
-
--   the parameters table contain 143 rows with NAs corresponding to the non-IMPC IDs
-
--   the analyses table is completely messed up
-
-```{r}
-# Assuming analyses_table is your data frame
-
-# Filter rows with NA values
-rows_with_na <- parameters_table[apply(parameters_table, 1, function(row) any(is.na(row))), ]
-
-# Print the rows with NA values
-print(rows_with_na)
-
-
-
+SELECT Genes.gene_symbol, Parameters.parameter_name, Analyses.p_value FROM Analyses JOIN Parameters ON Analyses.parameter_id = Parameters.parameter_id JOIN Genes ON Analyses.gene_accession_id = Genes.gene_accession_id;
 ```
