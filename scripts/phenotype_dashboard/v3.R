@@ -6,7 +6,7 @@ library(reshape2) # For data manipulation
 library(DBI)
 library(RMySQL)
 library(stringr)
-
+library(uwot)
 
 # Define UI
 ui <- fluidPage(
@@ -36,7 +36,7 @@ ui <- fluidPage(
       conditionalPanel(
         condition = "input.tabs == 'clusters_tab'",
         selectInput("cluster_method", "Clustering Method:",
-                    choices = c("Hierarchical", "K-Means", "PCA"),
+                    choices = c("Hierarchical", "PCA", "UMAP"),
                     selected = "Hierarchical"),
         numericInput("num_clusters", "Number of Clusters (K-Means):",
                      value = 3, min = 2, max = 50, step = 1),
@@ -273,35 +273,13 @@ server <- function(input, output, session) {
     
     #Pivot the data for clustering
     cluster_data <- dcast(data, gene_accession_id ~ parameter_name, value.var = "p_value", fill = 0)
-    mat <- cluster_data[, -1]
+    mat <- scale(cluster_data[, -1]) #Normalise data
     
     if (input$cluster_method == "Hierarchical") {
       hc <- hclust(dist(mat), method = "ward.D2")
-      ggdendro <- as.dendrogram(hc)
-      plot(ggdendro, main = "Hierarchical Clustering of Genes", 
+      plot(as.dendrogram(hc), main = "Hierarchical Clustering of Genes", 
            xlab = "Genes", ylab = "Distance", cex = 0.7)
-    } else if (input$cluster_method == "K-Means") {
-      km <- kmeans(mat, centers = input$num_clusters)
-      kmeans_data <- data.frame(
-        Gene = cluster_data$gene_accession_id,
-        Cluster = factor(km$cluster)
-      )
-      ggplot(kmeans_data, aes(x = seq_along(Cluster), y = Cluster, color = Cluster)) +
-        geom_point(size = 3) +
-        scale_color_manual(values = rainbow(input$num_clusters)) +
-        labs(
-          title = paste("K-Means Clustering with", input$num_clusters, "Clusters"),
-          x = "Gene Index",
-          y = "Cluster ID",
-          color = "Cluster"
-        ) +
-        theme_minimal() +
-        theme(
-          plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
-          axis.title = element_text(size = 12, face = "bold"),
-          axis.text = element_text(size = 10),
-          legend.position = "right"
-        )
+      
     } else if (input$cluster_method == "PCA") {
       # PCA computation
       pca <- prcomp(mat, scale. = TRUE)
@@ -336,7 +314,39 @@ server <- function(input, output, session) {
           panel.border = element_rect(color = "black", fill = NA, size = 1.5),  # Add bold border
           panel.grid.major = element_line(size = 0.5, linetype = "dotted", color = "gray80"),
           panel.grid.minor = element_blank()  # Hide minor grids for a cleaner look
-        )     }
+        )
+      
+    } else if (input$cluster_method == "UMAP") {
+      umap_result <- umap(mat, n_neighbors = 15, min_dist = 0.1)
+      umap_data <- data.frame(UMAP1 = umap_result[, 1], UMAP2 = umap_result[, 2], gene = cluster_data$gene_accession_id)
+      
+      km <- kmeans(mat, centers = input$num_clusters)
+      umap_data$Cluster <- factor(km$cluster)
+      
+      # Set dynamic title based on gene subset selection
+      gene_subset_label <- switch(input$gene_subset,
+                                  "All genes" = "All Genes",
+                                  "Genes with significant phenotypes (p<0.05)" = "Significant Genes",
+                                  "User-specific genes" = "Selected Genes")
+      plot_title <- paste("PCA Clustering of", gene_subset_label)
+      
+      ggplot(umap_data, aes(x = UMAP1, y = UMAP2, color = Cluster, label = gene)) +
+        geom_point(size = 3, alpha = 0.8) +
+        scale_color_manual(values = rainbow(input$num_clusters)) +
+        labs(
+          title = paste("UMAP Clustering of", gene_subset_label),
+          x = "UMAP 1",
+          y = "UMAP 2",
+          color = "Cluster"
+        ) +
+        theme_minimal() +
+        theme(
+          plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
+          axis.title = element_text(size = 12, face = "bold"),
+          axis.text = element_text(size = 10),
+          panel.border = element_rect(color = "black", fill = NA, size = 1.5)
+        )
+    }
   })
 }
 
