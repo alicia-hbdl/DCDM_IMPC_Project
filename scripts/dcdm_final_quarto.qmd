@@ -140,7 +140,7 @@ With the correct files loaded and directories specified, we define a function to
 Here, I have also included the column count validation function defined above. This means the results will all be presented in the same file.
 
 ```{r}
-# Function to validate, update, and complete row names in a file
+# Function to validate, update, complete and reorder row names in a file
 check_files <- function(file_path) {
   # Validate column count; skip file if it doesn't have exactly 2 columns
   if (!validate_columns(file_path)) {
@@ -149,29 +149,31 @@ check_files <- function(file_path) {
   }
   
   # Attempt to read the CSV file without headers
-  analysis <- tryCatch(
+  data <- tryCatch(
     read_csv(file_path, col_names = FALSE, show_col_types = FALSE), 
     error = function(e) return(NULL)  # Handle file reading errors gracefully
   )
   
   # If file reading fails, skip processing
-  if (is.null(analysis)) return(FALSE)
+  if (is.null(data)) return(FALSE)
   
   # Normalize row names by converting them to lowercase
-  analysis[[1]] <- tolower(analysis[[1]])
+  data[[1]] <- tolower(data[[1]])
   
   # Identify missing rows from `expected_row_names` and add them with NA values
-  missing_rows <- setdiff(expected_row_names, analysis[[1]])
+  missing_rows <- setdiff(expected_row_names, data[[1]])
   if (length(missing_rows) > 0) {
-    missing_data <- tibble(!!colnames(analysis)[1] := missing_rows)  # Create tibble with missing rows
-    for (i in 2:ncol(analysis)) {
-      missing_data[[colnames(analysis)[i]]] <- NA  # Fill other columns with NA
+    missing_data <- tibble(!!colnames(data)[1] := missing_rows)  # Create tibble with missing rows
+    for (i in 2:ncol(data)) {
+      missing_data[[colnames(data)[i]]] <- NA  # Fill other columns with NA
     }
-    analysis <- bind_rows(analysis, missing_data)  # Combine original and missing rows
+    data <- bind_rows(data, missing_data)  # Combine original and missing rows
   }
-  
+    # Reorder rows based on expected_row_names; this is super important otherwise the collating function won't work
+  data <- arrange(data, match(data[[1]], expected_row_names))
+
   # Save the updated file without headers to the updated data directory
-  write_csv(analysis, paste0(updated_data_dir, basename(file_path)), col_names = FALSE)
+  write_csv(data, paste0(updated_data_dir, basename(file_path)), col_names = FALSE)
   
   return(TRUE)  # Indicate successful processing
 }
@@ -207,7 +209,7 @@ diff -yr --suppress-common-line /path/to/raw_directory /path/to/cleaned_director
 
 ```{r}
 # Remove unused values to unclutter the environment
-rm(raw_data_dir, validation_results, summary_message, expected_row_names)
+rm(raw_data_dir, validation_results, summary_message)
 ```
 
 ### Combining the Raw Data in a Table (Alicia)
@@ -234,8 +236,12 @@ The `combine_files` function is then applied to each file in the directory, comb
 ```{r}
 # Combine all data files into a single table
 analysis <- dir_ls(path = updated_data_dir, glob = "*.csv") %>%  # List all CSV files in the directory
-  map_dfr(combine_files) %>%                                    # Apply the combine_files function to each file and combine results
-  write_csv(paste0(rootDir, "data/raw_data/analysis_table.txt")) # Save the combined table as a CSV
+  map_dfr(combine_files) # Apply the combine_files function to each file and combine results
+
+# Assign expected column names to the table
+colnames(analysis) <- expected_row_names
+
+write_csv(paste0(rootDir, "data/raw_data/analysis_table.txt")) # Save the combined table as a CSV
 ```
 
 ### QC and Cleaning the Combined Analysis Data (Esta)
@@ -535,7 +541,9 @@ procedure <- read_csv(temporary_path, show_col_types = FALSE, col_names = TRUE) 
   ) %>% 
   mutate(
     # Convert mapping to numeric, introduces NA for invalid entries  
-    parameter_mapping = as.numeric(parameter_mapping),  
+    parameter_mapping = as.numeric(parameter_mapping),
+    # Convert the column to logical
+    is_mandatory = as.logical(is_mandatory), 
   # Standardize conflicting descriptions for rows referring to the same observation
     procedure_description = case_when(
       procedure_name == "Experimental design" ~ "experimental_design",        
@@ -557,6 +565,17 @@ procedure <- read_csv(temporary_path, show_col_types = FALSE, col_names = TRUE) 
 
   # Expand the list of parameter mappings into individual rows
  unnest(parameter_mapping)
+
+# Add a new row to the cleaned procedure table
+procedure <- procedure %>%
+  add_row(
+    procedure_id = max(procedure$procedure_id, na.rm = TRUE) + 1, # Assign a new unique ID
+    procedure_name = "Unknown Procedure",                        # Specify the new procedure name
+    procedure_description = "No information available for the procedure associated with this parameter", # Provide a description
+    is_mandatory = FALSE,                                         # Indicate if it's mandatory
+    parameter_mapping = NA                                        # Include NA for parameter_mapping if none
+  )
+
 
 # Remove formatted file 
 file.remove(temporary_path)
@@ -988,6 +1007,15 @@ parameters_table <- left_join(parameter, procedure, by = join_by(parameter_mappi
       select(parameter_id) %>%
       filter(!parameter_id %in% parameter$parameter_id)
   ) %>%
+  filter(!if_all(everything(), is.na)) %>%
+  # Add the "unknown procedure" descriptor with parameters with no procedure information to meet the foreign key requirements 
+  mutate(
+    procedure_id = if_else(
+      is.na(procedure_id), 
+      max(procedure$procedure_id, na.rm = TRUE),
+      procedure_id                                
+    )
+  ) %>% 
   distinct(parameter_id, parameter_name, parameter_description, procedure_id)
 
 write_csv(parameters_table, paste0(rootDir, "/data/collated/Parameters.csv"), quote = "all")
@@ -1296,4 +1324,25 @@ ORDER BY Analyses.p_value ASC;
 ```{sql}
 #| eval: false
 SELECT Genes.gene_symbol, Parameters.parameter_name, Analyses.p_value FROM Analyses JOIN Parameters ON Analyses.parameter_id = Parameters.parameter_id JOIN Genes ON Analyses.gene_accession_id = Genes.gene_accession_id; 
+```
+
+Important info:
+
+-   the diseases and procedures_table table contains **NO** NA values
+
+-   the parameters table contain 143 rows with NAs corresponding to the non-IMPC IDs
+
+-   the analyses table is completely messed up
+
+```{r}
+# Assuming analyses_table is your data frame
+
+# Filter rows with NA values
+rows_with_na <- parameters_table[apply(parameters_table, 1, function(row) any(is.na(row))), ]
+
+# Print the rows with NA values
+print(rows_with_na)
+
+
+
 ```
