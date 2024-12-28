@@ -29,8 +29,6 @@ format: html
 
 Though we had access to the zip file of our data, we had no permissions on it so were unable to move or copy it to our own data. This required me to download the file to my own system using scp, then re-upload the file to a our group project folder using scp. I checked the file sizes before and after using the `ls -l` command, to ensure no data was corrupted in the process.
 
-##### `ls -l` does not detect corrupted files; it lists file metadata like permissions, size, and modification date but does not verify file integrity. Use checksums like `md5sum` or `sha256sum` instead to verify file integrity. {style="color: red"}
-
 ```{bash}
 # downloading the data locally from the HPC
 # scp -i ~/.ssh/msckey  k24064085@hpc.create.kcl.ac.uk:/scratch_tmp/grp/msc_appbio/7BBG1003/CW/Group3.zip ~/Desktop/applied_bioinformatics/DCDM/group_project/raw_data/Group3
@@ -42,90 +40,89 @@ Though we had access to the zip file of our data, we had no permissions on it so
 # Data Cleaning
 
 ```{r}
-# Clear workspace
 rm(list = ls())
 
-# Install packages if needed
-# install.packages(c("tidyverse", "janitor", "fs"))
+# Install and load Tidyverse packages
+#install.packages(c("tidyverse", "janitor", "fs"))
+library(tidyverse)
+library(janitor)
+library(fs)
 
-# Load packages
-library(tidyverse)  # Data manipulation
-library(janitor)    # Data cleaning
-library(fs)         # File system operations
+# ADD DIRECTORY STRUCTURE HERE 
 ```
 
 ```{r}
-#| warning: false
-
-# Set working directory (uncomment for other users as needed)
-rootDir <- "/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/" # Allie
-# rootDir <- "/Users/sanjanasrinivasan/Desktop/DCDM_IMPC_Project/" # Sanj
-# rootDir <- "/Users/ellajadealex/Desktop/applied_bioinformatics/DCDM/group_project/DCDM_IMPC_Project/" # Ella
-# rootDir <- "/Users/sama/Desktop/DCDM_Proj2/" # Sama
-# rootDir <- "~/Desktop/working_directory/DCDM_project" # Esta
-
-# Create directories
-dir.create(file.path(rootDir, "data/metadata"), recursive = TRUE)      # Directory for procedure, parameter, disease files, query genes, and SOP documents
-dir.create(file.path(rootDir, "data/raw_data"), recursive = TRUE)      # Directory for storing raw analysis data files
-dir.create(file.path(rootDir, "data/updated_data"), recursive = TRUE)  # Directory for storing raw data files with corrected field names
-dir.create(file.path(rootDir, "data/cleaned"), recursive = TRUE)       # Directory for cleaned metadata tables and a single combined table of all analyses
-dir.create(file.path(rootDir, "data/collated"), recursive = TRUE)      # Directory for tables ready to be uploaded into the database
-dir.create(file.path(rootDir, "data/database"), recursive = TRUE)      # Directory for the database dump file
+# Define the working directory path in r
+# Alicia
+rootDir = "/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/"
+# Sanj 
+#rootDir = "/Users/sanjanasrinivasan/Desktop/DCDM_IMPC_Project/"
+# Ella
+# rootDir = "/Users/ellajadealex/Desktop/applied_bioinformatics/DCDM/group_project/DCDM_IMPC_Project/"
+# Sama
+#rootDir = "/Users/sama/Desktop/DCDM_Proj2/"
+# Esta
+# rootDir = "~/Desktop/working_directory/DCDM_project"
 ```
 
-## Cleaning the Raw Data Files (Esta)
+## Cleaning the Raw Data Files
+
+### Quality Control/Cleaning Using the SOP (Esta)
 
 The experiment data includes an SOP that defines constraints for each field, such as data type, minimum and maximum values for numerical fields, string lengths, and specific allowable values. Data quality is assessed by comparing the raw data against these constraints.
 
 In this step, we have cleaned all CSV files by modifying the row names to match those specified in the SOP.
 
+#### Setting-Up the Environment
+
 We begin by defining the directory paths and the log file path.
 
 ```{r}
-# Define directory paths
-raw_data_dir <- paste0(rootDir, "data/raw_data/")          # Directory for input raw data files
-updated_data_dir <- paste0(rootDir, "data/updated_data/")  # Directory for updated raw data files with corrected field names
+# Defing directory paths
+raw_data_dir <- paste0(rootDir, "data/raw_data/") # Input raw data directory
+updated_data_dir <- paste0(rootDir, "data/updated_data/") # Input raw data directory
 
-# Define file paths
-log_file <- paste0(rootDir, "scripts/analysis_cleaning_overall.log")  # Log file for recording validation and modifications
-SOP_path <- paste0(rootDir, "data/metadata/IMPC_SOP.csv")             # Path to the SOP CSV file
+log_file <- paste0(rootDir, "scripts/analysis_cleaning_overall.log") # Log file for validation & modifications
 
-# Create the log file or clear its contents if it already exists
+SOP_path <- paste0(rootDir, "data/metadata/IMPC_SOP.csv") # SOP path
+
+# Clear the log files if they exist or create them otherwise
 file.create(log_file)
+
+
 ```
 
 Then we load the SOP file. *Here, I have normalized the row names to lowercase although this isn't strictly necessary for this specific file.*
 
 ```{r}
-# Load the SOP file and extract the expected row names, trimming whitespace
+# Load the SOP file and normalize and check row names
 expected_row_names <- trimws(read_csv(SOP_path, show_col_types = FALSE)$dataField)
 
-# Display the normalized row names
+# Check normalized row names
 expected_row_names
 ```
 
-### Validating the Number of Columns (Esta)
+#### Validating the number of columns
 
 To quickly identify any any delimation errors, we can validate the number of columns per CSV file (each file should have 2 columns).
 
 ```{r}
-# Function to validate the column count in a file
+# Function to validate column count
 validate_columns <- function(file_path) {
-  # Attempt to read the file, returning NULL if an error occurs
+  # Read the file and check its column count
   analysis <- tryCatch(
     read_csv(file_path, col_names = FALSE, show_col_types = FALSE),
-    error = function(e) return(NULL)  # Handle file reading errors gracefully
+    error = function(e) return(NULL)
   )
   
-  # Return FALSE if the file could not be read
   if (is.null(analysis)) return(FALSE)
   
-  # Check if the file has exactly 2 columns; return TRUE if it does, otherwise FALSE
+  # Return TRUE if the file has exactly 2 columns, otherwise FALSE
   return(ncol(analysis) == 2)
 }
 ```
 
-### Check and Correct the Field Names (Esta)
+#### Modify the field names
 
 With the correct files loaded and directories specified, we define a function to perform the following tasks:
 
@@ -135,63 +132,60 @@ With the correct files loaded and directories specified, we define a function to
 
 3.  Reorder the rows to align with the SOP layout.
 
-##### Reordering is unnecessary since information is merged/joined later based on matching fields, not indices {style="color: red"}
-
 Here, I have also included the column count validation function defined above. This means the results will all be presented in the same file.
 
 ```{r}
-# Function to validate, update, and complete row names in a file
-check_files <- function(file_path) {
-  # Validate column count; skip file if it doesn't have exactly 2 columns
-  if (!validate_columns(file_path)) {
+# Function to validate, update, and reorder row names
+combine_files <- function(file_path) {
+  # Validate column count
+  if(!validate_columns(file_path)){
     message(paste("File", basename(file_path), "does not have exactly 2 columns. Skipping."))
     return(FALSE)
   }
-  
-  # Attempt to read the CSV file without headers
+  # Read the CSV file as headerless
   analysis <- tryCatch(
     read_csv(file_path, col_names = FALSE, show_col_types = FALSE), 
-    error = function(e) return(NULL)  # Handle file reading errors gracefully
-  )
+    error = function(e) return(NULL))
   
   # If file reading fails, skip processing
   if (is.null(analysis)) return(FALSE)
   
-  # Normalize row names by converting them to lowercase
+  # Normalize row names
   analysis[[1]] <- tolower(analysis[[1]])
   
-  # Identify missing rows from `expected_row_names` and add them with NA values
+  # Identify missing rows and add them, input NA value for second column
   missing_rows <- setdiff(expected_row_names, analysis[[1]])
   if (length(missing_rows) > 0) {
-    missing_data <- tibble(!!colnames(analysis)[1] := missing_rows)  # Create tibble with missing rows
+    missing_data <- tibble(!!colnames(analysis)[1] := missing_rows)
     for (i in 2:ncol(analysis)) {
-      missing_data[[colnames(analysis)[i]]] <- NA  # Fill other columns with NA
+      missing_data[[colnames(analysis)[i]]] <- NA
     }
-    analysis <- bind_rows(analysis, missing_data)  # Combine original and missing rows
+    analysis <- bind_rows(analysis, missing_data)
   }
   
-  # Save the updated file without headers to the updated data directory
-  write_csv(analysis, paste0(updated_data_dir, basename(file_path)), col_names = FALSE)
+  # Reorder rows based on expected_row_names
+  analysis <- arrange(analysis, match(analysis[[1]], expected_row_names))
   
-  return(TRUE)  # Indicate successful processing
+  # Save the updated file as headerless
+  write_csv(analysis, paste0(updated_data_dir, basename(file_path)), col_names = FALSE)
+ 
+  return(TRUE)
 }
 ```
 
 We now apply this function to all data files. This process will generate an `updated_data` folder containing the cleaned files and a log file in the main directory.
 
 ```{r}
-# Process CSV files in the raw data directory and validate them
+# Process files and log results
 validation_results <- dir_ls(path = raw_data_dir, glob = "*.csv") %>%
-  map_dfr(check_files)  # Apply check_files to each file and collect results
+  map_dfr(combine_files) #%>%
+ # map(as.integer) %>%
+ # unlist()
 
-# Log the validation summary
-summary_message <- sprintf(
-  "Validation Summary:\nTotal files checked: %d\nTotal updated files: %d\n", 
-  length(validation_results), 
-  sum(validation_results)
-)
-write_lines(summary_message, log_file)  # Write summary to the log file
-message(summary_message)                # Print summary to the console
+# Log summary
+summary_message <- sprintf("Validation Summary:\nTotal files checked: %d\nTotal updated files: %d\n", length(validation_results), sum(validation_results))
+write_lines(summary_message, log_file)
+message(summary_message)
 ```
 
 The log file, now streamlined to include only this summary, initially contained detailed row name differences between the files and the SOP, based on a subset of 600 files.
@@ -210,96 +204,98 @@ diff -yr --suppress-common-line /path/to/raw_directory /path/to/cleaned_director
 rm(raw_data_dir, validation_results, summary_message, expected_row_names)
 ```
 
-### Combining the Raw Data in a Table (Alicia)
+### Combining the Raw Data in a Table
 
-Esta made sure all analysis files have the same field names: `analysis_id`, `gene_accession_id`, `gene_symbol`, `mouse_strain`, `mouse_life_stage`, `parameter_id`, `parameter_name`, and `pvalue`.
+The data-set consists of thousands of CSV files with key fields: `analysis_id`, `gene_accession_id`, `gene_symbol`, `mouse_strain`, `mouse_life_stage`, `parameter_id`, `parameter_name`, and `pvalue`.
 
-To make data cleaning and processing easier, these files will be combined into one table using these shared fields. This way, we can check all values for a specific field at once (vectorized), making the process faster and simpler.
+To streamline data cleaning and enable further analysis, these files must be combined into a single table based on their shared fields.
 
-The `combine_files` function reads a file and transforms its data into a row for the unified table:
+Below is a function that reads a file and converts its data into a row for the unified table:
 
 ```{r}
-combine_files <- function(file_path) {
-  read_csv(file_path, show_col_types = FALSE) %>%  # Read the CSV file 
-    t() %>%                                        # Transpose so fields become columns and values become rows
-    as.data.frame() %>%                            # Convert the transposed data to a data frame
-    setNames(.[1, ]) %>%                           # Set analysis_id (first column) as column name 
-    slice(-1) %>%                                  # Remove the field names (first row)
-    mutate(analysis_id = rownames(.), .before = 1) # Move analysis_id as the first column
+# Define a function to process a single file
+clean_files <- function(file_path) {
+  read_csv(file_path, show_col_types = FALSE) %>%
+    # Transpose the data so that fields become column names and values form the row
+    t() %>% 
+    # Convert to dataframe (needed by the map_dfr function)
+    as.data.frame() %>% 
+    # Set the first row (after transposing) as the column names
+    setNames(.[1, ]) %>%
+    # Remove the first row since it is now used as column names
+    slice(-1) %>%
+    mutate(analysis_id = rownames(.), .before = 1)
 }
+
+# Apply the function to each file and combine the results into a single data frame
+analysis <- dir_ls(path = updated_data_dir, glob = "*.csv") %>%
+  map_dfr(clean_files) %>%
+  write_csv(paste0(rootDir, "data/raw_data/analysis_table.txt"))
+
+# Display the first 6 rows of the combined table
+head(analysis)
 ```
 
-The `combine_files` function is then applied to each file in the directory, combining their contents into a single table:
-
-```{r}
-# Combine all data files into a single table
-analysis <- dir_ls(path = updated_data_dir, glob = "*.csv") %>%  # List all CSV files in the directory
-  map_dfr(combine_files) %>%                                    # Apply the combine_files function to each file and combine results
-  write_csv(paste0(rootDir, "data/raw_data/analysis_table.txt")) # Save the combined table as a CSV
-```
-
-### QC and Cleaning the Combined Analysis Data (Esta)
+### Cleaning the Collated Raw Data (Esta)
 
 For each column, we need to check similar things, like whether column values are the right lengths (for strings) or size (for floats), and whether the results matche allowed values, like for `mouse_strain` and `mouse_life_stage`.We also need to check if certain variables are perfectly correlated with one another.
 
 First we load the data and generate a log file.
 
 ```{r}
-# Read the collated analysis file
+# Read the collated file
 analysis <- read_csv(paste0(rootDir, "data/raw_data/analysis_table.txt"), show_col_types = FALSE)
 
-# Define a custom logging function
+# Custom logging function
 log_message <- function(message) {
-  cat(message, "\n", file = log_file, append = TRUE)  # Write message to log file
-  message(message)                                    # Display message in the console
+  cat(message, "\n", file = log_file, append = TRUE)
+  message(message) # Optionally display in the console
 }
 
-# Log the start of the process
+# Start logging
 log_message("=== Data Validation and Transformation Log ===")
 ```
 
 Check if variable data types match those specified in the SOP - all character (or string) data types except for pvalue (numeric or float).
 
 ```{r}
-# Extract expected data types from the SOP and map them to R-compatible types
+# Extract expected data types
 expected_data_types <- read_csv(SOP_path, show_col_types = FALSE)$dataType %>% 
-  recode("String" = "character", "Float" = "numeric")  # Map SOP data types to R data types
+  recode("String" = "character", "Float" = "numeric") # Convert datatypes to those recognised by R
 
-# Determine the actual data types of the analysis table columns
+# Get actual data types
 data_types <- sapply(analysis, class)
 
-# Identify mismatched data types by comparing actual vs. expected
+# Identify and report mismatches
 type_mismatches <- tibble(
-  variable = names(data_types),                          # Column names
-  actual_type = unname(data_types),                      # Actual data types
-  expected_type = expected_data_types[names(data_types)] # Expected data types from SOP
+  variable = names(data_types),
+  actual_type = unname(data_types),
+  expected_type = expected_data_types[names(data_types)]
 ) %>%
-  filter(actual_type != expected_type)                   # Filter for mismatches
+  filter(actual_type != expected_type)
 
-# Log the results of the type validation
+# Log results
 if (nrow(type_mismatches) > 0) {
-  log_message("Data type mismatches found:")                     # Log message header
-  log_message(capture.output(print(type_mismatches)))            # Log mismatched types
+  log_message("Data type mismatches found:")
+  log_message(capture.output(print(type_mismatches)))
 } else {
-  log_message("All data types match the SOP specification.")     # Log success message
+  log_message("All data types match the SOP specification.")
 }
 
-# Cleanup temporary variables
 rm(data_types, expected_data_types)
 ```
 
 Check if `analysis_id` values are all 15 characters long and all unique.
 
 ```{r}
-# Validate 'analysis_id' by checking length and uniqueness
+### Validate 'analysis_id'
 invalid_ids <- analysis %>%
-  filter(nchar(analysis_id) != 15 | duplicated(analysis_id))  # Identify invalid IDs
+  filter(nchar(analysis_id) != 15 | duplicated(analysis_id))
 
-# Log the results of the validation
 log_message(if (nrow(invalid_ids) == 0) {
-  "All analysis_id values are valid."                          # Log success if no issues
+  "All analysis_id values are valid."
 } else {
-  paste("Invalid analysis_id values found:", nrow(invalid_ids)) # Log count of invalid IDs
+  paste("Invalid analysis_id values found:", nrow(invalid_ids))
 })
 ```
 
@@ -308,146 +304,116 @@ Check if `gene_accession_id` values are all between 9-11 characters long - Accor
 ###### basically when you create a knockout mouse, you knock out a specific gene, but then that gene goes through a workflow of procedures (like electrocardiogram) and then within an ecg, multiple parameters are measured (qrs, heart rate, ejection fraction, etc e.g), so for each gene, you automatically have many files because each file is a single parameter. so it’s totally normal to have duplicate IDs in teh analysis file, however, the unique in this case in the sop means taht the gene ids are specific ways to refer to a unique gene, so they are already used in some way as foreign key in teh analysis table {style="color: red"}
 
 ```{r}
-# Validate 'gene_accession_id' by checking its length
-invalid_gene_lengths <- analysis %>%
-  filter(nchar(gene_accession_id) < 9 | nchar(gene_accession_id) > 11)  # Identify invalid lengths
+### Validate 'gene_accession_id'
 
-# Log the results of the validation
-log_message(if (nrow(invalid_gene_lengths) == 0) {
-  "All gene_accession_id values are valid."                            # Log success if no issues
-} else {
-  paste("Invalid gene_accession_id lengths:", nrow(invalid_gene_lengths))  # Log count of invalid IDs
-})
+invalid_gene_lengths <- analysis %>% 
+  filter(nchar(gene_accession_id) < 9 | nchar(gene_accession_id) > 11)
+
+log_message(if (nrow(invalid_gene_lengths) == 0) "All gene_accession_id values are valid." else paste("Invalid gene_accession_id lengths:", nrow(invalid_gene_lengths)))
 ```
 
 Check & format `gene_symbol` so all values are in title format.
 
 ```{r}
-# Validate and format 'gene_symbol'
+### Validate & format 'gene_symbol'
 
-# Convert all gene_symbol values to title case and remove duplicates
-analysis <- analysis %>%
-  mutate(gene_symbol = str_to_title(gene_symbol)) %>%
+# Convert all gene_symbols to title format
+analysis <- analysis %>%   mutate(
+    gene_symbol = str_to_title(gene_symbol)) %>%
+  mutate(# Convert to title case 
+    gene_symbol = case_when(
+      gene_accession_id == "MGI:98967" ~ "Wt",
+      gene_accession_id == "MGI:96090" ~ "Asmt",
+      gene_accession_id == "MGI:98266" ~ "Sord",
+      gene_accession_id == "MGI:1928271" ~ "Malrd1",
+      gene_accession_id == "MGI:109279" ~ "Nnt",
+      gene_accession_id == "MGI:3665157" ~ "Rsxr",
+      gene_accession_id == "MGI:1345961" ~ "Coro1a",
+      gene_accession_id == "MGI:87868" ~ "Acads",
+      gene_accession_id == "MGI:1351634" ~ "Abcc6",
+      gene_accession_id == "MGI:104511" ~ "Tnfsf4",
+      TRUE ~ gene_symbol)) %>% 
   distinct()
 
-# Check for invalid gene_symbol lengths
-invalid_gene_symbols <- analysis %>%
-  filter(nchar(gene_symbol) < 1 | nchar(gene_symbol) > 13)  # Identify invalid lengths
+# Check length of gene_symbol values
+invalid_gene_symbols <- analysis %>% 
+  filter(nchar(gene_symbol) < 1 | nchar(gene_symbol) > 13)
 
-# Log the results of the validation
-log_message(if (nrow(invalid_gene_symbols) == 0) {
-  "All gene_symbol values are valid."                            # Log success if no issues
-} else {
-  paste("Invalid gene_symbol values:", nrow(invalid_gene_symbols))  # Log count of invalid symbols
-})
+log_message(if (nrow(invalid_gene_symbols) == 0) "All gene_symbol values are valid." else paste("Invalid gene_symbol values:", nrow(invalid_gene_symbols)))
 ```
 
 Check if `gene_accession_id` and `gene_symbol` are perfectly correlated.
 
 ```{r}
-# Check correlation between `gene_accession_id` and `gene_symbol`
+### Check `gene_accession_id` and `gene_symbol` correlation
 gene_symbol_correlation <- analysis %>%
   group_by(gene_accession_id) %>%
-  filter(n_distinct(gene_symbol) > 1)  # Identify cases where one gene_accession_id maps to multiple gene_symbols
+  filter(n_distinct(gene_symbol) > 1)
 
-# Log the results of the correlation check
-log_message(if (nrow(gene_symbol_correlation) == 0) {
-  "Perfect correlation between gene_accession_id and gene_symbol."  # Log success if no issues
-} else {
-  "Correlation issues detected."  # Log message if issues are found
-})
+log_message(if (nrow(gene_symbol_correlation) == 0) "Perfect correlation between gene_accession_id and gene_symbol." else "Correlation issues detected.")
 ```
 
 Check & format `mouse_strain` so all results are one of the four valid strains specified in the SOP: C57BL, B6J, C3H or 129SV. Our results show 11 unique strains, 9 of which appear to be typos of C57BL (e.g. C53BL, C58BL - none of the 'typos' are valid mouse strains according to MGI).
 
 ```{r}
-# Validate and fix `mouse_strain` by standardizing known values and replacing others with "C57BL"
+#### Validate and fix `mouse_strain`
 analysis <- analysis %>%
   mutate(mouse_strain = ifelse(mouse_strain %in% c("C57BL", "B6J", "C3H", "129SV"), mouse_strain, "C57BL"))
 
-# Log the update to mouse_strain values
-log_message("Updated mouse_strain values. Non-standard values were replaced with 'C57BL' due to observed typos.")
+log_message("Updated mouse_strain values.") # Selected 'C57BL' after looking at unique results - there appear to be typos of C57BL
 ```
 
 Check if `mouse_life_stage` values are one of the allowed values according to the SOP.
 
 ```{r}
-# Validate `mouse_life_stage` by checking against valid values
-invalid_life_stages <- analysis %>%
-  filter(!mouse_life_stage %in% c("E12.5", "E15.5", "E18.5", "E9.5", "Early adult", "Late adult", "Middle aged adult"))
+### Validate 'mouse_life_stage'
+invalid_life_stages <- analysis %>% filter(!mouse_life_stage %in% c("E12.5", "E15.5", "E18.5", "E9.5", "Early adult", "Late adult", "Middle aged adult"))
 
-# Log the results of the validation
-log_message(if (nrow(invalid_life_stages) == 0) {
-  "All mouse_life_stage values are valid."  # Log success if no issues
-} else {
-  paste("Invalid mouse_life_stage values:", nrow(invalid_life_stages))  # Log count of invalid values
-})
+log_message(if (nrow(invalid_life_stages) == 0) "All mouse_life_stage values are valid." else paste("Invalid mouse_life_stage values:", nrow(invalid_life_stages)))
 ```
 
 Checking if `parameter_id` & `parameter_name` are the correct lengths (15-18 characters & 2-74 characters respectively). Also checking if they are perfectly correlated with each other.
 
 ```{r}
-# Validate 'parameter_id' by checking its length
+### Validate 'parameter_id'
 invalid_parameter_ids <- analysis %>%
-  filter(nchar(parameter_id) < 15 | nchar(parameter_id) > 18)  # Identify invalid lengths
+  filter(nchar(parameter_id) < 15 | nchar(parameter_id) > 18)
 
-log_message(if (nrow(invalid_parameter_ids) == 0) {
-  "All parameter_id values are valid."  # Log success if no issues
-} else {
-  paste("Invalid parameter_id values:", nrow(invalid_parameter_ids))  # Log count of invalid IDs
-})
+log_message(if (nrow(invalid_parameter_ids) == 0) {"All parameter_id values are valid."} else {paste("Invalid parameter_id values:", nrow(invalid_parameter_ids))})
 
-# Validate 'parameter_name' by checking its length
-invalid_parameter_names <- analysis %>%
-  filter(nchar(parameter_name) < 2 | nchar(parameter_name) > 74)  # Identify invalid lengths
+### Validate 'parameter_name'
+invalid_parameter_names <- analysis %>% 
+  filter(nchar(parameter_name) < 2 | nchar(parameter_name) > 74)
 
-log_message(if (nrow(invalid_parameter_names) == 0) {
-  "All parameter_name values have valid lengths."  # Log success if no issues
-} else {
-  paste("Invalid parameter_name values:", nrow(invalid_parameter_names))  # Log count of invalid names
-})
+log_message(if (nrow(invalid_parameter_names) == 0) {"All parameter_name values have valid lengths."} else {paste("Invalid parameter_name values:", nrow(invalid_parameter_names))})
 
-# Check correlation between 'parameter_id' and 'parameter_name'
-parameter_correlation <- analysis %>%
-  group_by(parameter_id) %>%
-  summarise(unique_names = n_distinct(parameter_name)) %>%
-  filter(unique_names > 1)  # Identify cases where one parameter_id maps to multiple parameter_names
+### Correlation between 'parameter_id' & 'parameter_name'
+parameter_correlation <- analysis %>% 
+  group_by(parameter_id) %>% summarise(unique_names = n_distinct(parameter_name)) %>% 
+  filter(unique_names > 1)
 
-log_message(if (nrow(parameter_correlation) == 0) {
-  "Perfect correlation between parameter_id and parameter_name."  # Log success if no issues
-} else {
-  "Correlation issues detected for parameter_id and parameter_name."  # Log message if issues are found
-})
+log_message(if (nrow(parameter_correlation) == 0) {"Perfect correlation between parameter_id and parameter_name."} else {"Correlation issues detected for parameter_id and parameter_name."})
+
 ```
 
 Check if all `pvalues` are between 0 & 1, if not cap the values at those extremes. In this case, we had no values below 0 but we did have values above 1.
 
 ```{r}
-# Validate and fix 'pvalue'
+### Validate & fix 'pvalue'
 
-# Cap pvalues greater than 1 to 1
 analysis <- analysis %>%
-  mutate(pvalue = ifelse(pvalue > 1, 1, pvalue))  # Fix values >1 based on observed issues
+  mutate(pvalue = ifelse(pvalue > 1, 1, pvalue)) # Viewing pvalues before transforming shows values >1
+invalid_pvalues <- analysis %>% filter(pvalue < 0 | pvalue > 1 | is.na(pvalue))
 
-# Identify invalid pvalues (out of range or missing)
-invalid_pvalues <- analysis %>%
-  filter(pvalue < 0 | pvalue > 1 | is.na(pvalue))
-
-# Log the validation results
-log_message(if (nrow(invalid_pvalues) == 0) {
-  "All pvalue values are valid."  # Log success if no issues
-} else {
-  paste("Invalid pvalue values:", nrow(invalid_pvalues))  # Log count of invalid values
-})
+log_message(if (nrow(invalid_pvalues) == 0) "All pvalue values are valid." else paste("Invalid pvalue values:", nrow(invalid_pvalues)))
 ```
 
 Save the cleaned dataframe to a new file.
 
 ```{r}
-# Save the cleaned analysis dataset to the cleaned data directory
+### SAVE CLEANED DATA ###
 write_csv(analysis, paste0(rootDir, "data/cleaned/cleaned_analysis_table.txt"))
 
-# Log the successful save operation
 log_message("Cleaned dataset saved as 'cleaned_analysis_table.txt'.")
 log_message("=== End of Log ===")
 ```
@@ -455,36 +421,22 @@ log_message("=== End of Log ===")
 Log file shows the all the messaged corresponding to the if/else statement results in every step of this workflow.
 
 ```{r}
-# Remove temporary variables and objects to free up memory
-rm(
-  invalid_gene_lengths, invalid_gene_symbols, invalid_ids, invalid_life_stages,
-  invalid_parameter_ids, invalid_parameter_names, invalid_pvalues, 
-  parameter_correlation, type_mismatches, gene_symbol_correlation, 
-  log_file, log_message, updated_data_dir, SOP_path
-)
+rm(invalid_gene_lengths, invalid_gene_symbols, invalid_ids, invalid_life_stages, invalid_parameter_ids, invalid_parameter_names, invalid_pvalues, parameter_correlation, type_mismatches, gene_symbol_correlation, log_file, log_message, updated_data_dir, SOP_path)
 ```
 
 ## Cleaning the Metadata Files
 
-Extra information about the parameters tested, the procedures they are part of, and the human diseases linked to the knockout genes is stored in separate metadata files. However, these files are not set up correctly for loading into R and have inconsistent values, so they need cleaning.
+The cleaning of the procedure, parameter, and disease files involved two steps:
 
-The cleaning process for the procedure, parameter, and disease files had two steps:
+1.  **Initial Processing**: Fields were clearly separated by commas, and fields containing commas were enclosed in quotes to ensure proper loading as a table. A temporary text file reflecting these changes was saved.
 
-1.  **Initial Setup**: Fields were separated with commas, and any fields with commas inside were enclosed in quotes to make sure the file could load properly as a table. A temporary text file with these fixes was saved.
+2.  **Data Cleaning**: The temporary text file was loaded as a table, and values were cleaned to remove duplicates and ensure consistent formatting.
 
-2.  **Data Cleaning**: The temporary file was loaded as a table, duplicates were removed, and formatting was made consistent.
+After these changes were applied, a quick check was performed to ensure the fields met the SOP requirements.
 
-Finally, a quick check was done to confirm that the fields followed the SOP rules.
-
-### `IMPC_procedure.txt (Alicia)`
+### `IMPC_procedure.txt`
 
 #### Formatting
-
--   Replaced double quotes between fields with commas.
-
--   Removed leading and trailing double quotes from each line.
-
--   Enclosed descriptions containing commas in quotes using a regular expression.
 
 ```{r}
 # Define the path to temporarily store the formatted table before cleaning
@@ -503,14 +455,6 @@ procedure <- read_lines(paste0(rootDir, "data/metadata/IMPC_procedure.txt")) %>%
 ```
 
 #### Cleaning
-
--   Trimmed whitespace and replaced HTML codes.
-
--   Renamed columns for consistency.
-
--   Standardized or filled missing/conflicting descriptions based on procedure names.
-
--   Grouped identical procedures, assigned shared `procedure_id`s, and stored parameter IDs for integration with the parameter table.
 
 ```{r}
 # Clean and standardize the procedure information
@@ -558,14 +502,23 @@ procedure <- read_csv(temporary_path, show_col_types = FALSE, col_names = TRUE) 
   # Expand the list of parameter mappings into individual rows
  unnest(parameter_mapping)
 
-# Remove formatted file 
-file.remove(temporary_path)
-
 # Save the cleaned data to a new CSV file
 write_csv(procedure, paste0(rootDir, "data/cleaned/cleaned_IMPC_procedure.csv"))
 ```
 
-The cleaned table reduced over 5,000 rows to [50 distinct procedures](https://www.mousephenotype.org/impress/PipelineInfo?id=7) and ensured all fields met SOP compliance.
+The table initially contained over 5,000 rows but only 50 distinct procedures, as each row represented a parameter tested within a procedure. To reduce redundancy:
+
+-   Identical procedures with missing or conflicting descriptions were standardized by filling in or selecting the most appropriate value.
+
+-   Procedures with identical names, descriptions, and mandatory values were assigned a shared `procedure_id`, with their `impcParameterOrigId` values stored as a list for integration with the parameter table.
+
+IMPC link to procedures: <https://www.mousephenotype.org/impress/PipelineInfo?id=7>
+
+```{r}
+# Remove unnecessary files and variables
+file.remove(temporary_path)
+rm(temporary_path)
+```
 
 #### Validating
 
@@ -608,19 +561,9 @@ if (length(errors) == 0) {
 }
 ```
 
-### `IMPC_parameter_description.txt (Alicia/Sama)`
+### `IMPC_parameter_description.txt`
 
 #### Formatting
-
--   Removed the header line and empty lines.
-
--   Stripped leading and trailing double quotes.
-
--   Replaced double quotes between fields with commas.
-
--   Replaced inconsistent newline characters with spaces.
-
--   Corrected field separators and properly quoted descriptions using a regular expression.
 
 ```{r}
 # Define the path to temporarily store the formatted table before cleaning
@@ -666,14 +609,6 @@ parameter <- read_lines(paste0(rootDir, "data/metadata/IMPC_parameter_descriptio
 ```
 
 #### Cleaning
-
--   Trimmed whitespace and replaced empty strings with `NA`.
-
--   Renamed columns for consistency.
-
--   Standardized parameter names and descriptions using `parameter_id` and the IMPC database, filling missing descriptions with standardized names.
-
--   Removed duplicates to ensure one record per parameter, reducing rows from 5,325 to 3,600.
 
 ```{r}
 # Load and clean parameter data
@@ -737,11 +672,14 @@ parameter <- read_csv(temporary_path, show_col_types = FALSE) %>%
   # Ensure one record per parameter
   distinct(parameter_name, parameter_description, parameter_id, .keep_all = TRUE)  # Reduces rows from 5325 to 3600; ignore parameter_mappings for this as each parameter is part of a specific procedure 
 
-# Remove formatted file 
-file.remove(temporary_path)
-
 # Save the cleaned data to a new CSV file
 write_csv(parameter, paste0(rootDir, "data/cleaned/cleaned_IMPC_parameter_description.csv"))
+```
+
+```{r}
+# Remove unnecessary files and variables
+file.remove(temporary_path)
+rm(temporary_path)
 ```
 
 #### Validating
@@ -787,15 +725,9 @@ if (length(errors) == 0) {
 }
 ```
 
-### `disease_information.txt (Alicia/Sanj)`
+### `disease_information.txt`
 
 #### Formatting
-
--   Removed the header line and line numbers.
-
--   Stripped leading and trailing double quotes.
-
--   Used a regular expression to separate fields, ensuring proper quoting and field separation.
 
 ```{r}
 temporary_path <- paste0(rootDir, "data/cleaned/Disease_information_table.txt")
@@ -816,14 +748,6 @@ disease <- read_lines(paste0(rootDir, "data/metadata/Disease_information.txt")) 
 
 #### Cleaning
 
--   Trimmed white space and replaced empty strings with `NA`.
-
--   Converted `phenodigm_score` to numeric format.
-
--   Removed duplicate rows.
-
-##### Identified rows with the same `disease_id` and `gene_accession_id` for further discussion. {style="color: red"}
-
 ```{r}
 # Load and clean parameter data
 disease <- read_csv(temporary_path, show_col_types = FALSE) %>%
@@ -837,9 +761,6 @@ disease <- read_csv(temporary_path, show_col_types = FALSE) %>%
   )%>%
   # Remove duplicates
   distinct()
-
-# Remove formatted file 
-file.remove(temporary_path)
 
 # Save the cleaned data to a new CSV file
 write_csv(disease, paste0(rootDir, "data/cleaned/cleaned_disease_information.csv"))
@@ -859,6 +780,12 @@ if (nrow(duplicates) > 0) {
   cat("No rows with duplicate disease_id and gene_accession_id found.\n")
 }
 
+```
+
+```{r}
+# Remove unnecessary files and variables
+file.remove(temporary_path)
+rm(temporary_path)
 ```
 
 #### Validating
@@ -902,203 +829,126 @@ if (length(errors) == 0) {
 ```
 
 ```{r}
-rm(errors, temporary_path)
+rm(errors)
 ```
 
-# Collating (Alicia)
+# Collating
 
-![](images/Screenshot 2024-12-27 at 19.24.12.png)
+### GroupingsTable
 
-Although the metadata and analysis tables have been cleaned, they do not match the agreed database structure. To make them compatible, new tables are created by selecting and transforming specific fields from the cleaned data. Some tables require merging information from multiple sources. The final outputs are saved as CSV files for upload into the database.
+To reduce the parameter space the collaborator would like to start grouping parameters_table together based on phenotype test similarity and/or naming similarity. Design the database to reflect new groupings for weight,  images and brain parameters_table, plus at least 3 others of your choice (refer to below). 
 
-To avoid rerunning the entire script, the cleaned tables are loaded:
+In addition to the data provided, each group must  find at least 3 other parameter groupings from the parameter list and add this to the  database. We encourage you to find as many additional parameter groups as you can and  time permits, however only 3 more is compulsory. parameters_table
 
 ```{r}
+# Create a data frame with IDs and names
+groupings_table <- data.frame(group_id = 1:6,group_name = c("weight", "brain", "images", "cardiovascular", "eye", "neuro"))
+
+# Save the table as CSV 
+write_csv(groupings_table, paste0(rootDir, "/data/collated/GroupingsTable.csv"))
+```
+
+This step subsets the data from the metadata table according to the database schema decide dupon:
+
+```{r}
+# load tables to not have to run the rest of the script: 
 procedure <- read_csv(paste0(rootDir, "data/cleaned/cleaned_IMPC_procedure.csv"), show_col_types = FALSE) 
 analysis <- read_csv(paste0(rootDir, "data/cleaned/cleaned_analysis_table.txt"), show_col_types = FALSE) 
 parameter <- read_csv(paste0(rootDir, "data/cleaned/cleaned_IMPC_parameter_description.csv"), show_col_types = FALSE)
 disease <- read_csv(paste0(rootDir, "data/cleaned/cleaned_Disease_information.csv"), show_col_types = FALSE)
+
 ```
 
-## **Procedures Table**
-
-Key fields (`procedure_id`, `procedure_name`, `procedure_description`, `is_mandatory`) are selected, with `is_mandatory` converted to integers (0 or 1) for SQL compatibility.
+### Procedures
 
 ```{r}
 procedures_table <- procedure %>%
-  select(procedure_id, procedure_name, procedure_description, is_mandatory) %>%
-  mutate(is_mandatory = as.integer(is_mandatory)) %>%
-  distinct()
+  select(procedure_id, procedure_name, procedure_description, is_mandatory) %>%  # Select specific columns
+  distinct() # Keep only unique rows (this is needed due to the parameter_mapping field)
 
-write_csv(procedures_table, paste0(rootDir, "/data/collated/Procedures.csv"), quote = "all")
+# Save the table as CSV 
+write_csv(procedures_table, paste0(rootDir, "/data/collated/Procedures.csv"))
 ```
 
-## **Genes Table**
-
-Gene information (`gene_accession_id`, `gene_symbol`) is combined from the analysis and disease tables. Missing symbols are curated from the MGI database for about a dozen genes.
+### Genes
 
 ```{r}
-genes_table <- analysis %>%
-  select(gene_accession_id, gene_symbol) %>%
-  bind_rows(
-    disease %>%
+genes_table <- analysis %>% select(gene_accession_id, gene_symbol) %>% # Select desired columns
+  bind_rows(disease %>% 
       select(gene_accession_id) %>%
-      filter(!gene_accession_id %in% analysis$gene_accession_id)
-  ) %>%
-  mutate(
-    gene_symbol = case_when(
-      gene_accession_id == "MGI:98967" ~ "Wt",
-      gene_accession_id == "MGI:96090" ~ "Asmt",
-      gene_accession_id == "MGI:98266" ~ "Sord",
-      gene_accession_id == "MGI:1928271" ~ "Malrd1",
-      gene_accession_id == "MGI:109279" ~ "Nnt",
-      gene_accession_id == "MGI:3665157" ~ "Rsxr",
-      gene_accession_id == "MGI:1345961" ~ "Coro1a",
-      gene_accession_id == "MGI:87868" ~ "Acads",
-      gene_accession_id == "MGI:1351634" ~ "Abcc6",
-      gene_accession_id == "MGI:104511" ~ "Tnfsf4",
-      TRUE ~ gene_symbol
-    )
-  ) %>%
-  distinct()
+      filter(!gene_accession_id %in% analysis$gene_accession_id)) 
 
-write_csv(genes_table, paste0(rootDir, "/data/collated/Genes.csv"), quote = "all")
+write_csv(genes_table, paste0(rootDir, "/data/collated/Genes.csv"))
 ```
 
-## **Analyses Table**
-
-Relevant fields are selected from the analysis table.
+# Parameters
 
 ```{r}
-analyses_table <- analysis %>%
-  select(analysis_id, gene_accession_id, mouse_strain, mouse_life_stage, parameter_id, pvalue) %>%
-  distinct()
+parameters_table <- left_join(parameter, procedure, by = join_by(parameter_mapping)) %>% 
+  distinct(parameter_id, parameter_name, parameter_description, procedure_id)%>%
+  mutate(parameter_group = case_when(
+    str_detect(parameter_name, regex(
+      "weight|density|fat|lean|BMI|BMC|mass|composition|bone|length|adipose|lipid|body size|size|growth|skeletal|area|volume", 
+      ignore_case = TRUE)) ~ groupings_table$group_id[groupings_table$group_name == "weight"],
+        str_detect(parameter_name, regex(
+        "image|screenshot|microscope|pdf|lacz|waveform|ogram|resolution|visual|pixel|scan|photo|imaging|bit depth|microscopy|contrast", 
+      ignore_case = TRUE)) ~ groupings_table$group_id[groupings_table$group_name == "images"],
+    str_detect(parameter_name, regex(
+        "brain|cortex|hippo|thalamus|amygdala|lobe|cere|spinal|pituitary|striatum|hypothal|neural|neuronal|pons|medulla|ganglion|nerve|enceph|ventricle|choroid",
+        ignore_case = TRUE)) ~ groupings_table$group_id[groupings_table$group_name == "brain"],
+    str_detect(parameter_name, regex(
+        "heart|cardiac|vascular|blood|vein|aort|arter|HR|stroke|ejection|QT|circulation|pulse|pressure|rate|systolic|diastolic|respiration|ECG|cardio|valve",       ignore_case = TRUE)) ~ groupings_table$group_id[groupings_table$group_name == "cardiovascular"],
+    str_detect(parameter_name, regex(
+        "eye|retina|cornea|lens|eyelid|iris|optic|ocular|vision|acuity|photoreceptor|brightness|scheimpflug|nuclear|macula|pupil|color|refraction|sclera|vitreous",
+        ignore_case = TRUE)) ~ groupings_table$group_id[groupings_table$group_name == "eye"]))
 
-write_csv(analyses_table, paste0(rootDir, "/data/collated/Analyses.csv"), quote = "all")
+
+write_csv(parameters_table, paste0(rootDir, "/data/collated/Parameters.csv")) 
 ```
 
-## **Parameters Table**
-
-The parameter table is joined with the procedure table using `parameter_mapping`, and missing `parameter_id` values from the analyses table are added.
-
-```{r}
-parameters_table <- left_join(parameter, procedure, by = join_by(parameter_mapping)) %>%
-  bind_rows(
-    analyses_table %>%
-      select(parameter_id) %>%
-      filter(!parameter_id %in% parameter$parameter_id)
-  ) %>%
-  distinct(parameter_id, parameter_name, parameter_description, procedure_id)
-
-write_csv(parameters_table, paste0(rootDir, "/data/collated/Parameters.csv"), quote = "all")
-```
-
-## **Diseases Table**
-
-Disease information (`disease_id`, `disease_term`) is extracted.
+# Diseases
 
 ```{r}
 diseases_table <- disease %>%
-  select(disease_id, disease_term) %>%
+  select(disease_id, disease_term) %>% 
   distinct()
 
-write_csv(diseases_table, paste0(rootDir, "/data/collated/Diseases.csv"), quote = "all")
+write_csv(diseases_table, paste0(rootDir, "/data/collated/Diseases.csv"))
 ```
 
-## **Phenodigm Scores Table**
-
-Disease and gene information along with `phenodigm_score` is selected from the disease table.
+### PhenoDigm
 
 ```{r}
 phenodigm_scores <- disease %>%
-  select(disease_id, gene_accession_id, phenodigm_score)
+  select(disease_id, gene_accession_id, phenodigm_score) 
 
-write_csv(phenodigm_scores, paste0(rootDir, "/data/collated/PhenodigmScores.csv"), quote = "all")
+write_csv(phenodigm_scores, paste0(rootDir, "/data/collated/PhenodigmScores.csv")) 
 ```
 
-## Parameter Groupings
-
-The goal is to group parameters by naming or phenotype test similarity, reducing parameter space and organizing them into meaningful categories (e.g., weight, images, brain). At least three new parameter groups are needed beyond the initial ones.
-
-### Define Group Patterns
-
-The `group_patterns` table defines group names (e.g., "weight," "images," "brain") with regex patterns to match parameter names, forming the basis for identifying and categorizing parameters.
+### Analyses
 
 ```{r}
+analyses_table <- analysis %>%
+  select(analysis_id, gene_accession_id, mouse_strain, mouse_life_stage, parameter_id, pvalue)   %>%  
+    distinct()
 
-group_patterns <- tibble(
-  group_name = c(
-    "weight", "images", "brain", "cardiovascular", "eye", 
-    "metabolic", "morphology", "audiology", 
-    "reproductive", "toxicology", "experimental_identifiers"
-  ),
-  regex_pattern = c(
-    "weight|density|fat|lean|BMI|BMC|mass|composition|bone|length|adipose|lipid|body size|size|growth|skeletal|area|volume",
-    "image|screenshot|microscope|pdf|lacz|waveform|ogram|resolution|visual|pixel|scan|photo|imaging|bit depth|microscopy|contrast",
-    "brain|cortex|hippo|thalamus|amygdala|lobe|cere|spinal|pituitary|striatum|hypothal|neural|neuronal|pons|medulla|ganglion|nerve|enceph|ventricle|choroid",
-    "heart|cardiac|vascular|blood|vein|aort|arter|HR|stroke|ejection|QT|circulation|pulse|pressure|rate|systolic|diastolic|respiration|ECG|cardio|valve",
-    "eye|retina|cornea|lens|eyelid|iris|optic|ocular|vision|acuity|photoreceptor|brightness|scheimpflug|nuclear|macula|pupil|color|refraction|sclera|vitreous",
-    "glucose|insulin|cholesterol|lipid|fasting|diet|energy|metabolism|metabolic|AUC|glycemic|resistance|glucagon|carbohydrate|diabetes|calories|homeostasis",
-    "morphology|shape|size|growth|length|hypoplasia|syndactyly|microcephaly|anatomy|limb|edema|facial|cleft|dysmorphic|developmental|pattern|CRL|development|blebs",
-    "ABR|hearing|audiometry|waveform|tone|decibel|audiogram|stimulus|frequency|click|response|threshold|sound|ear",
-    "reproductive|fertility|embryo|ovary|sperm|testis|testicular|gestation|ovulation|pregnancy|CRL|zygote|oocyte|gonad",
-    "anesthetic|drug|agent|dosage|administration|route|exposure|chemical|toxic|compound|biomarkers|toxicology|medication",
-    "experimenter|ID|lot|kit|manufacturer|model|calibration|SOP|genotype|mutation|allele|strain|batch|control|sample|label|protocol|method"
-  )
-)
+write_csv(analyses_table, paste0(rootDir, "/data/collated/Analyses.csv"))
 ```
 
-### Create Groupings Table
-
-The `groupings_table` assigns a unique ascending `group_id` to each group name from the `group_patterns` table, retaining only `group_id` and `group_name`.
-
-```{r}
-groupings_table <- group_patterns %>%
-  mutate(group_id = row_number()) %>%  # Assign unique ascending IDs
-  select(group_id, group_name)         # Retain only group_id and group_name
-
-write_csv(groupings_table, paste0(rootDir, "data/collated/GroupingsTable.csv"), quote = "all")
-```
-
-### Map Parameters to Groups
-
-The `parameter` table is processed to match each `parameter_id` with groups using regex patterns from `group_patterns`. Matches are expanded into separate rows for multiple groups, joined with the `groupings_table` to add `group_id`, and duplicates are removed.
-
-```{r}
-groupXparameter_table <- parameter %>%
-  select(parameter_id, parameter_name) %>%                # Select relevant columns
-  mutate(group_name = map(parameter_name, ~               # Match parameter names to group patterns
-    group_patterns$group_name[
-      str_detect(.x, regex(group_patterns$regex_pattern, ignore_case = TRUE))
-    ])
-  ) %>%
-  unnest_longer(group_name) %>%                           # Expand rows for each matched group
-  left_join(groupings_table, by = "group_name") %>%       # Add group_id from groupings_table
-  select(parameter_id, group_id) %>%                      # Retain parameter_id and group_id columns
-  distinct()                                              # Remove duplicates
-
-write_csv(groupXparameter_table, paste0(rootDir, "/data/collated/ParameterGroupings.csv"), quote = "all")
-```
-
-# MySQL Database (Alicia)
-
-After creating the tables in R, the database can be set up in MySQL, and the tables can be imported directly using the `LOAD DATA LOCAL INFILE` function.
-
-This script checks if MySQL is running and connects with local file import enabled:
+# MySQL Database
 
 ```{sql}
 #| eval: false
 
-# Check if MySQL is running
+-- Check if MySQL is running
 ps -ef | grep mysql
 
-# Connect to MySQL with local file import enabled
+-- Connect to MySQL
 mysql -u root -p --local-infile=1
+-- local-infile=1 enables data import from local files using LOAD DATA LOCAL INFILE.
 ```
 
-## Create Database and Tables
-
-The first step is to create the database in MySQL, followed by creating the tables according to the agreed-upon schema.
+## Create Database and Schemas
 
 ```{sql}
 #| eval: false
@@ -1169,131 +1019,166 @@ CREATE TABLE PhenodigmScores (
 
 CREATE TABLE ParameterGroupings (
     parameter_id VARCHAR(18),                        -- Foreign key to Parameters
-    group_id INT,                                    -- Foreign key to Groupings
+    group_name VARCHAR(50),                                    -- Foreign key to Groupings by name
     PRIMARY KEY (parameter_id, group_id),            -- Composite key
     FOREIGN KEY (parameter_id) REFERENCES Parameters(parameter_id),
-    FOREIGN KEY (group_id) REFERENCES Groupings(group_id)
+    FOREIGN KEY (group_name) REFERENCES Groupings(group_name)
 ) COMMENT = 'Links Parameters and Groupings.';
-```
 
-##### Someone should review the constraints (character limits, mandatory fields, and foreign keys) to ensure they align with the data and the SOP. For fields not covered in the SOP, check the actual maximum lengths in the data to assign appropriate character limits. {style="color: red"}
+
+```
 
 ## Populate Database
 
-With the tables created and CSV files ready, data can be imported into MySQL using `LOAD DATA INFILE` with these specifications: fields separated by commas, optionally enclosed in double quotes, and skipping the header row.
+To populate the database, the schema should first be examined to identify which attributes correspond to each table. Data should then be organized into separate CSV or TSV files, with each file representing a single table. Each file is expected to include a header row (optional but recommended) that matches the column names defined in the database schema.
+
+Once a CSV file has been created for each table, the data can be loaded directly into MySQL using the `LOAD DATA INFILE` command.
+
+-   **`FIELDS TERMINATED BY ','`**: Indicates that fields are separated by commas.
+
+-   **`OPTIONALLY ENCLOSED BY '"'`**: Handles strings enclosed in double quotes.
+
+-   **`IGNORE 1 LINES`**: Skips the header row in the CSV, if present.
+
+### 
 
 ```{sql}
 #| eval: false
-
+-- Path to tables 
 LOAD DATA LOCAL INFILE '/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/collated/Procedures.csv'
-INTO TABLE ProceduresTable
-FIELDS TERMINATED BY ','    
-OPTIONALLY ENCLOSED BY '"'    
-IGNORE 1 LINES;             
+INTO TABLE Procedures
+FIELDS TERMINATED BY ',' 
+OPTIONALLY ENCLOSED BY '"'
+IGNORE 1 LINES;
+```
 
-SHOW WARNINGS;
-
+```{sql}
+#| eval: false
 LOAD DATA LOCAL INFILE '/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/collated/Genes.csv'
 INTO TABLE Genes
 FIELDS TERMINATED BY ',' 
-OPTIONALLY ENCLOSED BY '"' 
-IGNORE 1 LINES;
+OPTIONALLY ENCLOSED BY '"'
+IGNORE 1 LINES; 
+```
 
-SHOW WARNINGS;
+*\*Some of the IDs appeared to be duplicated, but upon inspection, the rows contained equivalent values (e.g., for IMPC_HIS_010_001: "Eye with optic nerve - Severity score" and "Eye - Severity score"). Given the same identifier and the similarity of these terms, it is reasonable to assume that they refer to the same parameter, and only one of the duplicates was uploaded to the database.*
 
+![](images/Screenshot%202024-12-18%20at%2015.27.00.png)
+
+*Some values are truncated, which aligns with the SOP specifying a maximum of 74 characters. However, the maximum number of characters in the dataset is 88, exceeding the allowed limit.*
+
+![](images/Screenshot%202024-12-18%20at%2015.26.12.png)
+
+```{sql}
+#| eval: false
 LOAD DATA LOCAL INFILE '/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/collated/Groupings.csv'
-INTO TABLE Groupings
+INTO TABLE GroupingsTable
 FIELDS TERMINATED BY ',' 
-OPTIONALLY ENCLOSED BY '"' 
+OPTIONALLY ENCLOSED BY '"'
 IGNORE 1 LINES;
 
-SHOW WARNINGS;
 
 LOAD DATA LOCAL INFILE '/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/collated/Parameters.csv'
 INTO TABLE Parameters
 FIELDS TERMINATED BY ',' 
-OPTIONALLY ENCLOSED BY '"' 
+OPTIONALLY ENCLOSED BY '"'
 IGNORE 1 LINES;
+```
 
-SHOW WARNINGS;
-
+```{sql}
+#| eval: false
 LOAD DATA LOCAL INFILE '/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/collated/Diseases.csv'
 INTO TABLE Diseases
 FIELDS TERMINATED BY ',' 
-OPTIONALLY ENCLOSED BY '"' 
+OPTIONALLY ENCLOSED BY '"'
 IGNORE 1 LINES;
+```
 
-SHOW WARNINGS;
-
+```{sql}
+#| eval: false
 LOAD DATA LOCAL INFILE '/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/collated/PhenodigmScores.csv'
 INTO TABLE PhenodigmScores
 FIELDS TERMINATED BY ',' 
 OPTIONALLY ENCLOSED BY '"' 
+LINES TERMINATED BY '\n' 
 IGNORE 1 LINES
-(disease_id, gene_accession_id, phenodigm_score); -- Explicitly map columns (phenodigm_id is auto-generated)
+(disease_id, gene_accession_id, phenodigm_score); -- so that the phenodigm_id is created dynamically
+```
 
-SHOW WARNINGS;
-
+```{sql}
+#| eval: false
 LOAD DATA LOCAL INFILE '/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/collated/Analyses.csv'
 INTO TABLE Analyses
 FIELDS TERMINATED BY ',' 
 OPTIONALLY ENCLOSED BY '"' 
-IGNORE 1 LINES;
-
-SHOW WARNINGS;
-
-LOAD DATA LOCAL INFILE '/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/collated/ParameterGroupings.csv'
-INTO TABLE ParameterGroupings
-FIELDS TERMINATED BY ','               
-OPTIONALLY ENCLOSED BY '"'                   
-IGNORE 1 LINES;  
-
-SHOW WARNINGS;
+LINES TERMINATED BY '\n'
+IGNORE 1 LINES; -- so that the phenodigm_id is created dynamically
 ```
 
-##### A total of 143 parameters corresponding to 83,712 analysis files have non-IMPC identifiers, meaning they are not linked to any procedure. This violates the foreign key constraints in the database, resulting in the following issues: {style="color: red"}
-
-1.  During the loading of the `Parameters` table, missing or invalid `procedure_id` values (e.g., `NA`) cause errors, such as "Incorrect integer value: 'NA' for column 'procedure_id' at row 3601." Additionally, foreign key violations occur when `procedure_id` values are not linked to `ProceduresTable`.
-
-2.  During the loading of the `Analyses` table, non-IMPC `parameter_id` values prevent rows from referencing the `Parameters` table, resulting in foreign key constraint failures.
-
-##### Currently, parameters and related analyses that lack a procedure are skipped during upload. To avoid this, we could assign such parameters to an 'unknown/undefined' procedure by adding a corresponding row to the procedure table, ensuring the data is loaded and associated with an unknown value instead of being omitted. {style="color: red"}
+## Create dump
 
 ```{bash}
 #| eval: false
 
-# Create database dump 
 /opt/homebrew/bin/mysqldump IMPCDb -u root -p > /Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/database/IMPCDb.dump
 ```
 
-# R/Shiny (Sanj/Sama)
+# R/Shiny
 
 **Test R/Shiny 1:** They want the ability to select a particular knockout mouse and visualise the statistical scores of all phenotypes tested.
 
 ```{sql}
 #| eval: false
-
-SELECT Analyses.p_value, Parameters.parameter_name FROM Analyses 
+SELECT Analyses.p_value, Parameters.parameter_name 
+FROM Analyses 
 JOIN Parameters ON Analyses.parameter_id = Parameters.parameter_id 
 WHERE Analyses.gene_accession_id IN (
-    SELECT gene_accession_id FROM Genes WHERE gene_symbol IN ('Ifi204', 'Mettl21c', 'Ier5', 'Abca4')) 
+    SELECT gene_accession_id 
+    FROM Genes 
+    WHERE gene_symbol IN ('Ifi204', 'Mettl21c', 'Ier5', 'Abca4')
+)
 ORDER BY Analyses.p_value ASC;
 ```
+
+![](images/Screenshot%202024-12-21%20at%2016.21.52.png)
 
 **Test R/Shiny 2:** The collaborator also wishes to visualise the statistical scores of all knockout mice for a selected phenotype.
 
 ```{sql}
 #| eval: false
-SELECT Analyses.p_value, Genes.gene_symbol FROM Analyses 
+SELECT Analyses.p_value, Genes.gene_symbol 
+FROM Analyses 
 JOIN Parameters ON Analyses.parameter_id = Parameters.parameter_id 
 JOIN Genes ON Analyses.gene_accession_id = Genes.gene_accession_id 
-WHERE Parameters.parameter_name IN ("Fusion of vertebrae", "Hindbrain morphology", "Limb morphology") 
+WHERE Parameters.parameter_name IN (
+    'Facial Cleft',
+    'Lens Opacity',
+    'Triglycerides',
+    'Skin color - tail',
+    'Potassium',
+    'HRV',
+    'Hindbrain morphology',
+    'Aspartate aminotransferase',
+    'Tibia length',
+    'Left total retinal thickness',
+    'Embryo Size',
+    'Effector CD4+ T helper cells - % of live leukocytes (Panel A)',
+    'Limb morphology',
+    'Coat - color - back',
+    'Aggression',
+    'Joints'
+)
 ORDER BY Analyses.p_value ASC;
 ```
+
+![](images/Screenshot%202024-12-21%20at%2016.22.09.png)
 
 **Test R/Shiny 3:** The collaborator would like to visualise clusters of genes with similar phenotype scores.  
 
 ```{sql}
 #| eval: false
+
 SELECT Genes.gene_symbol, Parameters.parameter_name, Analyses.p_value FROM Analyses JOIN Parameters ON Analyses.parameter_id = Parameters.parameter_id JOIN Genes ON Analyses.gene_accession_id = Genes.gene_accession_id; 
 ```
+
+![](images/Screenshot%202024-12-21%20at%2016.22.33.png)

@@ -639,13 +639,14 @@ str(disease_data)
 Deciding on key words for the eye grouping of parameters:
 ```{r}
 #read the csv file
-parameter_description_table < read.csv("/Users/sanjanasrinivasan/Desktop/DCDM_IMPC_Project/data/cleaned/cleaned_IMPC_parameter_description.csv", stringAsFactors = FALSE)
+parameter_description_table <- read.csv("/Users/sanjanasrinivasan/Desktop/DCDM_IMPC_Project/data/cleaned/cleaned_IMPC_parameter_description.csv", sep = ",", stringsAsFactors = FALSE)
 
 #View table
 View(parameter_description_table)
+
 ```
 
-
+Key words identified = retina|cornea|lens|iris"optic"ocular"vision"acuity|photoreceptor|brightness|cataract|glaucoma|macula|pupil|colour|refraction|sclera|vitreous
 
 
 

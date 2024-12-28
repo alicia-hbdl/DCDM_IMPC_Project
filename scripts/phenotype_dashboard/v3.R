@@ -94,7 +94,7 @@ server <- function(input, output, session) {
     host = "localhost",
     port = 3306,
     user = "root",
-    password = "mahiat123"
+    password = "Llama123@"
   )
   
   onStop(function() {
@@ -263,6 +263,7 @@ server <- function(input, output, session) {
       return()
     }
     
+    #Filter subset of genes if specific 
     if (input$gene_subset == "Genes with significant phenotypes (p<0.05)") {
       data <- data %>% filter(p_value < 0.05)
     } else if (input$gene_subset == "User-specific genes") {
@@ -270,21 +271,72 @@ server <- function(input, output, session) {
       data <- data %>% filter(gene_accession_id %in% user_genes)
     }
     
+    #Pivot the data for clustering
     cluster_data <- dcast(data, gene_accession_id ~ parameter_name, value.var = "p_value", fill = 0)
     mat <- cluster_data[, -1]
     
     if (input$cluster_method == "Hierarchical") {
-      hc <- hclust(dist(mat), method = "ward.D")
-      plot(hc, main = "Hierarchical Clustering of Genes", xlab = "Genes", ylab = "Distance")
+      hc <- hclust(dist(mat), method = "ward.D2")
+      ggdendro <- as.dendrogram(hc)
+      plot(ggdendro, main = "Hierarchical Clustering of Genes", 
+           xlab = "Genes", ylab = "Distance", cex = 0.7)
     } else if (input$cluster_method == "K-Means") {
       km <- kmeans(mat, centers = input$num_clusters)
-      ggplot(data.frame(cluster = km$cluster), aes(x = seq_along(cluster), y = cluster)) +
-        geom_point() + labs(title = "K-Means Clustering")
+      kmeans_data <- data.frame(
+        Gene = cluster_data$gene_accession_id,
+        Cluster = factor(km$cluster)
+      )
+      ggplot(kmeans_data, aes(x = seq_along(Cluster), y = Cluster, color = Cluster)) +
+        geom_point(size = 3) +
+        scale_color_manual(values = rainbow(input$num_clusters)) +
+        labs(
+          title = paste("K-Means Clustering with", input$num_clusters, "Clusters"),
+          x = "Gene Index",
+          y = "Cluster ID",
+          color = "Cluster"
+        ) +
+        theme_minimal() +
+        theme(
+          plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
+          axis.title = element_text(size = 12, face = "bold"),
+          axis.text = element_text(size = 10),
+          legend.position = "right"
+        )
     } else if (input$cluster_method == "PCA") {
+      # PCA computation
       pca <- prcomp(mat, scale. = TRUE)
-      ggplot(data.frame(pca$x), aes(x = PC1, y = PC2)) + geom_point() +
-        labs(title = "PCA Clustering")
-    }
+      pca_data <- data.frame(pca$x[, 1:2], gene = cluster_data$gene_accession_id)
+      
+      # Add K-Means clustering for color coding
+      km <- kmeans(mat, centers = input$num_clusters)
+      pca_data$cluster <- factor(km$cluster)  # Add cluster information
+      
+      # Set dynamic title based on gene subset selection
+      gene_subset_label <- switch(input$gene_subset,
+                                  "All genes" = "All Genes",
+                                  "Genes with significant phenotypes (p<0.05)" = "Significant Genes",
+                                  "User-specific genes" = "User-Selected Genes")
+      plot_title <- paste("PCA Clustering of", gene_subset_label)
+      
+      ggplot(pca_data, aes(x = PC1, y = PC2, color = cluster, label = gene)) +
+        geom_point(size = 3, alpha = 0.8) +
+        scale_color_manual(values = rainbow(input$num_clusters)) +  # Color palette for clusters
+        labs(
+          title = plot_title,
+          x = "Principal Component 1",
+          y = "Principal Component 2",
+          color = "Cluster"
+        ) +
+        theme_minimal() +
+        theme(
+          plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
+          axis.title = element_text(size = 12, face = "bold"),
+          axis.text = element_text(size = 10),
+          legend.position = "right",
+          panel.border = element_rect(color = "black", fill = NA, size = 1.5),  # Add bold border
+          panel.grid.major = element_line(size = 0.5, linetype = "dotted", color = "gray80"),
+          panel.grid.minor = element_blank()  # Hide minor grids for a cleaner look
+        )     }
   })
 }
 
