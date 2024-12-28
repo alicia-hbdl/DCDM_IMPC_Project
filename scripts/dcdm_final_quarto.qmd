@@ -1295,7 +1295,7 @@ IGNORE 1 LINES;
 SELECT Analyses.p_value, Parameters.parameter_name FROM Analyses 
 JOIN Parameters ON Analyses.parameter_id = Parameters.parameter_id 
 WHERE Analyses.gene_accession_id IN (
-    SELECT gene_accession_id FROM Genes WHERE gene_symbol IN ('Ifi204', 'Mettl21c', 'Ier5', 'Abca4')) 
+    SELECT gene_accession_id FROM Genes WHERE gene_symbol IN ('Ifi204', 'Mettl21c', 'Ier5', 'Abca4'))
 ORDER BY Analyses.p_value ASC;
 ```
 
@@ -1315,4 +1315,10 @@ ORDER BY Analyses.p_value ASC;
 ```{sql}
 #| eval: false
 SELECT Genes.gene_symbol, Parameters.parameter_name, Analyses.p_value FROM Analyses JOIN Parameters ON Analyses.parameter_id = Parameters.parameter_id JOIN Genes ON Analyses.gene_accession_id = Genes.gene_accession_id;
+```
+
+```{sql}
+#| eval: false
+
+SELECT parameter_name FROM Parameters WHERE parameter_id IN (     SELECT parameter_id     FROM ParameterGroupings     WHERE group_id IN (         SELECT group_id         FROM Groupings         WHERE group_name = "brain"     ) );
 ```
