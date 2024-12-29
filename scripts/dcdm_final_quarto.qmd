@@ -993,6 +993,37 @@ analyses_table <- analysis %>%
 write_csv(analyses_table, paste0(rootDir, "/data/collated/Analyses.csv"), quote = "all")
 ```
 
+There are some gene-parameter combos that occur up to 12 times. If we filter for life stage and mouse strain, we get up to 4 replicates of a gene-parameter-stage-strain combo.
+
+```{r}
+# Count the number of duplicates for each gene_accession_id and parameter_id combination
+duplicate_counts <- analyses_table %>%
+  group_by(gene_accession_id, parameter_id) %>%
+  summarize(count = n()) %>%  # Count the occurrences
+  filter(count > 1) %>%       # Keep only combinations with duplicates
+  ungroup()                   # Remove grouping for further manipulation
+
+# View the result
+#print(duplicate_counts)
+
+# Find the maximum count of duplicates
+max_duplicate_count <- duplicate_counts %>%
+  summarize(max_count = max(count)) %>%
+  pull(max_count)
+
+# Print the maximum count
+#print(max_duplicate_count)
+
+
+# Filter rows with the maximum count
+rows_with_max_count <- duplicate_counts %>%
+  filter(count == max_duplicate_count)
+
+# View the rows
+print(rows_with_max_count)
+
+```
+
 ## **Parameters Table**
 
 The parameter table is joined with the procedure table using `parameter_mapping`, and missing `parameter_id` values from the analyses table are added.
@@ -1036,7 +1067,8 @@ Disease and gene information along with `phenodigm_score` is selected from the d
 
 ```{r}
 phenodigm_scores <- disease %>%
-  select(disease_id, gene_accession_id, phenodigm_score)
+  select(disease_id, gene_accession_id, phenodigm_score) %>%
+  distinct()
 
 write_csv(phenodigm_scores, paste0(rootDir, "/data/collated/PhenodigmScores.csv"), quote = "all")
 ```
@@ -1080,7 +1112,8 @@ The `groupings_table` assigns a unique ascending `group_id` to each group name f
 ```{r}
 groupings_table <- group_patterns %>%
   mutate(group_id = row_number()) %>%  # Assign unique ascending IDs
-  select(group_id, group_name)         # Retain only group_id and group_name
+  select(group_id, group_name) %>%        # Retain only group_id and group_name
+  distinct()
 
 write_csv(groupings_table, paste0(rootDir, "data/collated/Groupings.csv"), quote = "all")
 ```
@@ -1314,11 +1347,89 @@ ORDER BY Analyses.p_value ASC;
 
 ```{sql}
 #| eval: false
-SELECT Genes.gene_symbol, Parameters.parameter_name, Analyses.p_value FROM Analyses JOIN Parameters ON Analyses.parameter_id = Parameters.parameter_id JOIN Genes ON Analyses.gene_accession_id = Genes.gene_accession_id;
+-- This query retrieves the gene symbols, parameter names, and p-values from the `Analyses` table, combining data from the `Parameters` and `Genes` tables.
+SELECT Genes.gene_symbol, Parameters.parameter_name, Analyses.p_value 
+FROM Analyses 
+JOIN Parameters  ON Analyses.parameter_id = Parameters.parameter_id 
+JOIN Genes ON Analyses.gene_accession_id = Genes.gene_accession_id;
 ```
 
 ```{sql}
 #| eval: false
+-- This query retrieves the names of parameters associated with the group named "brain."
+SELECT parameter_name 
+FROM Parameters 
+WHERE parameter_id IN (
+  SELECT parameter_id     
+  FROM ParameterGroupings     
+  WHERE group_id IN (         
+    SELECT group_id         
+    FROM Groupings         
+    WHERE group_name = "brain") );
+```
 
-SELECT parameter_name FROM Parameters WHERE parameter_id IN (     SELECT parameter_id     FROM ParameterGroupings     WHERE group_id IN (         SELECT group_id         FROM Groupings         WHERE group_name = "brain"     ) );
+```{r}
+# Get the options for the drop-downs 
+
+# Mouse strain
+mouse_strains <- dbGetQuery(con, "SELECT DISTINCT mouse_strain FROM Analyses") # Query unique values 
+mouse_strains <- c("All", sort(mouse_strains$mouse_strain))  # Sort and prepend "All"
+
+# Life stage
+life_stages <- dbGetQuery(con, "SELECT DISTINCT mouse_life_stage FROM Analyses")
+life_stages <- c("All", sort(life_stages$mouse_life_stage))
+
+# Reactive function to construct the query based on user input
+# -- This query retrieves the average p-value for each combination of gene and parameter, filtered by mouse strain and life stage (based on user inputs in the Shiny app), and orders the results by the average p-value in ascending order.
+data <- reactive({
+  # Start the base query
+  query <- "SELECT gene_accession_id, parameter_id, ROUND(AVG(p_value), 6) AS avg_p_value FROM Analyses WHERE 1=1"
+  
+  # Add mouse_life_stage condition if not "All"
+  if (input$life_stage != "All") {
+    query <- paste0(query, " AND mouse_life_stage = '", input$life_stage, "'")
+  }
+  
+  # Add mouse_strain condition if not "All"
+  if (input$mouse_strain != "All") {
+    query <- paste0(query, " AND mouse_strain = '", input$mouse_strain, "'")
+  }
+  
+  # Add GROUP BY clause
+  query <- paste0(query, " GROUP BY gene_accession_id, parameter_id ORDER BY avg_p_value ASC;")
+  
+  # Execute the query and return the result
+  dbGetQuery(con, query)
+})
+
+# Pivot to a gene-by-parameter matrix for PCA
+pca_matrix <- reactive({
+  data() %>%
+    pivot_wider(names_from = parameter_id, values_from = avg_p_value) %>%
+    column_to_rownames(var = "gene_accession_id")  # Set gene_accession_id as row names
+})
+```
+
+```{sql}
+-- This query retrieves information about genes, their associated parameters, and the average p-value of statistical analyses, while including the parameter names for better interpretation.
+SELECT 
+    a.gene_accession_id, 
+    a.parameter_id, 
+    p.parameter_name, 
+    ROUND(AVG(a.p_value), 6) AS avg_p_value
+FROM 
+    Analyses a
+JOIN 
+    Parameters p
+ON 
+    a.parameter_id = p.parameter_id
+WHERE 
+    1=1
+GROUP BY 
+    a.gene_accession_id, 
+    a.parameter_id, 
+    p.parameter_name
+ORDER BY 
+    avg_p_value ASC;
+
 ```
