@@ -94,7 +94,7 @@ SOP_path <- paste0(rootDir, "data/metadata/IMPC_SOP.csv")             # Path to 
 file.create(log_file)
 ```
 
-Then we load the SOP file. *Here, I have normalized the row names to lowercase although this isn't strictly necessary for this specific file.*
+Then we load the SOP file.
 
 ```{r}
 # Load the SOP file and extract the expected row names, trimming whitespace
@@ -106,7 +106,7 @@ expected_row_names
 
 ### Validating the Number of Columns (Esta)
 
-To quickly identify any any delimation errors, we can validate the number of columns per CSV file (each file should have 2 columns).
+To quickly identify any any delimitation errors, we can validate the number of columns per CSV file (each file should have 2 columns).
 
 ```{r}
 # Function to validate the column count in a file
@@ -243,7 +243,7 @@ write_csv(analysis, paste0(rootDir, "data/raw_data/analysis_table.txt")) # Save 
 
 ### QC and Cleaning the Combined Analysis Data (Esta)
 
-For each column, we need to check similar things, like whether column values are the right lengths (for strings) or size (for floats), and whether the results matche allowed values, like for `mouse_strain` and `mouse_life_stage`.We also need to check if certain variables are perfectly correlated with one another.
+For each column we check whether column values are the right lengths (for strings) or size (for floats), and whether the results match allowed values, like for `mouse_strain` and `mouse_life_stage`. We also to checked if certain variables are perfectly correlated with one another.
 
 First we load the data and generate a log file.
 
@@ -261,7 +261,7 @@ log_message <- function(message) {
 log_message("=== Data Validation and Transformation Log ===")
 ```
 
-Check if variable data types match those specified in the SOP - all character (or string) data types except for pvalue (numeric or float).
+Check if variable data types match those specified in the SOP - all character (or string) data types except for `pvalue` (numeric or float).
 
 ```{r}
 # Extract expected data types from the SOP and map them to R-compatible types
@@ -306,9 +306,7 @@ log_message(if (nrow(invalid_ids) == 0) {
 })
 ```
 
-Check if `gene_accession_id` values are all between 9-11 characters long - According to the SOP they should all be unique but our script shows over 190,000 duplicated results. We have chosen to consider duplicated gene_accession_ids valid.
-
-###### basically when you create a knockout mouse, you knock out a specific gene, but then that gene goes through a workflow of procedures (like electrocardiogram) and then within an ecg, multiple parameters are measured (qrs, heart rate, ejection fraction, etc e.g), so for each gene, you automatically have many files because each file is a single parameter. so it’s totally normal to have duplicate IDs in teh analysis file, however, the unique in this case in the sop means taht the gene ids are specific ways to refer to a unique gene, so they are already used in some way as foreign key in teh analysis table {style="color: red"}
+Check if `gene_accession_id` values are all between 9-11 characters long.
 
 ```{r}
 # Validate 'gene_accession_id' by checking its length
@@ -423,14 +421,14 @@ log_message(if (nrow(parameter_correlation) == 0) {
 })
 ```
 
-Check if all `pvalues` are between 0 & 1, if not cap the values at those extremes. In this case, we had no values below 0 but we did have values above 1.
+Check if all `pvalues` are between 0 & 1, if not cap the values at those extremes. In this case, we had no values below 0 but we did have values above 1. All `pvalue` results are standardized to 6 decimal points.
 
 ```{r}
 # Validate and fix 'pvalue'
 
-# Cap pvalues greater than 1 to 1
+# Cap p-values to be >=1 & round all results to 6 decimal points
 analysis <- analysis %>%
-  mutate(pvalue = ifelse(pvalue > 1, 1, pvalue))  # Fix values >1 based on observed issues
+  mutate(pvalue = ifelse(pvalue > 1, 1, round(pvalue, 6)))
 
 # Identify invalid pvalues (out of range or missing)
 invalid_pvalues <- analysis %>%
@@ -438,13 +436,23 @@ invalid_pvalues <- analysis %>%
 
 # Log the validation results
 log_message(if (nrow(invalid_pvalues) == 0) {
-  "All pvalue values are valid."  # Log success if no issues
+  "All pvalue values are valid & standardized to 6 decimal points."  # Log success if no issues
 } else {
   paste("Invalid pvalue values:", nrow(invalid_pvalues))  # Log count of invalid values
 })
 ```
 
-Save the cleaned dataframe to a new file.
+Finally, check the data-frame for rows with identical results in every column (excluding `analysis_id`, which are all identical). Once identified, these rows are removed.
+
+```{r}
+### Check & remove duplicate rows (excluding 'analysis_id')
+
+data <- data %>%
+  distinct(across(-analysis_id), .keep_all = TRUE)
+log_message("Duplicated rows removed. Updated dataset has ", nrow(data), " rows.")
+```
+
+Save the cleaned data-frame to a new file.
 
 ```{r}
 # Save the cleaned analysis dataset to the cleaned data directory
