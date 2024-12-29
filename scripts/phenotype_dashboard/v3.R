@@ -6,8 +6,9 @@ library(reshape2) # For data manipulation
 library(DBI)
 library(RMySQL)
 library(stringr)
+library(ComplexHeatmap)
 library(uwot)
-
+  
 # Define UI
 ui <- fluidPage(
   titlePanel("Statistical Analysis and Visualization of Knockout Mouses"),
@@ -279,6 +280,7 @@ server <- function(input, output, session) {
       hc <- hclust(dist(mat), method = "ward.D2")
       plot(as.dendrogram(hc), main = "Hierarchical Clustering of Genes", 
            xlab = "Genes", ylab = "Distance", cex = 0.7)
+
       
     } else if (input$cluster_method == "PCA") {
       # PCA computation
@@ -329,7 +331,7 @@ server <- function(input, output, session) {
                                   "Genes with significant phenotypes (p<0.05)" = "Significant Genes",
                                   "User-specific genes" = "Selected Genes")
       plot_title <- paste("PCA Clustering of", gene_subset_label)
-      
+     
       ggplot(umap_data, aes(x = UMAP1, y = UMAP2, color = Cluster, label = gene)) +
         geom_point(size = 3, alpha = 0.8) +
         scale_color_manual(values = rainbow(input$num_clusters)) +

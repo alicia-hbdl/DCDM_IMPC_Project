@@ -1322,3 +1322,92 @@ SELECT Genes.gene_symbol, Parameters.parameter_name, Analyses.p_value FROM Analy
 
 SELECT parameter_name FROM Parameters WHERE parameter_id IN (     SELECT parameter_id     FROM ParameterGroupings     WHERE group_id IN (         SELECT group_id         FROM Groupings         WHERE group_name = "brain"     ) );
 ```
+
+Querying SQL Database for Gene x Parameter Tables:
+
+We use the gene_accession_id and parameter_id instead of the gene names and parameter names due to different parameters having the same name and some parameters having no name.
+
+```{sql connection=}
+SELECT 
+    gene_accession_id, 
+    parameter_id, 
+    ROUND(AVG(p_value), 6) AS avg_rounded_pvalue
+FROM 
+    Analyses
+WHERE 
+    p_value IS NOT NULL
+GROUP BY 
+    gene_accession_id, parameter_id
+ORDER BY 
+    avg_rounded_pvalue ASC;
+
+
+```
+
+Load Data into R and Reshape it into a wide format to create a matrix suitable for clustering genes based on phenotype scores.
+
+```{r}
+#Load necessary libraries
+library(DBI)
+library(RMySQL)
+library(tidyr)
+
+# Connect to the MySQL database
+con <- dbConnect(
+  RMySQL::MySQL(),
+  dbname = "IMPCDb",  # Replace with your database name
+  host = "localhost",
+  port = 3306,
+  user = "root",
+  password = "Llama123@"  # Replace with your password
+)
+
+#Query the database
+#This ensures that the genes_and_param dataframe contains only one entry per unique gene_accession_id and parameter_id, with the average p_value.
+query <- "
+SELECT 
+    gene_accession_id, 
+    parameter_id, 
+    ROUND(AVG(p_value), 6) AS avg_rounded_pvalue
+FROM 
+    Analyses
+WHERE 
+    p_value IS NOT NULL
+GROUP BY 
+    gene_accession_id, parameter_id
+ORDER BY 
+    avg_rounded_pvalue ASC;"
+
+genes_and_param <- dbGetQuery(con, query)
+
+# Disconnect the database connection
+dbDisconnect(con)
+
+# Check the structure of the imported data
+str(genes_and_param)
+
+#Checking that there are no duplicates  
+duplicates <- genes_and_param %>%
+  dplyr::count(gene_accession_id, parameter_id) %>%
+  dplyr::filter(n > 1)
+
+print(duplicates)
+
+# Reshape data into a wide format (we want gene_accession_id as rows, parameter_ids as columns where pvalues for each parameter are shown in the cells)
+genes_param_wide <- genes_and_param %>%
+  pivot_wider(
+    names_from = parameter_id, # Use parameter_id as column headers
+    values_from = avg_rounded_pvalue, #Fill cells with rounded_pvalue
+    values_fill = list(avg_rounded_pvalue = 0)  # Fill missing combinations with 0
+  )
+
+#View the reshaped matrix
+head(genes_param_wide)
+
+
+
+# Save the reshaped matrix as needed for gene clustering
+write.csv(genes_param_matrix, "genes_phenotype_scores.csv", row.names = FALSE)
+
+
+```
