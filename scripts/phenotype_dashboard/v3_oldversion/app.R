@@ -6,8 +6,8 @@ library(reshape2) # For data manipulation
 library(DBI)
 library(RMySQL)
 library(stringr)
-library(uwot)
-  
+
+
 # Define UI
 ui <- fluidPage(
   titlePanel("Statistical Analysis and Visualization of Knockout Mouses"),
@@ -21,7 +21,7 @@ ui <- fluidPage(
         selectInput("selected_mouse", "Select Knockout Mouse:",
                     choices = NULL, selected = NULL),
         sliderInput("mouse_threshold", "Significance Threshold (p-value):",
-                    min = 0, max = 1, value = 0.05, step = 0.01)
+                    min = 0, max = 1, value = 0.0001, step = 0.01)
       ),
       
       conditionalPanel(
@@ -30,13 +30,13 @@ ui <- fluidPage(
                     choices = NULL, selected = NULL),
         selectInput("selected_phenotype", "Select Phenotype:",
                     choices = NULL, selected = NULL)
-      
+        
       ),
       
       conditionalPanel(
         condition = "input.tabs == 'clusters_tab'",
         selectInput("cluster_method", "Clustering Method:",
-                    choices = c("Hierarchical", "PCA", "UMAP"),
+                    choices = c("Hierarchical", "K-Means", "PCA"),
                     selected = "Hierarchical"),
         numericInput("num_clusters", "Number of Clusters (K-Means):",
                      value = 3, min = 2, max = 50, step = 1),
@@ -103,33 +103,33 @@ server <- function(input, output, session) {
   
   # Populate dropdowns
   
-    observe({
+  observe({
     gene_choices <- dbGetQuery(con, "SELECT DISTINCT gene_symbol FROM Genes;")
     updateSelectInput(session, "selected_mouse", choices = gene_choices$gene_symbol)
   })
   
-    observe({
+  observe({
     groups <- dbGetQuery(con, "SELECT DISTINCT group_id FROM ParameterGroupings;")
     updateSelectInput(session, "selected_phenotype_group", choices = groups$group_id)
-    })
-    
+  })
   
-    observe({
-      req(input$selected_phenotype_group)  
-      phenotype_choices <- dbGetQuery(con, sprintf("
+  
+  observe({
+    req(input$selected_phenotype_group)  # Ensure the group is selected
+    phenotype_choices <- dbGetQuery(con, sprintf("
     SELECT DISTINCT P.parameter_name
     FROM Parameters P
     JOIN ParameterGroupings PG ON P.parameter_id = PG.parameter_id
     WHERE PG.group_id = '%s';", input$selected_phenotype_group))
-      updateSelectInput(session, "selected_phenotype", choices = phenotype_choices$parameter_name)
-    })
-    
+    updateSelectInput(session, "selected_phenotype", choices = phenotype_choices$parameter_name)
+  })
+  
   
   observe({
     diseases <- dbGetQuery(con, "SELECT DISTINCT disease_term FROM Diseases;")
     updateSelectInput(session, "disease", choices = diseases$disease_term)
   })
-
+  
   # Visualisation 1: Phenotype Scores for Knockout Mouse
   
   output$mouse_phenotype_plot <- renderPlot({
@@ -141,26 +141,20 @@ server <- function(input, output, session) {
     JOIN Parameters P ON A.parameter_id = P.parameter_id
     WHERE A.gene_accession_id IN (
       SELECT gene_accession_id FROM Genes WHERE gene_symbol = '%s'
-    ) 
-    AND A.p_value IS NOT NULL 
-    AND A.p_value > 0 
-    AND P.parameter_name IS NOT NULL 
+    ) AND A.p_value IS NOT NULL AND A.p_value > 0
     ORDER BY A.p_value ASC;",
-                     input$selected_mouse)
+                     input$selected_mouse, input$mouse_threshold)  # Use the selected gene symbol
     
-    # Fetch the data from the database
     data <- dbGetQuery(con, query)
     
-    # Check if there is no data and handle it
     if (nrow(data) == 0) {
       plot.new()
       title("No phenotypes meet the threshold for this knockout mouse.")
       return()
     }
-
+    
     data <- data %>%
       mutate(Threshold = ifelse(p_value < input$mouse_threshold, "Significant", "Not Significant"))
-    
     
     # Adjust the plot height
     ggplot(data, aes(x = reorder(parameter_name, p_value), y = p_value, fill = Threshold)) +
@@ -187,7 +181,7 @@ server <- function(input, output, session) {
   
   
   # Visualisation 2: Scores of All Knockout Mice for a Selected Phenotype
-
+  
   output$phenotype_group_plot <- renderPlot({
     req(input$selected_phenotype, input$selected_phenotype_group)
     
@@ -269,7 +263,6 @@ server <- function(input, output, session) {
       return()
     }
     
-    #Filter subset of genes if specific 
     if (input$gene_subset == "Genes with significant phenotypes (p<0.05)") {
       data <- data %>% filter(p_value < 0.05)
     } else if (input$gene_subset == "User-specific genes") {
@@ -277,82 +270,20 @@ server <- function(input, output, session) {
       data <- data %>% filter(gene_accession_id %in% user_genes)
     }
     
-    #Pivot the data for clustering
     cluster_data <- dcast(data, gene_accession_id ~ parameter_name, value.var = "p_value", fill = 0)
-    mat <- scale(cluster_data[, -1]) #Normalise data
+    mat <- cluster_data[, -1]
     
     if (input$cluster_method == "Hierarchical") {
-      hc <- hclust(dist(mat), method = "ward.D2")
-      plot(as.dendrogram(hc), main = "Hierarchical Clustering of Genes", 
-           xlab = "Genes", ylab = "Distance", cex = 0.7)
-
-      
+      hc <- hclust(dist(mat), method = "ward.D")
+      plot(hc, main = "Hierarchical Clustering of Genes", xlab = "Genes", ylab = "Distance")
+    } else if (input$cluster_method == "K-Means") {
+      km <- kmeans(mat, centers = input$num_clusters)
+      ggplot(data.frame(cluster = km$cluster), aes(x = seq_along(cluster), y = cluster)) +
+        geom_point() + labs(title = "K-Means Clustering")
     } else if (input$cluster_method == "PCA") {
-      # PCA computation
       pca <- prcomp(mat, scale. = TRUE)
-      pca_data <- data.frame(pca$x[, 1:2], gene = cluster_data$gene_accession_id)
-      
-      # Add K-Means clustering for color coding
-      km <- kmeans(mat, centers = input$num_clusters)
-      pca_data$cluster <- factor(km$cluster)  # Add cluster information
-      
-      # Set dynamic title based on gene subset selection
-      gene_subset_label <- switch(input$gene_subset,
-                                  "All genes" = "All Genes",
-                                  "Genes with significant phenotypes (p<0.05)" = "Significant Genes",
-                                  "User-specific genes" = "User-Selected Genes")
-      plot_title <- paste("PCA Clustering of", gene_subset_label)
-      
-      ggplot(pca_data, aes(x = PC1, y = PC2, color = cluster, label = gene)) +
-        geom_point(size = 3, alpha = 0.8) +
-        scale_color_manual(values = rainbow(input$num_clusters)) +  # Color palette for clusters
-        labs(
-          title = plot_title,
-          x = "Principal Component 1",
-          y = "Principal Component 2",
-          color = "Cluster"
-        ) +
-        theme_minimal() +
-        theme(
-          plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
-          axis.title = element_text(size = 12, face = "bold"),
-          axis.text = element_text(size = 10),
-          legend.position = "right",
-          panel.border = element_rect(color = "black", fill = NA, size = 1.5),  # Add bold border
-          panel.grid.major = element_line(size = 0.5, linetype = "dotted", color = "gray80"),
-          panel.grid.minor = element_blank()  # Hide minor grids for a cleaner look
-        )
-      
-    } else if (input$cluster_method == "UMAP") {
-      umap_result <- umap(mat, n_neighbors = 15, min_dist = 0.1)
-      umap_data <- data.frame(UMAP1 = umap_result[, 1], UMAP2 = umap_result[, 2], gene = cluster_data$gene_accession_id)
-      
-      km <- kmeans(mat, centers = input$num_clusters)
-      umap_data$Cluster <- factor(km$cluster)
-      
-      # Set dynamic title based on gene subset selection
-      gene_subset_label <- switch(input$gene_subset,
-                                  "All genes" = "All Genes",
-                                  "Genes with significant phenotypes (p<0.05)" = "Significant Genes",
-                                  "User-specific genes" = "Selected Genes")
-      plot_title <- paste("PCA Clustering of", gene_subset_label)
-     
-      ggplot(umap_data, aes(x = UMAP1, y = UMAP2, color = Cluster, label = gene)) +
-        geom_point(size = 3, alpha = 0.8) +
-        scale_color_manual(values = rainbow(input$num_clusters)) +
-        labs(
-          title = paste("UMAP Clustering of", gene_subset_label),
-          x = "UMAP 1",
-          y = "UMAP 2",
-          color = "Cluster"
-        ) +
-        theme_minimal() +
-        theme(
-          plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
-          axis.title = element_text(size = 12, face = "bold"),
-          axis.text = element_text(size = 10),
-          panel.border = element_rect(color = "black", fill = NA, size = 1.5)
-        )
+      ggplot(data.frame(pca$x), aes(x = PC1, y = PC2)) + geom_point() +
+        labs(title = "PCA Clustering")
     }
   })
 }
