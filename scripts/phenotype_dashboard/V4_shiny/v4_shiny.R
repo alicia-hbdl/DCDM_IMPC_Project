@@ -98,7 +98,7 @@ server <- function(input, output, session) {
     host = "localhost",
     port = 3306,
     user = "root",
-    password = "mahiat123"
+    password = "icecream8"
   )
   
   onStop(function() {
@@ -240,7 +240,7 @@ server <- function(input, output, session) {
   
   # Visualisation 2: Scores of All Knockout Mice for a Selected Phenotype
   
-  output$phenotype_group_plot <- renderPlot({
+  output$phenotype_mouse_plot <- renderPlot({
     req(input$selected_phenotype, input$selected_phenotype_group)
     
     # Query to fetch p-values for the selected phenotype and group
@@ -264,14 +264,17 @@ server <- function(input, output, session) {
       return()
     }
     
-    # Plotting the p-value for each gene on the x-axis
-    ggplot(data, aes(x = gene_accession_id, y = p_value)) +
+    ggplot(data, aes(x = factor(gene_accession_id), y = p_value)) +
       geom_point(size = 3, color = "blue") +
       labs(title = paste("Phenotype Data for:", input$selected_phenotype),
            x = "Gene Accessions", y = "p-value") +
-      theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 8),
-            axis.text.y = element_text(size = 10)) +
-      theme_minimal()
+      theme_minimal() +
+      theme(
+        axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, size = 6),
+        axis.title.x = element_text(size = 12, face = "bold"),
+        axis.title.y = element_text(size = 12, face = "bold"),
+        plot.title = element_text(size = 16, face = "bold", hjust = 0.5)
+      )
   })
   
   
