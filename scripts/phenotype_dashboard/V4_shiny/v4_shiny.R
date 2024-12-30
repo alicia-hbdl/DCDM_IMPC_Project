@@ -173,7 +173,6 @@ server <- function(input, output, session) {
     data <- data %>%
       mutate(Threshold = ifelse(p_value < input$mouse_threshold, "Significant", "Not Significant"))
     
-    
     # Adjust the plot height
     ggplot(data, aes(x = reorder(parameter_name, p_value), y = p_value, fill = Threshold)) +
       geom_bar(stat = "identity", show.legend = TRUE, width = 0.7) +  # Bar plot with adjusted bar width
@@ -241,24 +240,19 @@ server <- function(input, output, session) {
     query <- "SELECT gene_accession_id, parameter_id, ROUND(AVG(p_value), 6) AS avg_p_value 
             FROM Analyses 
             WHERE 1=1"
-    
     # Add filters for life stage
     if (input$life_stage != "All") {
       query <- paste0(query, " AND mouse_life_stage = '", input$life_stage, "'")
     }
-    
     # Add filters for strain
     if (input$mouse_strain != "All") {
       query <- paste0(query, " AND mouse_strain = '", input$mouse_strain, "'")
     }
-    
     # Final group by & order
     query <- paste0(query, " GROUP BY gene_accession_id, parameter_id 
                            ORDER BY avg_p_value ASC;")
-    
     # Execute the query
     df <- dbGetQuery(con, query)
-    
     # Return the raw aggregated data
     return(df)
   })
