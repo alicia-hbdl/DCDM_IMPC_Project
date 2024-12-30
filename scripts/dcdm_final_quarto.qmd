@@ -1309,7 +1309,7 @@ INTO TABLE Analyses
 FIELDS TERMINATED BY ',' 
 OPTIONALLY ENCLOSED BY '"' 
 IGNORE 1 LINES;
-# Records: 198449  Deleted: 0  Skipped: 0  Warnings: 0
+# Records: 177981  Deleted: 0  Skipped: 0  Warnings: 0
 
 LOAD DATA LOCAL INFILE '/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/collated/ParameterGroupings.csv'
 INTO TABLE ParameterGroupings
