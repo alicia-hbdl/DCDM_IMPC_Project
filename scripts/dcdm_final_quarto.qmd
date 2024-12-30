@@ -445,11 +445,17 @@ log_message(if (nrow(invalid_pvalues) == 0) {
 Finally, check the data-frame for rows with identical results in every column (excluding `analysis_id`, which are all identical). Once identified, these rows are removed.
 
 ```{r}
-### Check & remove duplicate rows (excluding 'analysis_id')
+#
+rows_before <- nrow(analysis)
 
-data <- data %>%
+### Check & remove duplicate rows (excluding 'analysis_id')
+analysis <- analysis %>%
   distinct(across(-analysis_id), .keep_all = TRUE)
-log_message("Duplicated rows removed. Updated dataset has ", nrow(data), " rows.")
+
+rows_after <- nrow(analysis)
+
+log_message(paste(rows_before - rows_after, "duplicated rows removed. Updated dataset has",rows_after,"rows."))
+
 ```
 
 Save the cleaned data-frame to a new file.
@@ -471,7 +477,8 @@ rm(
   invalid_gene_lengths, invalid_gene_symbols, invalid_ids, invalid_life_stages,
   invalid_parameter_ids, invalid_parameter_names, invalid_pvalues, 
   parameter_correlation, type_mismatches, gene_symbol_correlation, 
-  log_file, log_message, updated_data_dir, SOP_path
+  log_file, log_message, updated_data_dir, SOP_path, 
+  rows_before, rows_after
 )
 ```
 
@@ -1377,6 +1384,8 @@ WHERE parameter_id IN (
 ```
 
 ```{r}
+#| eval: false
+
 # Get the options for the drop-downs 
 
 # Mouse strain
@@ -1419,6 +1428,8 @@ pca_matrix <- reactive({
 ```
 
 ```{sql}
+#| eval: false
+
 -- This query retrieves information about genes, their associated parameters, and the average p-value of statistical analyses, while including the parameter names for better interpretation.
 SELECT 
     a.gene_accession_id, 
@@ -1443,6 +1454,8 @@ ORDER BY
 ```
 
 ```{r}
+#| eval: false
+
 # Load necessary libraries
 library(DBI)
 library(RMySQL)
