@@ -1441,3 +1441,56 @@ ORDER BY
     avg_p_value ASC;
 
 ```
+
+```{r}
+# Load necessary libraries
+library(DBI)
+library(RMySQL)
+library(tidyr)
+
+# Connect to the MySQL database
+con <- dbConnect(
+  RMySQL::MySQL(),
+  dbname = "IMPCDb",  # Replace with your database name
+  host = "localhost",
+  port = 3306,
+  user = "root",
+  password = "Llama123@"  # Replace with your password
+)
+
+# Query the database
+query <- "
+SELECT a.gene_accession_id, a.parameter_id, p.parameter_name, ROUND(AVG(a.p_value), 6) AS avg_p_value
+FROM Analyses a
+JOIN Parameters p
+ON a.parameter_id = p.parameter_id
+WHERE 1=1
+GROUP BY a.gene_accession_id, a.parameter_id, p.parameter_name
+ORDER BY avg_p_value ASC;
+"
+genes_and_param <- dbGetQuery(con, query)
+
+# Disconnect the database connection
+dbDisconnect(con)
+
+# Check the structure of the imported data
+str(genes_and_param)
+
+# Reshape data into a wide format (gene_accession_id as rows, parameter_id as columns)
+genes_param_wide <- genes_and_param %>%
+  pivot_wider(
+    names_from = parameter_id,
+    values_from = avg_p_value,
+    values_fill = list(avg_p_value = 0)  # Fill missing values with 0
+  )
+
+# View the reshaped data
+head(genes_param_wide)
+
+
+
+
+
+
+
+```

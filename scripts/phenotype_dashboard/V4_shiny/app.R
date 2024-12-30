@@ -7,7 +7,7 @@ library(DBI)
 library(RMySQL)
 library(stringr)
 library(uwot)
-  
+
 # Define UI
 ui <- fluidPage(
   titlePanel("Statistical Analysis and Visualization of Knockout Mouses"),
@@ -30,7 +30,7 @@ ui <- fluidPage(
                     choices = NULL, selected = NULL),
         selectInput("selected_phenotype", "Select Phenotype:",
                     choices = NULL, selected = NULL)
-      
+        
       ),
       
       conditionalPanel(
@@ -103,33 +103,33 @@ server <- function(input, output, session) {
   
   # Populate dropdowns
   
-    observe({
+  observe({
     gene_choices <- dbGetQuery(con, "SELECT DISTINCT gene_symbol FROM Genes;")
     updateSelectInput(session, "selected_mouse", choices = gene_choices$gene_symbol)
   })
   
-    observe({
+  observe({
     groups <- dbGetQuery(con, "SELECT DISTINCT group_id FROM ParameterGroupings;")
     updateSelectInput(session, "selected_phenotype_group", choices = groups$group_id)
-    })
-    
+  })
   
-    observe({
-      req(input$selected_phenotype_group)  
-      phenotype_choices <- dbGetQuery(con, sprintf("
+  
+  observe({
+    req(input$selected_phenotype_group)  
+    phenotype_choices <- dbGetQuery(con, sprintf("
     SELECT DISTINCT P.parameter_name
     FROM Parameters P
     JOIN ParameterGroupings PG ON P.parameter_id = PG.parameter_id
     WHERE PG.group_id = '%s';", input$selected_phenotype_group))
-      updateSelectInput(session, "selected_phenotype", choices = phenotype_choices$parameter_name)
-    })
-    
+    updateSelectInput(session, "selected_phenotype", choices = phenotype_choices$parameter_name)
+  })
+  
   
   observe({
     diseases <- dbGetQuery(con, "SELECT DISTINCT disease_term FROM Diseases;")
     updateSelectInput(session, "disease", choices = diseases$disease_term)
   })
-
+  
   # Visualisation 1: Phenotype Scores for Knockout Mouse
   
   output$mouse_phenotype_plot <- renderPlot({
@@ -157,7 +157,7 @@ server <- function(input, output, session) {
       title("No phenotypes meet the threshold for this knockout mouse.")
       return()
     }
-
+    
     data <- data %>%
       mutate(Threshold = ifelse(p_value < input$mouse_threshold, "Significant", "Not Significant"))
     
@@ -187,7 +187,7 @@ server <- function(input, output, session) {
   
   
   # Visualisation 2: Scores of All Knockout Mice for a Selected Phenotype
-
+  
   output$phenotype_group_plot <- renderPlot({
     req(input$selected_phenotype, input$selected_phenotype_group)
     
@@ -285,7 +285,7 @@ server <- function(input, output, session) {
       hc <- hclust(dist(mat), method = "ward.D2")
       plot(as.dendrogram(hc), main = "Hierarchical Clustering of Genes", 
            xlab = "Genes", ylab = "Distance", cex = 0.7)
-
+      
       
     } else if (input$cluster_method == "PCA") {
       # PCA computation
@@ -336,7 +336,7 @@ server <- function(input, output, session) {
                                   "Genes with significant phenotypes (p<0.05)" = "Significant Genes",
                                   "User-specific genes" = "Selected Genes")
       plot_title <- paste("PCA Clustering of", gene_subset_label)
-     
+      
       ggplot(umap_data, aes(x = UMAP1, y = UMAP2, color = Cluster, label = gene)) +
         geom_point(size = 3, alpha = 0.8) +
         scale_color_manual(values = rainbow(input$num_clusters)) +
