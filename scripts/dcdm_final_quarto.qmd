@@ -1011,6 +1011,7 @@ write_csv(analyses_table, paste0(rootDir, "/data/collated/Analyses.csv"), quote 
 There are some gene-parameter combos that occur up to 12 times. If we filter for life stage and mouse strain, we get up to 4 replicates of a gene-parameter-stage-strain combo.
 
 ```{r}
+## THIS SECTION IS EXPLORATORY! 
 # Count the number of duplicates for each gene_accession_id and parameter_id combination
 duplicate_counts <- analyses_table %>%
   group_by(gene_accession_id, parameter_id) %>%
