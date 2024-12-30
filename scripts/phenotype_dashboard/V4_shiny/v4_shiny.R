@@ -10,7 +10,7 @@ library(uwot)
 
 # Define UI
 ui <- fluidPage(
-  titlePanel("Statistical Analysis and Visualization of Knockout Mouses"),
+  titlePanel("Statistical Analysis and Visualisation of Knockout Mice"),
   
   sidebarLayout(
     sidebarPanel(
@@ -46,14 +46,17 @@ ui <- fluidPage(
                                 "User-specific genes"),
                     selected = "All genes"),
         textInput("user_genes", 
-                  "Enter gene symbols (comma-separated) if 'User-specific genes' is selected:")
+                  "Enter gene symbols (comma-separated) if 'User-specific genes' is selected:"),
+        selectInput("mouse_strain", "Select Mouse Strain:", choices = NULL, selected = "All"),
+        selectInput("life_stage", "Select Mouse Life Stage:", choices = NULL, selected = "All")
+        )
       ),
       
       conditionalPanel(
         condition = "input.tabs == 'gene_disease_tab'",
         selectInput("disease", "Select Disease:", choices = NULL),
         uiOutput("gene_select_ui")  # Dynamically generated selectInput
-      ),
+      )
     ),
     
     mainPanel(
@@ -82,7 +85,6 @@ ui <- fluidPage(
       )
     )
   )
-)
 
 # Define Server
 server <- function(input, output, session) {
@@ -128,6 +130,16 @@ server <- function(input, output, session) {
   observe({
     diseases <- dbGetQuery(con, "SELECT DISTINCT disease_term FROM Diseases;")
     updateSelectInput(session, "disease", choices = diseases$disease_term)
+  })
+  
+  observe({
+    mouse_strains <- dbGetQuery(con, "SELECT DISTINCT mouse_strain FROM Analyses")
+    updateSelectInput(session, "mouse_strain", choices = c("All", sort(mouse_strains$mouse_strain)))
+  })
+  
+  observe({
+    life_stages <- dbGetQuery(con, "SELECT DISTINCT mouse_life_stage FROM Analyses")
+    updateSelectInput(session, "life_stage", choices = c("All", sort(life_stages$mouse_life_stage)))
   })
   
   # Visualisation 1: Phenotype Scores for Knockout Mouse
@@ -223,89 +235,127 @@ server <- function(input, output, session) {
   })
   
   
-  # Gene-Disease Associations Plot
-  
-  output$gene_disease_plot <- renderPlot({
-    req(input$selected_mouse)  # Ensure that the gene is selected
+  #Visualisation 3  
+  analysis_data <- reactive({
+    # Base query
+    query <- "SELECT gene_accession_id, parameter_id, ROUND(AVG(p_value), 6) AS avg_p_value 
+            FROM Analyses 
+            WHERE 1=1"
     
-    # Query to fetch the gene-disease associations
-    query <- sprintf("
-        SELECT Genes.gene_symbol, Diseases.disease_term, PhenodigmScores.phenodigm_score
-        FROM PhenodigmScores
-        JOIN Genes ON PhenodigmScores.gene_accession_id = Genes.gene_accession_id
-        JOIN Diseases ON PhenodigmScores.disease_id = Diseases.disease_id
-        WHERE Genes.gene_symbol = '%s'", input$selected_mouse)
-    
-    # Fetch data from the database
-    data <- dbGetQuery(con, query)
-    if (nrow(data) == 0) {
-      plot.new()
-      title("No Gene-Disease association data available for this gene.")
-      return()
+    # Add filters for life stage
+    if (input$life_stage != "All") {
+      query <- paste0(query, " AND mouse_life_stage = '", input$life_stage, "'")
     }
     
-    # Create a bar plot using ggplot2
-    ggplot(data, aes(x = reorder(disease_term, phenodigm_score), y = phenodigm_score, fill = disease_term)) +
-      geom_bar(stat = "identity") +
-      labs(title = paste("Gene-Disease Associations for", input$selected_mouse),
-           x = "Disease Term", y = "Phenodigm Score") +
-      theme(axis.text.x = element_text(angle = 45, hjust = 1))
+    # Add filters for strain
+    if (input$mouse_strain != "All") {
+      query <- paste0(query, " AND mouse_strain = '", input$mouse_strain, "'")
+    }
+    
+    # Final group by & order
+    query <- paste0(query, " GROUP BY gene_accession_id, parameter_id 
+                           ORDER BY avg_p_value ASC;")
+    
+    # Execute the query
+    df <- dbGetQuery(con, query)
+    
+    # Return the raw aggregated data
+    return(df)
   })
   
+  pca_matrix <- reactive({
+    df <- analysis_data()
+    
+    if (nrow(df) == 0) {
+      return(NULL)
+    }
+    
+    # Pivot wider: one row per gene, columns are parameter_ids
+    wide_df <- df %>%
+      tidyr::pivot_wider(
+        names_from = parameter_id,
+        values_from = avg_p_value
+      )
+    
+    # Convert gene_accession_id into rownames
+    # (Assumes 'gene_accession_id' is a column in df)
+    wide_df <- as.data.frame(wide_df)
+    rownames(wide_df) <- wide_df$gene_accession_id
+    
+    # Remove the gene_accession_id column now that it’s the rowname
+    wide_df <- wide_df[, !names(wide_df) %in% "gene_accession_id"]
+    
+    return(wide_df)
+  })
   
-  # Visualisation 3: Gene Clusters
   output$gene_cluster_plot <- renderPlot({
-    query <- "
-      SELECT G.gene_accession_id, P.parameter_name, A.p_value
-      FROM Analyses A
-      JOIN Parameters P ON A.parameter_id = P.parameter_id
-      JOIN Genes G ON A.gene_accession_id = G.gene_accession_id;"
+    req(pca_matrix())           # Wait until the data is available
+    data_wide <- pca_matrix()   # This is the wide gene-by-parameter matrix
     
-    data <- dbGetQuery(con, query)
-    
-    if (nrow(data) == 0) {
+    # If no data:
+    if (is.null(data_wide) || nrow(data_wide) == 0) {
       plot.new()
-      title("No data available for clustering.")
+      title("No data available after filtering.")
       return()
     }
     
-    #Filter subset of genes if specific 
+    # --- Filter for gene_subset ---
+
     if (input$gene_subset == "Genes with significant phenotypes (p<0.05)") {
-      data <- data %>% filter(p_value < 0.05)
+      # Keep rows (genes) where ANY parameter’s p-value is < 0.05
+      keep_rows <- apply(data_wide, 1, function(x) any(x < 0.05, na.rm = TRUE))
+      data_wide <- data_wide[keep_rows, , drop = FALSE]
+      
     } else if (input$gene_subset == "User-specific genes") {
       user_genes <- unlist(strsplit(input$user_genes, "\\s*,\\s*"))
-      data <- data %>% filter(gene_accession_id %in% user_genes)
+      # rownames(data_wide) are the gene_accession_ids
+      data_wide <- data_wide[rownames(data_wide) %in% user_genes, , drop = FALSE]
     }
     
-    #Pivot the data for clustering
-    cluster_data <- dcast(data, gene_accession_id ~ parameter_name, value.var = "p_value", fill = 0)
-    mat <- scale(cluster_data[, -1]) #Normalise data
+    # Check if anything remains
+    if (nrow(data_wide) == 0) {
+      plot.new()
+      title("No genes left after filtering.")
+      return()
+    }
     
+    # Scale the data
+    mat_scaled <- scale(data_wide)
+    
+    
+    #Clustering
     if (input$cluster_method == "Hierarchical") {
-      hc <- hclust(dist(mat), method = "ward.D2")
-      plot(as.dendrogram(hc), main = "Hierarchical Clustering of Genes", 
+      
+      # Hierarchical clustering
+      hc <- hclust(dist(mat_scaled), method = "ward.D2")
+      plot(as.dendrogram(hc),
+           main = "Hierarchical Clustering of Genes",
            xlab = "Genes", ylab = "Distance", cex = 0.7)
       
-      
     } else if (input$cluster_method == "PCA") {
-      # PCA computation
-      pca <- prcomp(mat, scale. = TRUE)
-      pca_data <- data.frame(pca$x[, 1:2], gene = cluster_data$gene_accession_id)
       
-      # Add K-Means clustering for color coding
-      km <- kmeans(mat, centers = input$num_clusters)
-      pca_data$cluster <- factor(km$cluster)  # Add cluster information
+      # Run PCA
+      pca <- prcomp(mat_scaled, scale. = FALSE)  # mat_scaled is already scaled
+      pca_data <- data.frame(pca$x[, 1:2])
+      pca_data$gene <- rownames(mat_scaled)
       
-      # Set dynamic title based on gene subset selection
-      gene_subset_label <- switch(input$gene_subset,
-                                  "All genes" = "All Genes",
-                                  "Genes with significant phenotypes (p<0.05)" = "Significant Genes",
-                                  "User-specific genes" = "User-Selected Genes")
+      # K-means clustering for coloring
+      km <- kmeans(mat_scaled, centers = input$num_clusters)
+      pca_data$cluster <- factor(km$cluster)
+      
+      # Title
+      gene_subset_label <- switch(
+        input$gene_subset,
+        "All genes" = "All Genes",
+        "Genes with significant phenotypes (p<0.05)" = "Significant Genes",
+        "User-specific genes" = "User-Selected Genes"
+      )
       plot_title <- paste("PCA Clustering of", gene_subset_label)
       
+      # Plot
       ggplot(pca_data, aes(x = PC1, y = PC2, color = cluster, label = gene)) +
         geom_point(size = 3, alpha = 0.8) +
-        scale_color_manual(values = rainbow(input$num_clusters)) +  # Color palette for clusters
+        scale_color_manual(values = rainbow(input$num_clusters)) +
         labs(
           title = plot_title,
           x = "Principal Component 1",
@@ -318,26 +368,34 @@ server <- function(input, output, session) {
           axis.title = element_text(size = 12, face = "bold"),
           axis.text = element_text(size = 10),
           legend.position = "right",
-          panel.border = element_rect(color = "black", fill = NA, size = 1.5),  # Add bold border
+          panel.border = element_rect(color = "black", fill = NA, size = 1.5),
           panel.grid.major = element_line(size = 0.5, linetype = "dotted", color = "gray80"),
-          panel.grid.minor = element_blank()  # Hide minor grids for a cleaner look
+          panel.grid.minor = element_blank()
         )
       
     } else if (input$cluster_method == "UMAP") {
-      umap_result <- umap(mat, n_neighbors = 15, min_dist = 0.1)
-      umap_data <- data.frame(UMAP1 = umap_result[, 1], UMAP2 = umap_result[, 2], gene = cluster_data$gene_accession_id)
       
-      km <- kmeans(mat, centers = input$num_clusters)
-      umap_data$Cluster <- factor(km$cluster)
+      # UMAP
+      umap_result <- umap(mat_scaled, n_neighbors = 15, min_dist = 0.1)
+      umap_data <- data.frame(
+        UMAP1 = umap_result$layout[, 1],
+        UMAP2 = umap_result$layout[, 2],
+        gene  = rownames(mat_scaled)
+      )
       
-      # Set dynamic title based on gene subset selection
-      gene_subset_label <- switch(input$gene_subset,
-                                  "All genes" = "All Genes",
-                                  "Genes with significant phenotypes (p<0.05)" = "Significant Genes",
-                                  "User-specific genes" = "Selected Genes")
-      plot_title <- paste("PCA Clustering of", gene_subset_label)
+      # K-means for color
+      km <- kmeans(mat_scaled, centers = input$num_clusters)
+      umap_data$cluster <- factor(km$cluster)
       
-      ggplot(umap_data, aes(x = UMAP1, y = UMAP2, color = Cluster, label = gene)) +
+      # Title
+      gene_subset_label <- switch(
+        input$gene_subset,
+        "All genes" = "All Genes",
+        "Genes with significant phenotypes (p<0.05)" = "Significant Genes",
+        "User-specific genes" = "User-Selected Genes"
+      )
+      
+      ggplot(umap_data, aes(x = UMAP1, y = UMAP2, color = cluster, label = gene)) +
         geom_point(size = 3, alpha = 0.8) +
         scale_color_manual(values = rainbow(input$num_clusters)) +
         labs(
@@ -348,9 +406,9 @@ server <- function(input, output, session) {
         ) +
         theme_minimal() +
         theme(
-          plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
-          axis.title = element_text(size = 12, face = "bold"),
-          axis.text = element_text(size = 10),
+          plot.title   = element_text(size = 16, face = "bold", hjust = 0.5),
+          axis.title   = element_text(size = 12, face = "bold"),
+          axis.text    = element_text(size = 10),
           panel.border = element_rect(color = "black", fill = NA, size = 1.5)
         )
     }

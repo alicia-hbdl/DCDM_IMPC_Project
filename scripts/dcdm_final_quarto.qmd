@@ -1461,6 +1461,9 @@ ORDER BY
 library(DBI)
 library(RMySQL)
 library(tidyr)
+library(tibble)
+library(dplyr)
+library(ggplot2)
 
 # Connect to the MySQL database
 con <- dbConnect(
@@ -1469,18 +1472,23 @@ con <- dbConnect(
   host = "localhost",
   port = 3306,
   user = "root",
-  password = "Llama123@"  # Replace with your password
+  password = "pw"  # Replace with your password
 )
 
 # Query the database
 query <- "
-SELECT a.gene_accession_id, a.parameter_id, p.parameter_name, ROUND(AVG(a.p_value), 6) AS avg_p_value
-FROM Analyses a
-JOIN Parameters p
-ON a.parameter_id = p.parameter_id
-WHERE 1=1
-GROUP BY a.gene_accession_id, a.parameter_id, p.parameter_name
-ORDER BY avg_p_value ASC;
+SELECT 
+    gene_accession_id, 
+    parameter_id, 
+    ROUND(AVG(p_value), 6) AS avg_rounded_pvalue
+FROM 
+    Analyses
+WHERE 
+    p_value IS NOT NULL
+GROUP BY 
+    gene_accession_id, parameter_id
+ORDER BY 
+    avg_rounded_pvalue ASC;
 "
 genes_and_param <- dbGetQuery(con, query)
 
@@ -1490,18 +1498,78 @@ dbDisconnect(con)
 # Check the structure of the imported data
 str(genes_and_param)
 
+#Checking that there are no duplicates  
+duplicates <- genes_and_param %>%
+  dplyr::count(gene_accession_id, parameter_id) %>%
+  dplyr::filter(n > 1)
+
+print(duplicates)
+
 # Reshape data into a wide format (gene_accession_id as rows, parameter_id as columns)
 genes_param_wide <- genes_and_param %>%
   pivot_wider(
-    names_from = parameter_id,
-    values_from = avg_p_value,
-    values_fill = list(avg_p_value = 0)  # Fill missing values with 0
+    names_from = parameter_id, # Use parameter_id as column headers
+    values_from = avg_rounded_pvalue, #Fill cells with avg_p_value
+    values_fill = list(avg_rounded_pvalue = 0)  # Fill missing values with 0
   )
 
 # View the reshaped data
 head(genes_param_wide)
 
+# Save the reshaped matrix as needed for gene clustering
+write.csv(genes_param_wide, "/Users/sanjanasrinivasan/Desktop/DCDM_IMPC_Project/data/cleaned/genes_phenotype_scores.csv", row.names = FALSE)
 
+# Read the reshaped matrix
+genes_param_wide <- read.csv("/Users/sanjanasrinivasan/Desktop/DCDM_IMPC_Project/data/cleaned/genes_phenotype_scores.csv")
+
+# Prepare the data for PCA (exclude the first column containing gene_accession_id)
+pca_input <- genes_param_wide %>% 
+  select(-gene_accession_id) %>% 
+  as.matrix()
+
+write.csv(pca_input, "/Users/sanjanasrinivasan/Desktop/DCDM_IMPC_Project/scripts/phenotype_dashboard/pca_input.csv", row.names = FALSE)
+
+# Perform PCA
+pca_result <- prcomp(pca_input, scale. = TRUE)
+
+# View the explained variance by each principal component
+explained_variance <- summary(pca_result)$importance[2, ]
+print("Explained Variance:")
+print(explained_variance)
+
+# Add PCA-transformed data to a data frame
+pca_data <- as.data.frame(pca_result$x)
+pca_data$gene_accession_id <- genes_param_wide$gene_accession_id
+
+# Perform K-means clustering on PCA-transformed data
+set.seed(123)  # Set seed for reproducibility
+num_clusters <- 3  # Choose the number of clusters (adjust as needed)
+kmeans_result <- kmeans(pca_data[, 1:2], centers = num_clusters)
+
+# Add cluster information to the PCA data frame
+pca_data$cluster <- as.factor(kmeans_result$cluster)
+
+# Visualize the PCA results with clusters
+ggplot(pca_data, aes(x = PC1, y = PC2, color = cluster, label = gene_accession_id)) +
+  geom_point(size = 3, alpha = 0.8) +
+  scale_color_manual(values = c("indianred3", "steelblue", "darkolivegreen3")) +  # Customize cluster colors
+  labs(
+    title = "PCA Clustering of Genes Based on Phenotype Scores",
+    x = "Principal Component 1",
+    y = "Principal Component 2",
+    color = "Cluster"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
+    axis.title = element_text(size = 12, face = "bold"),
+    axis.text = element_text(size = 10),
+    legend.position = "right",
+    panel.border = element_rect(color = "black", fill = NA, size = 1.5),
+    panel.grid.major = element_line(size = 0.5, linetype = "dotted", color = "gray80"),
+    panel.grid.minor = element_blank()
+  ) +
+  geom_text(aes(label = gene_accession_id), vjust = 1.5, size = 3, check_overlap = TRUE)  # Optional: Add gene labels
 
 
 
