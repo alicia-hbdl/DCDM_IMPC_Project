@@ -1454,6 +1454,8 @@ ORDER BY
 
 ```
 
+**Examining PCA Loadings & Identifying Parameter Groupings**
+
 ```{r}
 #| eval: false
 
@@ -1472,7 +1474,7 @@ con <- dbConnect(
   host = "localhost",
   port = 3306,
   user = "root",
-  password = "Llama123@"  # Replace with your password
+  password = "pw"  # Replace with your password
 )
 
 # Query the database
@@ -1513,8 +1515,7 @@ genes_param_wide <- genes_and_param %>%
     values_fill = list(avg_rounded_pvalue = 0)  # Fill missing values with 0
   )
 
-# View the reshaped data
-head(genes_param_wide)
+head(genes_param_wide) # Check structure 
 
 # Save the reshaped matrix as needed for gene clustering
 write.csv(genes_param_wide, "/Users/sanjanasrinivasan/Desktop/DCDM_IMPC_Project/data/cleaned/genes_phenotype_scores.csv", row.names = FALSE)
@@ -1533,10 +1534,72 @@ write.csv(pca_input, "/Users/sanjanasrinivasan/Desktop/DCDM_IMPC_Project/scripts
 pca_result <- prcomp(pca_input, scale. = TRUE)
 
 # View the explained variance by each principal component
-explained_variance <- summary(pca_result)$importance[2, ]
-print("Explained Variance:")
-print(explained_variance)
+summary(pca_result)$importance[2, ]  # proportion of variance explained
 
+# =============================================================================
+#    Examine the PCA Loadings
+#    - This is what you need to group PARAMETERS by their shared variance
+# =============================================================================
+loadings <- pca_result$rotation  # rows=parameters, columns=PCs
+head(loadings)
+
+# Example: see top loadings for PC1
+# sort them in descending order
+pc1_loadings <- sort(loadings[, "PC1"], decreasing = TRUE)
+head(pc1_loadings)
+
+# Barplots for each PC:
+barplot(loadings[, "PC1"], las = 2, main = "Loadings for PC1")
+
+
+# Or create a heatmap of all loadings:
+pheatmap(loadings,
+         cluster_rows = TRUE, 
+         cluster_cols = TRUE,
+         main = "Heatmap of PCA Loadings (Parameters x PCs)")
+
+# =============================================================================
+#    Group Parameters by Their Loadings
+#    For instance, cluster the rows of 'loadings'
+# =============================================================================
+
+# option 1: K-means on loadings
+set.seed(123) # For reproducibility
+num_parameter_clusters <- 4  # choose how many param clusters you want
+km_loadings <- kmeans(loadings, centers = num_parameter_clusters)
+
+# Check cluster assignments
+param_cluster_assignments <- data.frame(
+  parameter_id = rownames(loadings),
+  cluster      = km_loadings$cluster
+)
+
+head(param_cluster_assignments)
+
+# option 2: Alternatively, hierarchical clustering on loadings
+dist_mat <- dist(loadings)
+hc <- hclust(dist_mat, method = "ward.D2")
+plot(hc, main = "Clustering of Parameters by PCA Loadings", xlab = "", sub = "")
+
+# =============================================================================
+#    Interpret the Groups
+#    - Look at which parameters ended up in each cluster
+#    - Possibly rename them, e.g., "Neurological-like group", "Metabolic group", etc.
+# =============================================================================
+
+View(param_cluster_assignments)  # see which parameters are in each group
+
+# Saving the parameter groupings
+write.csv(param_cluster_assignments, "parameter_clusters.csv", row.names=FALSE)
+
+
+```
+
+The param_cluster_assignments dataframe maps each parameter (parameter_id) to a cluster number, thus telling us which parameters are grouped together based on their similar loain
+
+PCA trial (while Shiny wasn't working):
+
+```{bash}
 # Add PCA-transformed data to a data frame
 pca_data <- as.data.frame(pca_result$x)
 pca_data$gene_accession_id <- genes_param_wide$gene_accession_id
@@ -1580,6 +1643,29 @@ ggplot(pca_data, aes(x = PC1, y = PC2, color = cluster, label = gene_accession_i
 **Examining PCA Loadings & Identifying Parameter Groupings**
 
 ```{r}
+
+## Extract Loadings 
+loadings <- pca_result$rotation  # This is a matrix of size (num_parameters × num_PCs)
+head(loadings)
+
+# Each row in loadings corresponds to a parameter, and each column is a principle component 
+# A “high loading” (positive or negative) in, say, PC1 means that parameter strongly influences the first principal component
+
+## Inspecting loadings
+
+# Bar plot for a single PC.
+barplot(loadings[, "PC1"], las = 2,
+        main = "Loadings for PC1",
+        ylab = "Loading Value")
+
+# Heatmap of all loadings
+library(pheatmap)
+pheatmap(loadings, cluster_rows = TRUE, cluster_cols = TRUE)
+
+
+## Grouping parameters based on their loadings
+param_clusters <- kmeans(loadings, centers = 4) 
+# or hierarchical clustering on 'loadings' to find sets of parameters that have similar loading patterns across the PCs
 
 
 ```
