@@ -23,6 +23,12 @@ ui <- fluidPage(
                     choices = NULL, selected = NULL),
         sliderInput("mouse_threshold", "Significance Threshold (p-value):",
                     min = 0, max = 1, value = 0.05, step = 0.01),
+        selectInput("plot_type", "Select Plot Type:",
+                    choices = c("Bar Plot", "Dot Plot"), selected = "Bar Plot"),
+        selectInput("mouse_strain", "Select Mouse Strain:",
+                    choices = c("All", "129SV", "C57BL")),
+        selectInput("life_stage", "Select Mouse Life Stage:",
+                    choices = c("All", "E12.5", "E15.5", "E18.5", "E9.5", "Early adult", "Late adult", "Middle aged adult"))
       ),
       
       conditionalPanel(
@@ -66,7 +72,8 @@ ui <- fluidPage(
         
         tabPanel("Phenotype Scores for Knockout Mouse",
                  value = "mouse_phenotype_tab",
-                 plotOutput("mouse_phenotype_plot", height = "900px", width = "150%"),
+                 uiOutput("no_data_message"),
+                 plotlyOutput("mouse_phenotype_plot", height = "900px", width = "160%"),
                  downloadButton("download_mouse_data", "Download Mouse Data")),
         
         tabPanel("Knockout Mice for Phenotype",
@@ -116,7 +123,6 @@ server <- function(input, output, session) {
     updateSelectInput(session, "selected_phenotype_group", choices = groups$group_id)
   })
   
-  
   observe({
     req(input$selected_phenotype_group)  
     phenotype_choices <- dbGetQuery(con, sprintf("
@@ -145,37 +151,47 @@ server <- function(input, output, session) {
   
   # Visualisation 1: Phenotype Scores for Knockout Mouse
   
-  output$mouse_phenotype_plot <- renderPlot({
-    req(input$selected_mouse)  # Ensure a gene symbol is selected
+  output$mouse_phenotype_plot <- renderPlotly({
+    req(input$selected_mouse)  
     
     query <- sprintf("
-  SELECT A.p_value, P.parameter_name 
-  FROM Analyses A
-  JOIN Parameters P ON A.parameter_id = P.parameter_id
-  WHERE A.gene_accession_id IN (
-    SELECT gene_accession_id FROM Genes WHERE gene_symbol = '%s'
-  ) 
-  AND A.p_value IS NOT NULL 
-  AND A.p_value > 0 
-  AND P.parameter_name IS NOT NULL 
-  ORDER BY A.p_value ASC;",
+    SELECT A.p_value, P.parameter_name 
+    FROM Analyses A
+    JOIN Parameters P ON A.parameter_id = P.parameter_id
+    WHERE A.gene_accession_id IN (
+      SELECT gene_accession_id FROM Genes WHERE gene_symbol = '%s'
+    ) 
+    AND A.p_value IS NOT NULL 
+    AND A.p_value > 0 
+    AND P.parameter_name IS NOT NULL",
                      input$selected_mouse)
+    
+    if (input$mouse_strain != "All") {
+      query <- paste0(query, " AND A.mouse_strain = '", input$mouse_strain, "'")
+    }
+    if (input$life_stage != "All") {
+      query <- paste0(query, " AND A.mouse_life_stage = '", input$life_stage, "'")
+    }
+    
+    query <- paste0(query, " ORDER BY A.p_value ASC;")
     
     # Fetch the data from the database
     data <- dbGetQuery(con, query)
     
-    # Ensure `data` is a dataframe and exclude NA values from `parameter_name`
-    if (!is.data.frame(data) || nrow(data) == 0) {
-      plot.new()
-      title("No phenotypes meet the threshold for this knockout mouse.")
-      return()
+    if (nrow(data) == 0) {
+      output$no_data_message <- renderUI({
+        tagList(
+          h3("No data available for the selected mouse. Please adjust your filters.", style = "color: red; text-align: center;")
+        )
+      })
+      return(NULL)
     }
     
     # Remove rows where `parameter_name` is NA
     data <- data %>%
       dplyr::filter(!(is.na(parameter_name) | parameter_name == "NA"))
     
-    # Aggregate data and calculate thresholds
+    
     data <- data %>%
       group_by(parameter_name) %>%
       summarize(
@@ -184,6 +200,7 @@ server <- function(input, output, session) {
       ) %>%
       ungroup()
     
+    p <- if (input$plot_type == "Bar Plot") {
       ggplot(data, aes(x = reorder(parameter_name, p_value), y = p_value, fill = Threshold)) +
         geom_bar(stat = "identity", position = position_dodge(width = 2), show.legend = TRUE, width = 0.6) +
         scale_fill_manual(values = c("Significant" = "palegreen3", "Not Significant" = "indianred3")) + 
@@ -195,7 +212,7 @@ server <- function(input, output, session) {
         ) +
         theme_minimal() +
         theme(
-          axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, size = 8, face = "bold"),  
+          axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, size = 7, face = "bold"),  
           axis.title.x = element_text(size = 12, face = "bold"),  
           axis.title.y = element_text(size = 12, face = "bold"),  
           plot.title = element_text(size = 16, face = "bold", hjust = 0.5),  
@@ -203,10 +220,33 @@ server <- function(input, output, session) {
           axis.text.y = element_text(size = 10),
         ) +
         geom_hline(yintercept = input$mouse_threshold, linetype = "dashed", color = "black")
+    } else 
       
-    } 
+      if (input$plot_type == "Dot Plot") {
+      ggplot(data, aes(x = parameter_name, y = p_value, color = Threshold, text = paste("p-value:", p_value, "<br>Phenotype:", parameter_name))) +
+        geom_point(size = 2.5) +
+        scale_color_manual(values = c("Significant" = "palegreen3", "Not Significant" = "indianred3")) +
+        labs(
+          title = paste("The Phenotype Scores for Knockout Mouse:", input$selected_mouse),
+          subtitle = paste("Showing phenotypes with p-value <= ", input$mouse_threshold),
+          x = "Knockout Mouse Phenotype", 
+          y = "p-value for Phenotype Association"
+        ) +
+        theme_minimal() +
+        theme(
+          axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, size = 6, face = "bold"),
+          axis.title.x = element_text(size = 12, face = "bold"),
+          axis.title.y = element_text(size = 12, face = "bold"),
+          plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
+          plot.subtitle = element_text(size = 12, hjust = 0.5),
+          axis.text.y = element_text(size = 10)
+        ) +
+        geom_hline(yintercept = input$mouse_threshold, linetype = "dashed", color = "black")
+    }
+  
+    ggplotly(p, tooltip = "text")
+  })
 
-  )
   
   # Visualisation 2: Scores of All Knockout Mice for a Selected Phenotype
   
