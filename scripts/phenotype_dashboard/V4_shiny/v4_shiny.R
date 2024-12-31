@@ -7,8 +7,8 @@ library(reshape2) # For data manipulation
 library(DBI)
 library(RMySQL)
 library(stringr)
-library(ggdendro)
-library(uwot)
+library(factoextra)
+library(umap)
 
 # Define UI
 ui <- fluidPage(
@@ -46,17 +46,34 @@ ui <- fluidPage(
         selectInput("cluster_method", "Clustering Method:",
                     choices = c("Hierarchical", "PCA", "UMAP"),
                     selected = "Hierarchical"),
-        numericInput("num_clusters", "Number of Clusters (K-Means):",
-                     value = 3, min = 2, max = 50, step = 1),
+        # Only show number of clusters if PCA or UMAP is chosen
+        conditionalPanel(
+          condition = "input.cluster_method == 'PCA' || input.cluster_method == 'UMAP'",
+          numericInput("num_clusters", "Number of Clusters (K-Means):",
+                       value = 3, min = 2, max = 50, step = 1)
+        ),
         selectInput("gene_subset", "Subset of Genes:",
                     choices = c("All genes", 
                                 "Genes with significant phenotypes (p<0.05)", 
                                 "User-specific genes"),
                     selected = "All genes"),
-        textInput("user_genes", 
-                  "Enter gene symbols (comma-separated) if 'User-specific genes' is selected:"),
-        selectInput("mouse_strain", "Select Mouse Strain:", choices = NULL, selected = "All"),
-        selectInput("life_stage", "Select Mouse Life Stage:", choices = NULL, selected = "All")
+        # Only show user_genes selection if "User-specific genes" is chosen
+        conditionalPanel(
+          condition = "input.gene_subset == 'User-specific genes'",
+          selectizeInput("user_genes", 
+                         "Select Gene Symbols:", 
+                         choices = NULL,   # We'll update via server
+                         multiple = TRUE,
+                         options = list(placeholder = 'Select at least 3 genes',
+                                        maxOptions = 10))  # tune as needed
+        ),
+        # We rename the strain/life_stage *for cluster tab* to avoid ID conflicts
+        selectInput("cluster_mouse_strain", "Select Mouse Strain:", 
+                    choices = NULL, 
+                    selected = "All"),
+        selectInput("cluster_life_stage",   "Select Mouse Life Stage:", 
+                    choices = NULL, 
+                    selected = "All")
         )
       ),
       
@@ -84,7 +101,7 @@ ui <- fluidPage(
         
         tabPanel("Gene Clusters",
                  value = "clusters_tab",
-                 plotOutput("gene_cluster_plot"),
+                 plotlyOutput("gene_cluster_plot", height = "900px"),
                  downloadButton("download_cluster_data", "Download Cluster Data")),
         
         tabPanel("Gene-Disease Associations",
@@ -112,18 +129,21 @@ server <- function(input, output, session) {
     dbDisconnect(con)
   })
   
-  # Populate dropdowns
+  ## Populate dropdowns
   
+  # Knockout mouse (phenotype tab)
   observe({
     gene_choices <- dbGetQuery(con, "SELECT DISTINCT gene_symbol FROM Genes;")
     updateSelectInput(session, "selected_mouse", choices = gene_choices$gene_symbol)
   })
   
+  # Parameter grouping
   observe({
     groups <- dbGetQuery(con, "SELECT DISTINCT group_id FROM ParameterGroupings;")
     updateSelectInput(session, "selected_phenotype_group", choices = groups$group_id)
   })
   
+  # Phenotype choices based on group
   observe({
     req(input$selected_phenotype_group)  
     phenotype_choices <- dbGetQuery(con, sprintf("
@@ -134,20 +154,43 @@ server <- function(input, output, session) {
     updateSelectInput(session, "selected_phenotype", choices = phenotype_choices$parameter_name)
   })
   
-  
+  # Disease
   observe({
     diseases <- dbGetQuery(con, "SELECT DISTINCT disease_term FROM Diseases;")
     updateSelectInput(session, "disease", choices = diseases$disease_term)
   })
   
+  # Mouse strains for phenotype tab
   observe({
     mouse_strains <- dbGetQuery(con, "SELECT DISTINCT mouse_strain FROM Analyses")
     updateSelectInput(session, "mouse_strain", choices = c("All", sort(mouse_strains$mouse_strain)))
   })
   
+  # Mouse life stages for phenotype tab
   observe({
     life_stages <- dbGetQuery(con, "SELECT DISTINCT mouse_life_stage FROM Analyses")
     updateSelectInput(session, "life_stage", choices = c("All", sort(life_stages$mouse_life_stage)))
+  })
+  
+  # 5) cluster_mouse_strain & cluster_life_stage (used in Gene Clusters tab)
+  observe({
+    mouse_strains <- dbGetQuery(con, "SELECT DISTINCT mouse_strain FROM Analyses;")
+    updateSelectInput(session, "cluster_mouse_strain", 
+                      choices = c("All", sort(mouse_strains$mouse_strain)))
+  })
+  
+  observe({
+    life_stages <- dbGetQuery(con, "SELECT DISTINCT mouse_life_stage FROM Analyses;")
+    updateSelectInput(session, "cluster_life_stage", 
+                      choices = c("All", sort(life_stages$mouse_life_stage)))
+  })
+  
+  # Populate user_genes (for user-specific genes) with all gene symbols
+  observe({
+    # We'll re-use the Genes table
+    all_genes <- dbGetQuery(con, "SELECT DISTINCT gene_symbol FROM Genes;")
+    # Update the selectizeInput with all possible gene symbols
+    updateSelectizeInput(session, "user_genes", choices = all_genes$gene_symbol, server = TRUE)
   })
   
   # Visualisation 1: Statistical Scores for Selected Knockout Mouse
@@ -295,23 +338,24 @@ server <- function(input, output, session) {
     query <- "SELECT gene_accession_id, parameter_id, ROUND(AVG(p_value), 6) AS avg_p_value 
             FROM Analyses 
             WHERE 1=1"
-    # Add filters for life stage
-    if (input$life_stage != "All") {
-      query <- paste0(query, " AND mouse_life_stage = '", input$life_stage, "'")
+    # Add filters for strain
+    if (input$cluster_mouse_strain != "All") {
+      query <- paste0(query, " AND mouse_strain = '", input$cluster_mouse_strain, "'")
     }
     # Add filters for strain
-    if (input$mouse_strain != "All") {
-      query <- paste0(query, " AND mouse_strain = '", input$mouse_strain, "'")
+    if (input$cluster_life_stage != "All") {
+      query <- paste0(query, " AND mouse_life_stage = '", input$cluster_life_stage, "'")
     }
     # Final group by & order
     query <- paste0(query, " GROUP BY gene_accession_id, parameter_id 
                            ORDER BY avg_p_value ASC;")
     # Execute the query
     df <- dbGetQuery(con, query)
-    # Return the raw aggregated data
-    return(df)
+    
+    df
   })
   
+  # pca_matrix -> pivot to wide
   pca_matrix <- reactive({
     df <- analysis_data()
     
@@ -326,18 +370,17 @@ server <- function(input, output, session) {
         values_from = avg_p_value
       )
     
-    # Convert gene_accession_id into rownames
-    # (Assumes 'gene_accession_id' is a column in df)
+    # Convert gene_accession_id into rownames, assuming 'gene_accession_id' is a column in df
     wide_df <- as.data.frame(wide_df)
     rownames(wide_df) <- wide_df$gene_accession_id
-    
     # Remove the gene_accession_id column now that it’s the rowname
     wide_df <- wide_df[, !names(wide_df) %in% "gene_accession_id"]
     
-    return(wide_df)
+    wide_df
   })
   
-  output$gene_cluster_plot <- renderPlot({
+  # Render the cluster plot
+  output$gene_cluster_plot <- renderPlotly({
     req(pca_matrix())           # Wait until the data is available
     data_wide <- pca_matrix()   # This is the wide gene-by-parameter matrix
     
@@ -348,24 +391,27 @@ server <- function(input, output, session) {
       return()
     }
     
-    # --- Filter for gene_subset ---
-
+    # Additional filters on subset
     if (input$gene_subset == "Genes with significant phenotypes (p<0.05)") {
       # Keep rows (genes) where ANY parameter’s p-value is < 0.05
       keep_rows <- apply(data_wide, 1, function(x) any(x < 0.05, na.rm = TRUE))
       data_wide <- data_wide[keep_rows, , drop = FALSE]
       
     } else if (input$gene_subset == "User-specific genes") {
-      user_genes <- unlist(strsplit(input$user_genes, "\\s*,\\s*"))
-      # rownames(data_wide) are the gene_accession_ids
-      data_wide <- data_wide[rownames(data_wide) %in% user_genes, , drop = FALSE]
+      # If user selected fewer than 2 genes, show a message
+      if (length(input$user_genes) < 3) {
+        plot.new()
+        title("Please select at least 2 genes for PCA/UMAP.")
+        return(NULL)
+      }
+      data_wide <- data_wide[rownames(data_wide) %in% input$user_genes, , drop = FALSE]
     }
     
     # Check if anything remains
     if (nrow(data_wide) == 0) {
       plot.new()
       title("No genes left after filtering.")
-      return()
+      return(NULL)
     }
     
     # Scale the data
@@ -374,23 +420,59 @@ server <- function(input, output, session) {
     
     #Clustering
     if (input$cluster_method == "Hierarchical") {
+      # from earlier code. Make sure you have at least 2 rows to cluster:
+      if (nrow(mat_scaled) < 2) {
+        plot.new()
+        title("Not enough data for hierarchical clustering (need >= 2 rows).")
+        return(NULL)
+      }
+      # Perform hierarchical clustering
+      hc <- hclust(dist(mat_scaled), method = "ward.D")
       
-      # Hierarchical clustering
-      hc <- hclust(dist(mat_scaled), method = "ward.D2")
-      hcdata <- dendro_data(hc)  # convert to a ggplot-friendly format
+      # 3. Convert hclust -> dendrogram -> apply "hang" to shorten tips
+      #    "hang" sets how far tips hang below the rest of the dendrogram.
+      #    0.1 or 0.2 often works well. Smaller => shorter vertical lines to labels.
+      library(dendextend)  # install.packages("dendextend") if needed
+      dend <- as.dendrogram(hc)
+      dend <- hang.dendrogram(dend, hang = 0.2)  # tweak 0.2 as desired
       
-      ggplot(segment(hcdata)) +
-        geom_segment(aes(x = x, y = y, xend = xend, yend = yend)) +
-        scale_y_reverse() +  # flip if you want a "bottom-up" dendrogram
-        coord_flip() +       # horizontal orientation
+      # 2) Convert to a ggdendro-friendly structure
+      library(ggdendro)   # install.packages("ggdendro") if not installed
+      dend_data <- dendro_data(dend, type = "rectangle")
+      
+      p <- ggplot() +
+        # Segments for the branches
+        geom_segment(
+          data = dend_data$segments,
+          aes(x = x, y = y, xend = xend, yend = yend),
+          color = "black"
+        ) +
+        # Tip labels: gene IDs
+        geom_text(
+          data = dend_data$labels,
+          aes(x = x, y = y, label = label),
+          size = 3,    # control text size
+          hjust = 1,   # right-justify the labels
+          color = "black"
+        ) +
+        # Flip coords to mimic the usual horizontal R dendrogram look
+        coord_flip() +
+        # Reverse y so the tree grows "up" (optional but common)
+        scale_y_reverse(expand = c(0.2, 0)) +
+        # Minimal theme
         theme_minimal() +
-        labs(title = "Hierarchical Clustering of Genes") +
+        labs(
+          title = "Hierarchical Clustering of Genes",
+          x = NULL,          # or "Genes"
+          y = "Distance"
+        ) +
         theme(
-          axis.text.y = element_text(size = 6),    # smaller label text
-          axis.ticks  = element_blank(),
-          axis.title  = element_blank()
+          plot.title   = element_text(size = 14, face = "bold"),
+          axis.text.y  = element_blank(),   # we have our own text for labels
+          axis.ticks.y = element_blank(),
+          axis.title.y = element_blank()
         )
-      
+
     } else if (input$cluster_method == "PCA") {
       
       # Run PCA
@@ -398,11 +480,11 @@ server <- function(input, output, session) {
       pca_data <- data.frame(pca$x[, 1:2])
       pca_data$gene <- rownames(mat_scaled)
       
-      # K-means clustering for coloring
+      # K-means clustering 
       km <- kmeans(mat_scaled, centers = input$num_clusters)
       pca_data$cluster <- factor(km$cluster)
       
-      # Title
+      # Set dynamic graph title
       gene_subset_label <- switch(
         input$gene_subset,
         "All genes" = "All Genes",
@@ -412,7 +494,7 @@ server <- function(input, output, session) {
       plot_title <- paste("PCA Clustering of", gene_subset_label)
       
       # Plot
-      ggplot(pca_data, aes(x = PC1, y = PC2, color = cluster, label = gene)) +
+      p <- ggplot(pca_data, aes(x = PC1, y = PC2, color = cluster, text = paste0("Gene: ", gene, "<br>Cluster: ", cluster))) +
         geom_point(size = 3, alpha = 0.8) +
         scale_color_manual(values = rainbow(input$num_clusters)) +
         labs(
@@ -431,10 +513,14 @@ server <- function(input, output, session) {
           panel.grid.major = element_line(size = 0.5, linetype = "dotted", color = "gray80"),
           panel.grid.minor = element_blank()
         )
+      ggplotly(p, tooltip = "text")
+
       
     } else if (input$cluster_method == "UMAP") {
-      
       # UMAP
+      # Make sure mat_scaled is a matrix
+      mat_scaled <- as.matrix(mat_scaled)
+      
       umap_result <- umap(mat_scaled, n_neighbors = 15, min_dist = 0.1)
       umap_data <- data.frame(
         UMAP1 = umap_result$layout[, 1],
@@ -442,11 +528,11 @@ server <- function(input, output, session) {
         gene  = rownames(mat_scaled)
       )
       
-      # K-means for color
+      # K-means for colouring
       km <- kmeans(mat_scaled, centers = input$num_clusters)
       umap_data$cluster <- factor(km$cluster)
       
-      # Title
+      # Set dynamic graph title
       gene_subset_label <- switch(
         input$gene_subset,
         "All genes" = "All Genes",
@@ -454,7 +540,7 @@ server <- function(input, output, session) {
         "User-specific genes" = "User-Selected Genes"
       )
       
-      ggplot(umap_data, aes(x = UMAP1, y = UMAP2, color = cluster, label = gene)) +
+      p <- ggplot(umap_data, aes(x = UMAP1, y = UMAP2, color = cluster, text = paste0("Gene: ", gene, "<br>Cluster: ", cluster))) +
         geom_point(size = 3, alpha = 0.8) +
         scale_color_manual(values = rainbow(input$num_clusters)) +
         labs(
@@ -470,6 +556,7 @@ server <- function(input, output, session) {
           axis.text    = element_text(size = 10),
           panel.border = element_rect(color = "black", fill = NA, size = 1.5)
         )
+      ggplotly(p, tooltip = "text")
     }
   })
 }
