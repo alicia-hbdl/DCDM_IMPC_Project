@@ -7,6 +7,7 @@ library(reshape2) # For data manipulation
 library(DBI)
 library(RMySQL)
 library(stringr)
+library(ggdendro)
 library(uwot)
 
 # Define UI
@@ -104,7 +105,7 @@ server <- function(input, output, session) {
     host = "localhost",
     port = 3306,
     user = "root",
-    password = "mahiat123"
+    password = "Llama123@"
   )
   
   onStop(function() {
@@ -149,7 +150,7 @@ server <- function(input, output, session) {
     updateSelectInput(session, "life_stage", choices = c("All", sort(life_stages$mouse_life_stage)))
   })
   
-  # Visualisation 1: Phenotype Scores for Knockout Mouse
+  # Visualisation 1: Statistical Scores for Selected Knockout Mouse
   
   output$mouse_phenotype_plot <- renderPlotly({
     req(input$selected_mouse)  
@@ -248,7 +249,7 @@ server <- function(input, output, session) {
   })
 
   
-  # Visualisation 2: Scores of All Knockout Mice for a Selected Phenotype
+  # Visualisation 2: Statistical Scores of All Knockout Mice for a Selected Phenotype
   
   output$phenotype_mouse_plot <- renderPlot({
     req(input$selected_phenotype, input$selected_phenotype_group)
@@ -376,9 +377,19 @@ server <- function(input, output, session) {
       
       # Hierarchical clustering
       hc <- hclust(dist(mat_scaled), method = "ward.D2")
-      plot(as.dendrogram(hc),
-           main = "Hierarchical Clustering of Genes",
-           xlab = "Genes", ylab = "Distance", cex = 0.7)
+      hcdata <- dendro_data(hc)  # convert to a ggplot-friendly format
+      
+      ggplot(segment(hcdata)) +
+        geom_segment(aes(x = x, y = y, xend = xend, yend = yend)) +
+        scale_y_reverse() +  # flip if you want a "bottom-up" dendrogram
+        coord_flip() +       # horizontal orientation
+        theme_minimal() +
+        labs(title = "Hierarchical Clustering of Genes") +
+        theme(
+          axis.text.y = element_text(size = 6),    # smaller label text
+          axis.ticks  = element_blank(),
+          axis.title  = element_blank()
+        )
       
     } else if (input$cluster_method == "PCA") {
       
