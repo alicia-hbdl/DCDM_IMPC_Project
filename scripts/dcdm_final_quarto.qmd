@@ -1456,6 +1456,8 @@ ORDER BY
 
 **Examining PCA Loadings & Identifying Parameter Groupings**
 
+Below is a **self-contained script** that (1) reads data from the database, (2) pivots it wide, (3) runs PCA, (4) extracts loadings, and (5) clusters parameters (variables) by their loadings.
+
 ```{r}
 #| eval: false
 
