@@ -58,10 +58,10 @@ library(fs)         # File system operations
 #| warning: false
 
 # Set working directory (uncomment for other users as needed)
-rootDir <- "/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/" # Allie
+# rootDir <- "/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/" # Allie
 # rootDir <- "/Users/sanjanasrinivasan/Desktop/DCDM_IMPC_Project/" # Sanj
 # rootDir <- "/Users/ellajadealex/Desktop/applied_bioinformatics/DCDM/group_project/DCDM_IMPC_Project/" # Ella
-# rootDir <- "/Users/sama/Desktop/DCDM_Proj2/" # Sama
+rootDir <- "/Users/sama/Desktop/DCDM_Proj2/" # Sama
 # rootDir <- "~/Desktop/working_directory/DCDM_project" # Esta
 
 # Create directories
@@ -1454,7 +1454,7 @@ ORDER BY
 
 ```
 
-**Examining PCA Loadings & Identifying Parameter Groupings**
+## **Examining PCA Loadings & Identifying Parameter Groupings**
 
 Below is a **self-contained script** that (1) reads data from the database, (2) pivots it wide, (3) runs PCA, (4) extracts loadings, and (5) clusters parameters (variables) by their loadings.
 
@@ -1520,17 +1520,17 @@ genes_param_wide <- genes_and_param %>%
 head(genes_param_wide) # Check structure 
 
 # Save the reshaped matrix as needed for gene clustering
-write.csv(genes_param_wide, "/Users/sanjanasrinivasan/Desktop/DCDM_IMPC_Project/data/cleaned/genes_phenotype_scores.csv", row.names = FALSE)
+write.csv(genes_param_wide, "/Users/sama/Desktop/DCDM/data/cleaned/genes_phenotype_scores.csv", row.names = FALSE)
 
 # Read the reshaped matrix
-genes_param_wide <- read.csv("/Users/sanjanasrinivasan/Desktop/DCDM_IMPC_Project/data/cleaned/genes_phenotype_scores.csv")
+genes_param_wide <- read.csv("/Users/sama/Desktop/DCDM/data/cleaned/genes_phenotype_scores.csv")
 
 # Prepare the data for PCA (exclude the first column containing gene_accession_id)
 pca_input <- genes_param_wide %>% 
   select(-gene_accession_id) %>% 
   as.matrix()
 
-write.csv(pca_input, "/Users/sanjanasrinivasan/Desktop/DCDM_IMPC_Project/scripts/phenotype_dashboard/pca_input.csv", row.names = FALSE)
+write.csv(pca_input, "/Users/sama/Desktop/DCDM/scripts/phenotype_dashboard/pca_input.csv", row.names = FALSE)
 
 # Perform PCA
 pca_result <- prcomp(pca_input, scale. = TRUE)
@@ -1567,7 +1567,7 @@ pheatmap(loadings,
 
 # option 1: K-means on loadings
 set.seed(123) # For reproducibility
-num_parameter_clusters <- 4  # choose how many param clusters you want
+num_parameter_clusters <- 6  # choose how many param clusters you want
 km_loadings <- kmeans(loadings, centers = num_parameter_clusters)
 
 # Check cluster assignments
@@ -1601,7 +1601,8 @@ The param_cluster_assignments dataframe maps each parameter (parameter_id) to a 
 
 PCA trial (while Shiny wasn't working):
 
-```{bash}
+```{r}
+
 # Add PCA-transformed data to a data frame
 pca_data <- as.data.frame(pca_result$x)
 pca_data$gene_accession_id <- genes_param_wide$gene_accession_id
@@ -1642,7 +1643,7 @@ ggplot(pca_data, aes(x = PC1, y = PC2, color = cluster, label = gene_accession_i
 
 ```
 
-**Examining PCA Loadings & Identifying Parameter Groupings**
+**Identifying Parameter Groupings**
 
 ```{r}
 
@@ -1668,6 +1669,92 @@ pheatmap(loadings, cluster_rows = TRUE, cluster_cols = TRUE)
 ## Grouping parameters based on their loadings
 param_clusters <- kmeans(loadings, centers = 4) 
 # or hierarchical clustering on 'loadings' to find sets of parameters that have similar loading patterns across the PCs
+
+
+```
+
+**Create groupings based on clusters**
+
+```{r}
+
+write.csv(param_cluster_assignments, "/Users/sama/Desktop/DCDM/data/parameter_clusters.csv", row.names = FALSE)
+
+write.csv(parameters_table, "/Users/sama/Desktop/DCDM/data/parameter_table.csv", row.names = FALSE)
+
+
+# Load the cluster assignments and the parameter name mapping
+param_clusters <- read.csv("/Users/sama/Desktop/DCDM/data/parameter_clusters.csv")
+parameter_names <- read.csv("/Users/sama/Desktop/DCDM/data/parameter_table.csv")
+
+# Select only the 'parameter_id' and 'parameter_name' columns from parameter_names
+parameter_names <- parameter_names %>%
+  select(parameter_id, parameter_name)
+
+# Merge the clusters with parameter names
+param_with_names <- param_clusters %>%
+  left_join(parameter_names, by = "parameter_id")
+
+# Check the first few rows to ensure the join worked
+param_with_names
+
+
+```
+
+```{r}
+
+# Group parameters by their cluster and assign meaningful names
+grouped_parameters <- param_with_names %>%
+  group_by(cluster) %>%
+  summarise(
+    parameter_names = paste(parameter_name, collapse = ", "),  # Combine all parameter names in a cluster
+    .groups = 'drop'
+  )
+
+# Create a list of parameter names under each cluster
+# We will separate each parameter in a new row under the corresponding cluster
+grouped_parameters_separated <- param_with_names %>%
+  select(cluster, parameter_name) %>%  # Ensure only cluster and parameter_name are selected
+  arrange(cluster)  # Sort by cluster for better visualization
+
+# Now pivot the data to have clusters as columns and parameters as rows
+grouped_parameters_wide <- grouped_parameters_separated %>%
+  group_by(cluster) %>%
+  mutate(row_id = row_number()) %>%  # Create a row identifier to align the values across clusters
+  ungroup() %>%
+  pivot_wider(
+    names_from = cluster,          # Cluster values become column names
+    values_from = parameter_name,  # Parameter names become values in the columns
+    values_fn = list(parameter_name = ~ .), # Make sure each parameter is treated as a separate list entry
+    values_fill = list(parameter_name = NA)  # Fill missing values with NA if there are different row counts per cluster
+  )
+
+# Save the grouped parameter
+write.csv(grouped_parameters_wide, "/Users/sama/Desktop/DCDM/data/grouped_parameters_wide.csv", row.names = FALSE)
+
+```
+
+```{r}
+
+install.packages("tidytext")
+library(tidytext)
+
+# Tokenize the parameter names into keywords. 
+
+tf_idf_by_cluster <- grouped_parameters_separated %>%
+  unnest_tokens(word, parameter_name) %>%  # Split the parameter names into individual words
+  count(cluster, word, sort = TRUE) %>%     # Count frequency of each word for each cluster
+  bind_tf_idf(word, cluster, n) %>%          # Calculate TF-IDF (Term Frequency-Inverse Document Frequency)
+  arrange(cluster, desc(tf_idf))             # Sort by TF-IDF within each cluster
+
+# View the TF-IDF values for each cluster
+print(tf_idf_by_cluster)
+
+```
+
+```{r}
+
+# Assign grouping names and keywords
+
 
 
 ```
