@@ -35,10 +35,11 @@ ui <- fluidPage(
       conditionalPanel(
         condition = "input.tabs == 'phenotype_mice_tab'",
         selectInput("selected_phenotype_group", "Select Parameter Grouping:",
-                    choices = NULL, selected = NULL),
+                    choices = c("All", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11")),
         selectInput("selected_phenotype", "Select Phenotype:",
-                    choices = NULL, selected = NULL)
-        
+                    choices = NULL, selected = NULL),
+        # Display a message explaining why some parameter groups are missing
+        textOutput("phenotype_explanation"),
       ),
       
       conditionalPanel(
@@ -94,9 +95,9 @@ ui <- fluidPage(
                  plotlyOutput("mouse_phenotype_plot", height = "900px", width = "160%"),
                  downloadButton("download_mouse_data", "Download Mouse Data")),
         
-        tabPanel("Knockout Mice for Phenotype",
+        tabPanel("Knockout Gene Scores for Phenotype",
                  value = "phenotype_mice_tab",
-                 plotOutput("phenotype_mouse_plot"),
+                 plotlyOutput("phenotype_mouse_plot", height = "900px", width = "160%"),
                  downloadButton("download_phenotype_data", "Download Phenotype Data")),
         
         tabPanel("Gene Clusters",
@@ -122,7 +123,7 @@ server <- function(input, output, session) {
     host = "localhost",
     port = 3306,
     user = "root",
-    password = "Llama123@"
+    password = "????????"
   )
   
   onStop(function() {
@@ -145,13 +146,37 @@ server <- function(input, output, session) {
   
   # Phenotype choices based on group
   observe({
-    req(input$selected_phenotype_group)  
-    phenotype_choices <- dbGetQuery(con, sprintf("
-    SELECT DISTINCT P.parameter_name
+    req(input$selected_phenotype_group)  # Ensure the input is valid
+    
+    # Query to fetch phenotypes and their data availability
+    query <- sprintf("
+    SELECT P.parameter_name, COUNT(A.p_value) AS data_count
     FROM Parameters P
     JOIN ParameterGroupings PG ON P.parameter_id = PG.parameter_id
-    WHERE PG.group_id = '%s';", input$selected_phenotype_group))
-    updateSelectInput(session, "selected_phenotype", choices = phenotype_choices$parameter_name)
+    LEFT JOIN Analyses A ON P.parameter_id = A.parameter_id
+    WHERE PG.group_id = '%s'
+    GROUP BY P.parameter_name;", input$selected_phenotype_group)
+    
+    phenotype_data <- dbGetQuery(con, query)
+    
+    # Filter to include only parameter names with available data
+    available_data <- phenotype_data %>%
+      filter(data_count > 0) %>%
+      pull(parameter_name)
+    
+    # Update dropdown based on available data
+    if (length(available_data) > 0) {
+      updateSelectInput(session, "selected_phenotype", choices = available_data)
+      explanation <- "Only phenotypes with data available are shown."
+    } else {
+      updateSelectInput(session, "selected_phenotype", choices = c("No data available"))
+      explanation <- "No data is available for the selected parameter group."
+    }
+    
+    # Update the explanation text
+    output$phenotype_explanation <- renderText({
+      explanation
+    })
   })
   
   # Disease
@@ -294,12 +319,12 @@ server <- function(input, output, session) {
   
   # Visualisation 2: Statistical Scores of All Knockout Mice for a Selected Phenotype
   
-  output$phenotype_mouse_plot <- renderPlot({
+  output$phenotype_mouse_plot <- renderPlotly({
     req(input$selected_phenotype, input$selected_phenotype_group)
     
     # Query to fetch p-values for the selected phenotype and group
     query <- sprintf("
-    SELECT A.p_value, G.gene_accession_id
+    SELECT A.p_value, G.gene_symbol
     FROM Analyses A
     JOIN Parameters P ON A.parameter_id = P.parameter_id
     JOIN Genes G ON A.gene_accession_id = G.gene_accession_id
@@ -307,6 +332,7 @@ server <- function(input, output, session) {
     WHERE P.parameter_name = '%s' AND PG.group_id = '%s'
     ORDER BY A.p_value ASC;", 
                      input$selected_phenotype, input$selected_phenotype_group)
+    
     
     # Fetch data from the database
     data <- dbGetQuery(con, query)
@@ -318,18 +344,37 @@ server <- function(input, output, session) {
       return()
     }
     
-    ggplot(data, aes(x = factor(gene_accession_id), y = p_value)) +
-      geom_point(size = 3, color = "blue") +
-      labs(title = paste("Phenotype Data for:", input$selected_phenotype),
-           x = "Gene Accessions", y = "p-value") +
-      theme_minimal() +
-      theme(
-        axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, size = 6),
-        axis.title.x = element_text(size = 12, face = "bold"),
-        axis.title.y = element_text(size = 12, face = "bold"),
-        plot.title = element_text(size = 16, face = "bold", hjust = 0.5)
-      )
-  })
+    # Group and summarize data for bar plot
+    data <- data %>%
+      group_by(gene_symbol) %>%
+      summarize(
+        p_value = mean(p_value),
+        Threshold = ifelse(any(p_value < input$mouse_threshold), "Significant", "Not Significant")
+      ) %>%
+      ungroup()
+    
+        p <- ggplot(data, aes(x = reorder(gene_symbol, p_value), y = p_value, color = Threshold, text = paste("p-value:", p_value, "<br>Gene:", gene_symbol))) +
+        geom_point(size = 2.5) +
+        scale_color_manual(values = c("Significant" = "palegreen3", "Not Significant" = "indianred3")) +
+        labs(
+          title = paste("Gene Knockout Scores for Selected Phenotype:", input$selected_phenotype),
+          subtitle = paste("Showing genes with p-value <= ", input$mouse_threshold),
+          x = "Gene Symbol", 
+          y = "p-value for Gene Association"
+        ) +
+        theme_minimal() +
+        theme(
+          axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, size = 6, face = "bold"),
+          axis.title.x = element_text(size = 12, face = "bold"),
+          axis.title.y = element_text(size = 12, face = "bold"),
+          plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
+          plot.subtitle = element_text(size = 12, hjust = 0.5),
+          axis.text.y = element_text(size = 10)
+        ) +
+        geom_hline(yintercept = input$mouse_threshold, linetype = "dashed", color = "black")
+  
+      ggplotly(p, tooltip = "text")
+      })
   
   
   #Visualisation 3  
