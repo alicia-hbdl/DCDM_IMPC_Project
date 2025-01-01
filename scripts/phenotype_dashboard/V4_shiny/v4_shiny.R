@@ -123,7 +123,7 @@ server <- function(input, output, session) {
     host = "localhost",
     port = 3306,
     user = "root",
-    password = "????????"
+    password = "icecream8"
   )
   
   onStop(function() {
@@ -354,7 +354,7 @@ server <- function(input, output, session) {
       ungroup()
     
         p <- ggplot(data, aes(x = reorder(gene_symbol, p_value), y = p_value, color = Threshold, text = paste("p-value:", p_value, "<br>Gene:", gene_symbol))) +
-        geom_point(size = 2.5) +
+        geom_point(size = 1.5) +
         scale_color_manual(values = c("Significant" = "palegreen3", "Not Significant" = "indianred3")) +
         labs(
           title = paste("Gene Knockout Scores for Selected Phenotype:", input$selected_phenotype),
@@ -364,7 +364,7 @@ server <- function(input, output, session) {
         ) +
         theme_minimal() +
         theme(
-          axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, size = 6, face = "bold"),
+          axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, size = 4, face = "bold"),
           axis.title.x = element_text(size = 12, face = "bold"),
           axis.title.y = element_text(size = 12, face = "bold"),
           plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
