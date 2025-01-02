@@ -1766,7 +1766,7 @@ group_patterns <- tibble(
   group_name = c(
     "weight", "images", "brain", "cardiovascular", "eye", 
     "metabolic", "morphology", "audiology", 
-    "immunology", "Behavior", "experimental_identifiers"
+    "immunology", "Behavior"
   ),
   regex_pattern = c(
     "weight|density|fat|lean|BMI|BMC|mass|composition|bone|length|adipose|lipid|body size|size|growth|skeletal|area|volume",
