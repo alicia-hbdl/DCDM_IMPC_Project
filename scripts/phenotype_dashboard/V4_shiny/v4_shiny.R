@@ -77,13 +77,6 @@ ui <- fluidPage(
                     selected = "All")
         )
       ),
-      
-      conditionalPanel(
-        condition = "input.tabs == 'gene_disease_tab'",
-        selectInput("disease", "Select Disease:", choices = NULL),
-        uiOutput("gene_select_ui")  # Dynamically generated selectInput
-      )
-    ),
     
     mainPanel(
       tabsetPanel(
@@ -102,16 +95,12 @@ ui <- fluidPage(
         
         tabPanel("Gene Clusters",
                  value = "clusters_tab",
-                 plotlyOutput("gene_cluster_plot", height = "900px"),
-                 downloadButton("download_cluster_data", "Download Cluster Data")),
-        
-        tabPanel("Gene-Disease Associations",
-                 value = "gene_disease_tab",  
-                 plotOutput("gene_disease_plot"),
-                 downloadButton("download_gene_disease_data", "Download Gene-Disease Data"))
+                 plotlyOutput("gene_cluster_plot", height = "2000px"),
+                 downloadButton("download_cluster_data", "Download Cluster Data"))
       )
     )
   )
+)
 
 # Define Server
 server <- function(input, output, session) {
@@ -123,7 +112,7 @@ server <- function(input, output, session) {
     host = "localhost",
     port = 3306,
     user = "root",
-    password = "Llama123@"
+    password = "mahiat123"
   )
   
   onStop(function() {
@@ -485,6 +474,8 @@ server <- function(input, output, session) {
       library(ggdendro)   # install.packages("ggdendro") if not installed
       dend_data <- dendro_data(dend, type = "rectangle")
       
+      str(dend_data$labels)
+      
       p <- ggplot() +
         # Segments for the branches
         geom_segment(
@@ -492,12 +483,13 @@ server <- function(input, output, session) {
           aes(x = x, y = y, xend = xend, yend = yend),
           color = "black"
         ) +
-        # Tip labels: gene IDs
+      
         geom_text(
-          data = dend_data$labels,
+          data = dend_data$labels %>%
+            mutate(y = y - max(dend_data$segments$y) * 0.2),  # Shift labels further down
           aes(x = x, y = y, label = label),
-          size = 3,    # control text size
-          hjust = 1,   # right-justify the labels
+          size = 3,
+          hjust = 0.5,  # Center the text horizontally
           color = "black"
         ) +
         # Flip coords to mimic the usual horizontal R dendrogram look
