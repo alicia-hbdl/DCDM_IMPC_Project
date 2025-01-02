@@ -1484,7 +1484,7 @@ con <- dbConnect(
   host = "localhost",
   port = 3306,
   user = "root",
-  password = "mahiat123"  # Replace with your password
+  password = "pw"  # Replace with your password
 )
 
 # Query the database
@@ -1740,7 +1740,7 @@ grouped_parameters_wide <- grouped_parameters_separated %>%
   )
 
 # Save the grouped parameter
-write.csv(grouped_parameters_wide, "/Users/sama/Desktop/DCDM/data/grouped_parameters_wide.csv", row.names = FALSE)
+write.csv(grouped_parameters_wide, "/Users/sama/Desktop/DCDM/data/groupings/grouped_parameters_wide.csv", row.names = FALSE)
 
 ```
 
