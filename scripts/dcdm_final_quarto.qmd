@@ -1528,17 +1528,17 @@ genes_param_wide <- genes_and_param %>%
 head(genes_param_wide) # Check structure 
 
 # Save the reshaped matrix as needed for gene clustering
-write.csv(genes_param_wide, "/Users/sama/Desktop/DCDM/data/cleaned/genes_phenotype_scores.csv", row.names = FALSE)
+write.csv(genes_param_wide, "/Users/sama/Desktop/DCDM/data/groupings//genes_phenotype_scores.csv", row.names = FALSE)
 
 # Read the reshaped matrix
-genes_param_wide <- read.csv("/Users/sama/Desktop/DCDM/data/cleaned/genes_phenotype_scores.csv")
+genes_param_wide <- read.csv("/Users/sama/Desktop/DCDM/data/groupings//genes_phenotype_scores.csv")
 
 # Prepare the data for PCA (exclude the first column containing gene_accession_id)
 pca_input <- genes_param_wide %>% 
   select(-gene_accession_id) %>% 
   as.matrix()
 
-write.csv(pca_input, "/Users/sama/Desktop/DCDM/scripts/phenotype_dashboard/pca_input.csv", row.names = FALSE)
+write.csv(pca_input, "/Users/sama/Desktop/DCDM/data/groupings/pca_input.csv", row.names = FALSE)
 
 # Perform PCA
 pca_result <- prcomp(pca_input, scale. = TRUE)

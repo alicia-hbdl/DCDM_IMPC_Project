@@ -1,0 +1,80 @@
+"row_id","1","2","3","4","5","6"
+1,"Conditioning Baseline % Freezing Time","Basophil cell count","Coat - color - abdomen","BMC/Body weight","Cholesterol ratio","Effector CD4+ NKT cells - % of live leukocytes (Panel A)"
+2,NA,NA,"Coat - color - back","Coat - hair texture / appearance - head",NA,"Coat - hair texture / appearance - back"
+3,"Left outer nuclear layer","Urea (Blood Urea Nitrogen - BUN)",NA,"Whole arena average speed","Optic Disc","Activity (body position)"
+4,"Retina (combined)",NA,"30kHz-evoked ABR Threshold",NA,"Effector CD4+ T helper cells - % of live leukocytes (Panel A)","Right posterior chamber depth"
+5,NA,"Percentage center movement time","Fat mass",NA,"Kyphosis","Gait"
+6,"Snout size","Heart weight","Retinal Blood Vessels Pattern","Skin color - whole body",NA,NA
+7,"Forelimb grip strength measurement mean",NA,NA,"Mean cell volume",NA,NA
+8,NA,"Bone Mineral Content (excluding skull)",NA,NA,NA,"Neutrophil differential count"
+9,"12kHz-evoked ABR Threshold","Difference in Context and Conditioning Baseline % Freezing","Triglycerides","Right outer nuclear layer","Number of center entries",NA
+10,"Spleen weight","Cue Baseline % Freezing Time",NA,NA,NA,"Vocalization"
+11,NA,NA,"Fasted blood glucose concentration","Cervical processes",NA,"Ulna"
+12,NA,NA,NA,"Total bilirubin","24kHz-evoked ABR Threshold","Distance travelled - total"
+13,"% Pre-pulse inhibition - Global",NA,"Red blood cell count",NA,"Bone Mineral Density (excluding skull)",NA
+14,"Aspartate aminotransferase","Fat/Body weight",NA,NA,"Alkaline phosphatase","Whole arena resting time"
+15,NA,"Lens",NA,NA,NA,NA
+16,NA,"Head size","Response amplitude - S",NA,"Periphery resting time","Mean platelet volume"
+17,NA,NA,"18kHz-evoked ABR Threshold",NA,NA,"Sodium"
+18,NA,"Mean corpuscular hemoglobin",NA,NA,"Phosphorus","Hindpaw - size"
+19,NA,NA,NA,"6kHz-evoked ABR Threshold","Bone Area",NA
+20,NA,"Radius","CD4+ NKT cells - % of live leukocytes (Panel A)",NA,"Joints","Retinal Blood Vessels"
+21,NA,"Coat - hair texture / appearance - abdomen","Head morphology",NA,"Retina (combined)","Center distance travelled"
+22,NA,"% Pre-pulse inhibition - PPI1",NA,NA,"Body length",NA
+23,NA,"Alpha-amylase",NA,NA,NA,"Lymphocyte differential count"
+24,NA,"Albumin",NA,NA,"Calcium","Mean cell hemoglobin concentration"
+25,NA,"% Pre-pulse inhibition - PPI2","Difference in Cue Tone and Cue Baseline % Freezing","Hematocrit","Forepaw - size",NA
+26,"Vibrissae - appearance",NA,"Corneal opacity","Lean mass","Iris transilumination","Periphery distance travelled"
+27,"Vitreous",NA,"Center permanence time","Chloride","Pupil Shape",NA
+28,"Forelimb grip strength normalised against body weight","UIBC (unsaturated iron binding capacity)","Periphery permanence time","RR",NA,NA
+29,"Skin color - tail","Fructosamine","Total cholesterol",NA,"Startle response","Coat - color - head"
+30,"Fusion of vertebrae","PR",NA,NA,"Forelimb and hindlimb grip strength normalised against body weight",NA
+31,NA,"Transitional vertebrae",NA,"Potassium","Right corneal thickness","NKT cells (panel A) - % of live leukocytes (Panel A)"
+32,NA,NA,"Forelimb and hindlimb grip strength measurement mean",NA,NA,"Hemoglobin"
+33,"White blood cell count","Right anterior chamber depth","% Pre-pulse inhibition - PPI4","LVPWs","% Pre-pulse inhibition - PPI3",NA
+34,"Number of lumbar vertebrae","rMSSD","Number of pelvic vertebrae","Eye Hemorrhage or Blood Presence","Retinal Blood Vessels Structure","Scapulae"
+35,"Effector CD8+ T cells - % of live leukocytes (Panel A)","Embryo Size","Neutrophil cell count","Neural tube closure","Glucose",NA
+36,"Periphery average speed",NA,NA,NA,NA,NA
+37,"Unexpected behaviors","Skin Appearance",NA,NA,"Tremor","Number of rears - total"
+38,NA,NA,NA,NA,"Alanine aminotransferase","Left total retinal thickness"
+39,NA,"Hindbrain morphology","Aggression","Respiratory Exchange Ratio","Latency to center entry","Tibia length"
+40,NA,"Tail Morphology",NA,NA,NA,"Tibia length"
+41,"Respiration Rate","Right total retinal thickness","Responsive to tactile stimuli","HRV","Right vitreous humor thickness","Locomotor activity"
+42,NA,"Edema","Mean left eye lens density",NA,"Treg cells - % of live leukocytes (Panel A)","Persistence of hyaloid vascular system"
+43,NA,"Delayed embryonic development","Pericardium Morphology",NA,"Percentage center time",NA
+44,NA,"Hemorrhage",NA,NA,"Humerus","Shape of spine"
+45,"spina bifida","Outer ear morpholgy",NA,NA,"Basophil differential count",NA
+46,"Craniofacial morphology",NA,NA,NA,"Lens Opacity","Total protein"
+47,NA,NA,"Midbrain morphology",NA,"Platelet count",NA
+48,"Tongue out",NA,"Neural tube morphology",NA,NA,NA
+49,"Limb morphology",NA,"Embryo Size",NA,"Red blood cell distribution width","Trunk curl"
+50,"Delayed embryonic development",NA,NA,NA,NA,"Lean/Body weight"
+51,NA,NA,NA,NA,"HR",NA
+52,NA,NA,NA,NA,"Lymphocyte cell count","Left vitreous humour thickness"
+53,NA,NA,NA,NA,"Creatinine","HDL-cholesterol"
+54,NA,NA,NA,NA,NA,NA
+55,NA,NA,NA,NA,NA,NA
+56,NA,NA,NA,NA,"Pelvis","Right inner nuclear layer"
+57,NA,NA,NA,NA,NA,"Area under glucose response curve"
+58,NA,NA,NA,NA,"Initial response to glucose challenge",NA
+59,NA,NA,NA,NA,NA,"Vibrissae - presence"
+60,NA,NA,NA,NA,NA,"Embryo turning"
+61,NA,NA,NA,NA,"LDL-cholesterol",NA
+62,NA,NA,NA,NA,"Coat - hair distribution - abdomen",NA
+63,NA,NA,NA,NA,NA,NA
+64,NA,NA,NA,NA,"QT",NA
+65,NA,NA,NA,NA,"CV",NA
+66,NA,NA,NA,NA,NA,NA
+67,NA,NA,NA,NA,"Facial Morphology","Pallor"
+68,NA,NA,NA,NA,"Head shape","Forebrain morphology"
+69,NA,NA,NA,NA,"Facial Cleft",NA
+70,NA,NA,NA,NA,"Heart morphology",NA
+71,NA,NA,NA,NA,NA,NA
+72,NA,NA,NA,NA,NA,NA
+73,NA,NA,NA,NA,"Placenta Morphology",NA
+74,NA,NA,NA,NA,NA,NA
+75,NA,NA,NA,NA,"Edema",NA
+76,NA,NA,NA,NA,"Embryo Size",NA
+77,NA,NA,NA,NA,"Left inner nuclear layer",NA
+78,NA,NA,NA,NA,NA,NA
+79,NA,NA,NA,NA,NA,NA
