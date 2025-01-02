@@ -58,10 +58,10 @@ library(fs)         # File system operations
 #| warning: false
 
 # Set working directory (uncomment for other users as needed)
-# rootDir <- "/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/" # Allie
+rootDir <- "/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/" # Allie
 # rootDir <- "/Users/sanjanasrinivasan/Desktop/DCDM_IMPC_Project/" # Sanj
 # rootDir <- "/Users/ellajadealex/Desktop/applied_bioinformatics/DCDM/group_project/DCDM_IMPC_Project/" # Ella
-rootDir <- "/Users/sama/Desktop/DCDM_Proj2/" # Sama
+# rootDir <- "/Users/sama/Desktop/DCDM_Proj2/" # Sama
 # rootDir <- "~/Desktop/working_directory/DCDM_project" # Esta
 
 # Create directories
@@ -326,11 +326,6 @@ Check & format `gene_symbol` so all values are in title format.
 ```{r}
 # Validate and format 'gene_symbol'
 
-# Convert all gene_symbol values to title case and remove duplicates
-analysis <- analysis %>%
-  mutate(gene_symbol = str_to_title(gene_symbol)) %>%
-  distinct()
-
 # Check for invalid gene_symbol lengths
 invalid_gene_symbols <- analysis %>%
   filter(nchar(gene_symbol) < 1 | nchar(gene_symbol) > 13)  # Identify invalid lengths
@@ -343,11 +338,20 @@ log_message(if (nrow(invalid_gene_symbols) == 0) {
 })
 ```
 
+```{r}
+# Convert all gene_symbol values to title case and remove duplicates
+analysis <- analysis %>%
+  mutate(gene_symbol = str_to_title(str_to_lower(gene_symbol))) %>%
+  distinct()
+```
+
 Check if `gene_accession_id` and `gene_symbol` are perfectly correlated.
 
 ```{r}
 # Check correlation between `gene_accession_id` and `gene_symbol`
 gene_symbol_correlation <- analysis %>%
+  select(gene_accession_id, gene_symbol) %>%
+  distinct() %>%
   group_by(gene_accession_id) %>%
   filter(n_distinct(gene_symbol) > 1)  # Identify cases where one gene_accession_id maps to multiple gene_symbols
 
@@ -362,6 +366,7 @@ log_message(if (nrow(gene_symbol_correlation) == 0) {
 Check & format `mouse_strain` so all results are one of the four valid strains specified in the SOP: C57BL, B6J, C3H or 129SV. Our results show 11 unique strains, 9 of which appear to be typos of C57BL (e.g. C53BL, C58BL - none of the 'typos' are valid mouse strains according to MGI).
 
 ```{r}
+unique(analysis$mouse_strain)
 # Validate and fix `mouse_strain` by standardizing known values and replacing others with "C57BL"
 analysis <- analysis %>%
   mutate(mouse_strain = ifelse(mouse_strain %in% c("C57BL", "B6J", "C3H", "129SV"), mouse_strain, "C57BL"))
@@ -1309,7 +1314,7 @@ INTO TABLE Analyses
 FIELDS TERMINATED BY ',' 
 OPTIONALLY ENCLOSED BY '"' 
 IGNORE 1 LINES;
-# Records: 177981  Deleted: 0  Skipped: 0  Warnings: 0
+# Records: 178176  Deleted: 0  Skipped: 0  Warnings: 0
 
 LOAD DATA LOCAL INFILE '/Users/aliciahobdell/Desktop/data_cleaning/DCDM_group3/data/collated/ParameterGroupings.csv'
 INTO TABLE ParameterGroupings
