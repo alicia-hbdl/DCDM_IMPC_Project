@@ -1393,7 +1393,7 @@ con <- dbConnect(
   host = "localhost",
   port = 3306,
   user = "root",
-  password = "mahiat123"  # Replace with your password
+  password = "pw"  # Replace with your password
 )
 # Get the options for the drop-downs 
 
@@ -1669,10 +1669,6 @@ barplot(loadings[, "PC1"], las = 2,
         main = "Loadings for PC1",
         ylab = "Loading Value")
 
-# Heatmap of all loadings
-library(pheatmap)
-pheatmap(loadings, cluster_rows = TRUE, cluster_cols = TRUE)
-
 
 ## Grouping parameters based on their loadings
 param_clusters <- kmeans(loadings, centers = 4) 
@@ -1686,14 +1682,14 @@ param_clusters <- kmeans(loadings, centers = 4)
 
 ```{r}
 
-write.csv(param_cluster_assignments, "/Users/sama/Desktop/DCDM/data/parameter_clusters.csv", row.names = FALSE)
+write.csv(param_cluster_assignments, "/Users/sama/Desktop/DCDM/data/groupings/parameter_clusters.csv", row.names = FALSE)
 
-write.csv(parameters_table, "/Users/sama/Desktop/DCDM/data/parameter_table.csv", row.names = FALSE)
+write.csv(parameters_table, "/Users/sama/Desktop/DCDM/data/groupings/parameter_table.csv", row.names = FALSE)
 
 
 # Load the cluster assignments and the parameter name mapping
-param_clusters <- read.csv("/Users/sama/Desktop/DCDM/data/parameter_clusters.csv")
-parameter_names <- read.csv("/Users/sama/Desktop/DCDM/data/parameter_table.csv")
+param_clusters <- read.csv("/Users/sama/Desktop/DCDM/data/groupings/parameter_clusters.csv")
+parameter_names <- read.csv("/Users/sama/Desktop/DCDM/data/groupings/parameter_table.csv")
 
 ma <- read.csv("/Users/sama/Desktop/DCDM/data/cleaned/cleaned_IMPC_parameter_description.csv")
 view(ma)
@@ -1762,7 +1758,7 @@ Cluster 5: Lipid metabolism and cholestrol, Eye, Bones and joint health, Blood, 
 
 Cluster 6: Immune system, external appearence, Eye, Physiology and their measurements, Morphology, Behaviorial responses.
 
-Most common groupings: Metabolism, Eye, Cardiovascular,Morphology, Audiology, Immunology, Behaviorial responses
+Possible groupings: Metabolism, Eye, Cardiovascular,Morphology, Audiology, Immunology, Behaviorial responses.
 
 ```{r}
 
@@ -1779,7 +1775,7 @@ group_patterns <- tibble(
     "heart|cardiac|vascular|blood|vein|aort|arter|HR|stroke|ejection|QT|circulation|pulse|pressure|rate|systolic|diastolic|respiration|respiratory|PR|pulse|ECG|cardio|valve|LVPWs|platelet|",
     "eye|retina|cornea|lens|eyelid|iris|optic|ocular|vision|acuity|photoreceptor|brightness|scheimpflug|nuclear|macula|pupil|color|refraction|sclera|vitreous|retinal|lens|",
     "glucose|insulin|cholesterol|lipid|triglycerides|fasting|diet|energy|metabolism|metabolic|AUC|glycemic|resistance|glucagon|carbohydrate|diabetes|protein|fat|urea|sodium|potassium|phosphorus|calories|homeostasis|hdl|ldl",
-    "morphology|shape|size|growth|length|hypoplasia|syndactyly|microcephaly|anatomy|limb|edema|facial|cleft|dysmorphic|developmental|pattern|CRL|development|blebs|appearance|structure|pattern|thickness|length|shape",
+    "morphology|shape|size|growth|length|hypoplasia|syndactyly|microcephaly|anatomy|limb|edema|facial|cleft|dysmorphic|developmental|pattern|CRL|development|blebs|appearance|structure|pattern|thickness|pelvis|hair|color|coat",
     "ABR|hearing|audiometry|waveform|tone|decibel|audiogram|stimulus|frequency|click|response|threshold|sound|ear",
     "Lymphocyte|Neutrophil|NKT|Treg|Leukocyte|Basophil|Platelet|Spleen|Blood|Cell|Immune|Differential|White|Hemoglobin|Eosinophil|Monocyte",
     "behavior|locomotor|percentage|movement|time|center|speed|distance|resting|stimuli|startle|unexpected|vocalization|entries|rears|tremor|tongue|curl|vibrissae|aggression|pallor|turning|activity"
