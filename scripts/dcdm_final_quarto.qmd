@@ -1387,6 +1387,14 @@ WHERE parameter_id IN (
 ```{r}
 #| eval: false
 
+con <- dbConnect(
+  RMySQL::MySQL(),
+  dbname = "IMPCDb",  # Replace with your database name
+  host = "localhost",
+  port = 3306,
+  user = "root",
+  password = "mahiat123"  # Replace with your password
+)
 # Get the options for the drop-downs 
 
 # Mouse strain
@@ -1476,7 +1484,7 @@ con <- dbConnect(
   host = "localhost",
   port = 3306,
   user = "root",
-  password = "pw"  # Replace with your password
+  password = "mahiat123"  # Replace with your password
 )
 
 # Query the database
@@ -1671,6 +1679,7 @@ param_clusters <- kmeans(loadings, centers = 4)
 # or hierarchical clustering on 'loadings' to find sets of parameters that have similar loading patterns across the PCs
 
 
+
 ```
 
 **Create groupings based on clusters**
@@ -1685,6 +1694,9 @@ write.csv(parameters_table, "/Users/sama/Desktop/DCDM/data/parameter_table.csv",
 # Load the cluster assignments and the parameter name mapping
 param_clusters <- read.csv("/Users/sama/Desktop/DCDM/data/parameter_clusters.csv")
 parameter_names <- read.csv("/Users/sama/Desktop/DCDM/data/parameter_table.csv")
+
+ma <- read.csv("/Users/sama/Desktop/DCDM/data/cleaned/cleaned_IMPC_parameter_description.csv")
+view(ma)
 
 # Select only the 'parameter_id' and 'parameter_name' columns from parameter_names
 parameter_names <- parameter_names %>%
@@ -1701,8 +1713,13 @@ param_with_names
 ```
 
 ```{r}
+cluster_summary <- param_with_names %>%
+  group_by(cluster) %>%
+  summarise(num_parameters = n())
+```
 
-# Group parameters by their cluster and assign meaningful names
+```{r}
+
 grouped_parameters <- param_with_names %>%
   group_by(cluster) %>%
   summarise(
@@ -1710,11 +1727,9 @@ grouped_parameters <- param_with_names %>%
     .groups = 'drop'
   )
 
-# Create a list of parameter names under each cluster
-# We will separate each parameter in a new row under the corresponding cluster
 grouped_parameters_separated <- param_with_names %>%
-  select(cluster, parameter_name) %>%  # Ensure only cluster and parameter_name are selected
-  arrange(cluster)  # Sort by cluster for better visualization
+  select(cluster, parameter_name) %>%  
+  arrange(cluster)  
 
 # Now pivot the data to have clusters as columns and parameters as rows
 grouped_parameters_wide <- grouped_parameters_separated %>%
@@ -1733,28 +1748,42 @@ write.csv(grouped_parameters_wide, "/Users/sama/Desktop/DCDM/data/grouped_parame
 
 ```
 
-```{r}
+Examining the data:
 
-install.packages("tidytext")
-library(tidytext)
+Cluster 1: behaviorial and neurological features, Eye, morphology, metabolic (Body, size and weights) and biochemical, immune system/haematologocal features.
 
-# Tokenize the parameter names into keywords. 
+Cluster 2: blood and immune system, Metabolic function (organ health and energy balance), Neurological (brain, behavior, and cognitive function), Morphology and external appearance (body and organ size, bone structure, skin, hair, and ear morphology) Pathological markers, Eye.
 
-tf_idf_by_cluster <- grouped_parameters_separated %>%
-  unnest_tokens(word, parameter_name) %>%  # Split the parameter names into individual words
-  count(cluster, word, sort = TRUE) %>%     # Count frequency of each word for each cluster
-  bind_tf_idf(word, cluster, n) %>%          # Calculate TF-IDF (Term Frequency-Inverse Document Frequency)
-  arrange(cluster, desc(tf_idf))             # Sort by TF-IDF within each cluster
+Cluster 3: External appearance (Skin colour), Audiology, Metabolism, Blood, Morphology, Cardiovascular, Behavorial features, Bones and skeletal, Immune cells and Eye.
 
-# View the TF-IDF values for each cluster
-print(tf_idf_by_cluster)
+Cluster 4: Metabolism, Cardiovascular, External appearance, Audiology, Neurological and Eye
 
-```
+Cluster 5: Lipid metabolism and cholestrol, Eye, Bones and joint health, Blood, Immune system, growth and development, Behaviorial and neurological, External appearence.
+
+Cluster 6: Immune system, external appearence, Eye, Physiology and their measurements, Morphology, Behaviorial responses.
+
+Most common groupings: Metabolism, Eye, Cardiovascular,Morphology, Audiology, Immunology, Behaviorial responses
 
 ```{r}
 
-# Assign grouping names and keywords
-
-
+group_patterns <- tibble(
+  group_name = c(
+    "weight", "images", "brain", "cardiovascular", "eye", 
+    "metabolic", "morphology", "audiology", 
+    "immunology", "Behavior", "experimental_identifiers"
+  ),
+  regex_pattern = c(
+    "weight|density|fat|lean|BMI|BMC|mass|composition|bone|length|adipose|lipid|body size|size|growth|skeletal|area|volume",
+    "image|screenshot|microscope|pdf|lacz|waveform|ogram|resolution|visual|pixel|scan|photo|imaging|bit depth|microscopy|contrast",
+    "brain|cortex|hippo|thalamus|amygdala|lobe|cere|spinal|pituitary|striatum|hypothal|neural|neuronal|pons|medulla|ganglion|nerve|enceph|ventricle|choroid",
+    "heart|cardiac|vascular|blood|vein|aort|arter|HR|stroke|ejection|QT|circulation|pulse|pressure|rate|systolic|diastolic|respiration|respiratory|PR|pulse|ECG|cardio|valve|LVPWs|platelet|",
+    "eye|retina|cornea|lens|eyelid|iris|optic|ocular|vision|acuity|photoreceptor|brightness|scheimpflug|nuclear|macula|pupil|color|refraction|sclera|vitreous|retinal|lens|",
+    "glucose|insulin|cholesterol|lipid|triglycerides|fasting|diet|energy|metabolism|metabolic|AUC|glycemic|resistance|glucagon|carbohydrate|diabetes|protein|fat|urea|sodium|potassium|phosphorus|calories|homeostasis|hdl|ldl",
+    "morphology|shape|size|growth|length|hypoplasia|syndactyly|microcephaly|anatomy|limb|edema|facial|cleft|dysmorphic|developmental|pattern|CRL|development|blebs|appearance|structure|pattern|thickness|length|shape",
+    "ABR|hearing|audiometry|waveform|tone|decibel|audiogram|stimulus|frequency|click|response|threshold|sound|ear",
+    "Lymphocyte|Neutrophil|NKT|Treg|Leukocyte|Basophil|Platelet|Spleen|Blood|Cell|Immune|Differential|White|Hemoglobin|Eosinophil|Monocyte",
+    "behavior|locomotor|percentage|movement|time|center|speed|distance|resting|stimuli|startle|unexpected|vocalization|entries|rears|tremor|tongue|curl|vibrissae|aggression|pallor|turning|activity"
+ 
+  )
 
 ```
