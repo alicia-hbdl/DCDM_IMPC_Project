@@ -1781,5 +1781,5 @@ group_patterns <- tibble(
     "behavior|locomotor|percentage|movement|time|center|speed|distance|resting|stimuli|startle|unexpected|vocalization|entries|rears|tremor|tongue|curl|vibrissae|aggression|pallor|turning|activity"
  
   )
-
+)
 ```
