@@ -476,19 +476,25 @@ server <- function(input, output, session) {
       
       str(dend_data$labels)
       
+      set.seed(123)  # For reproducibility
+      
+      # Generate a color palette for the branches
+      branch_colors <- sample(colors(), nrow(dend_data$segments), replace = TRUE)
+      
       p <- ggplot() +
         # Segments for the branches
         geom_segment(
           data = dend_data$segments,
           aes(x = x, y = y, xend = xend, yend = yend),
-          color = "black"
+          color = branch_colors,  # Custom color for the branches
+          size = 0.8  # Thicker branches for better visibility
         ) +
       
         geom_text(
           data = dend_data$labels %>%
             mutate(y = y - max(dend_data$segments$y) * 0.2),  # Shift labels further down
           aes(x = x, y = y, label = label),
-          size = 3,
+          size = 2.5,
           hjust = 0.5,  # Center the text horizontally
           color = "black"
         ) +
@@ -497,17 +503,19 @@ server <- function(input, output, session) {
         # Reverse y so the tree grows "up" (optional but common)
         scale_y_reverse(expand = c(0.2, 0)) +
         # Minimal theme
-        theme_minimal() +
+        theme_minimal(base_size = 10) +
         labs(
-          title = "Hierarchical Clustering of Genes",
-          x = NULL,          # or "Genes"
-          y = "Distance"
+          title = "Hierarchical Clustering of Knockout Mouse Genes",
+          x = "Genes of Knockout Mouse",
+          y = "Cluster Distance"
         ) +
         theme(
-          plot.title   = element_text(size = 14, face = "bold"),
-          axis.text.y  = element_blank(),   # we have our own text for labels
-          axis.ticks.y = element_blank(),
-          axis.title.y = element_blank()
+          plot.title   = element_text(size = 16, face = "bold", hjust = 0.5), 
+          axis.text.y  = element_text(size = 8),  # Axis label styling
+          axis.ticks.y = element_blank(),  # Remove y-axis ticks for a cleaner look
+          axis.title.y = element_blank(),  # Remove the y-axis title
+          panel.grid.major = element_line(color = "grey90", size = 1),  # Light grid lines for better readability
+          panel.grid.minor = element_blank()
         )
 
     } else if (input$cluster_method == "PCA") {
