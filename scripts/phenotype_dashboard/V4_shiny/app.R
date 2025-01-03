@@ -34,8 +34,8 @@ ui <- fluidPage(
       
       conditionalPanel(
         condition = "input.tabs == 'phenotype_mice_tab'",
-        selectInput("selected_phenotype_group", "Select Parameter Grouping:",
-                    choices = c("All", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11")),
+        selectInput("selected_phenotype_group", "Select Phenotype Group:",
+                    choices = NULL, selected = NULL),
         selectInput("selected_phenotype", "Select Phenotype:",
                     choices = NULL, selected = NULL),
         # Display a message explaining why some parameter groups are missing
@@ -112,7 +112,7 @@ server <- function(input, output, session) {
     host = "localhost",
     port = 3306,
     user = "root",
-    password = "mahiat123"
+    password = "icecream8"
   )
   
   onStop(function() {
@@ -129,8 +129,9 @@ server <- function(input, output, session) {
   
   # Parameter grouping
   observe({
-    groups <- dbGetQuery(con, "SELECT DISTINCT group_id FROM ParameterGroupings;")
-    updateSelectInput(session, "selected_phenotype_group", choices = groups$group_id)
+    groups <- dbGetQuery(con, "SELECT DISTINCT group_name FROM Groupings;")
+    groups$group_name <- tools::toTitleCase(groups$group_name) # Ensure title case
+    updateSelectInput(session, "selected_phenotype_group", choices = groups$group_name)
   })
   
   # Phenotype choices based on group
@@ -143,7 +144,8 @@ server <- function(input, output, session) {
     FROM Parameters P
     JOIN ParameterGroupings PG ON P.parameter_id = PG.parameter_id
     LEFT JOIN Analyses A ON P.parameter_id = A.parameter_id
-    WHERE PG.group_id = '%s'
+    JOIN Groupings GR ON PG.group_id = GR.group_id
+    WHERE GR.group_name = '%s'
     GROUP BY P.parameter_name;", input$selected_phenotype_group)
     
     phenotype_data <- dbGetQuery(con, query)
@@ -318,7 +320,8 @@ server <- function(input, output, session) {
     JOIN Parameters P ON A.parameter_id = P.parameter_id
     JOIN Genes G ON A.gene_accession_id = G.gene_accession_id
     JOIN ParameterGroupings PG ON P.parameter_id = PG.parameter_id
-    WHERE P.parameter_name = '%s' AND PG.group_id = '%s'
+    JOIN Groupings GR ON PG.group_id = GR.group_id
+    WHERE P.parameter_name = '%s' AND GR.group_name = '%s'
     ORDER BY A.p_value ASC;", 
                      input$selected_phenotype, input$selected_phenotype_group)
     
