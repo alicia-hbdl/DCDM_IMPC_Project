@@ -75,8 +75,8 @@ ui <- fluidPage(
         selectInput("cluster_life_stage",   "Select Mouse Life Stage:", 
                     choices = NULL, 
                     selected = "All")
-      )
-    ),
+        )
+      ),
     
     mainPanel(
       tabsetPanel(
@@ -275,36 +275,36 @@ server <- function(input, output, session) {
           axis.title.y = element_text(size = 12, face = "bold"),  
           plot.title = element_text(size = 16, face = "bold", hjust = 0.5),  
           plot.subtitle = element_text(size = 12, hjust = 0.5),  
-          axis.text.y = element_text(size = 10),
+          axis.text.y = element_text(size = 10)
         ) +
         geom_hline(yintercept = input$mouse_threshold, linetype = "dashed", color = "black")
     } else 
       
       if (input$plot_type == "Dot Plot") {
-        ggplot(data, aes(x = parameter_name, y = p_value, color = Threshold, text = paste("p-value:", p_value, "<br>Phenotype:", parameter_name))) +
-          geom_point(size = 2.5) +
-          scale_color_manual(values = c("Significant" = "palegreen3", "Not Significant" = "indianred3")) +
-          labs(
-            title = paste("The Phenotype Scores for Knockout Mouse:", input$selected_mouse),
-            subtitle = paste("Showing phenotypes with p-value <= ", input$mouse_threshold),
-            x = "Knockout Mouse Phenotype", 
-            y = "p-value for Phenotype Association"
-          ) +
-          theme_minimal() +
-          theme(
-            axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, size = 6, face = "bold"),
-            axis.title.x = element_text(size = 12, face = "bold"),
-            axis.title.y = element_text(size = 12, face = "bold"),
-            plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
-            plot.subtitle = element_text(size = 12, hjust = 0.5),
-            axis.text.y = element_text(size = 10)
-          ) +
-          geom_hline(yintercept = input$mouse_threshold, linetype = "dashed", color = "black")
-      }
-    
+      ggplot(data, aes(x = parameter_name, y = p_value, color = Threshold, text = paste("p-value:", p_value, "<br>Phenotype:", parameter_name))) +
+        geom_point(size = 2.5) +
+        scale_color_manual(values = c("Significant" = "palegreen3", "Not Significant" = "indianred3")) +
+        labs(
+          title = paste("The Phenotype Scores for Knockout Mouse:", input$selected_mouse),
+          subtitle = paste("Showing phenotypes with p-value <= ", input$mouse_threshold),
+          x = "Knockout Mouse Phenotype", 
+          y = "p-value for Phenotype Association"
+        ) +
+        theme_minimal() +
+        theme(
+          axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, size = 6, face = "bold"),
+          axis.title.x = element_text(size = 12, face = "bold"),
+          axis.title.y = element_text(size = 12, face = "bold"),
+          plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
+          plot.subtitle = element_text(size = 12, hjust = 0.5),
+          axis.text.y = element_text(size = 10)
+        ) +
+        geom_hline(yintercept = input$mouse_threshold, linetype = "dashed", color = "black")
+    }
+  
     ggplotly(p, tooltip = "text")
   })
-  
+
   
   # Visualisation 2: Statistical Scores of All Knockout Mice for a Selected Phenotype
   
@@ -342,36 +342,41 @@ server <- function(input, output, session) {
       ) %>%
       ungroup()
     
-    p <- ggplot(data, aes(x = reorder(gene_symbol, p_value), y = p_value, color = Threshold, text = paste("p-value:", p_value, "<br>Gene:", gene_symbol))) +
-      geom_point(size = 1.5) +
-      scale_color_manual(values = c("Significant" = "palegreen3", "Not Significant" = "indianred3")) +
-      labs(
-        title = paste("Gene Knockout Scores for Selected Phenotype:", input$selected_phenotype),
-        subtitle = paste("Showing genes with p-value <= ", input$mouse_threshold),
-        x = "Gene Symbol", 
-        y = "p-value for Gene Association"
-      ) +
-      theme_minimal() +
-      theme(
-        axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, size = 4, face = "bold"),
-        axis.title.x = element_text(size = 12, face = "bold"),
-        axis.title.y = element_text(size = 12, face = "bold"),
-        plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
-        plot.subtitle = element_text(size = 12, hjust = 0.5),
-        axis.text.y = element_text(size = 10)
-      ) +
-      geom_hline(yintercept = input$mouse_threshold, linetype = "dashed", color = "black")
-    
-    ggplotly(p, tooltip = "text")
-  })
+        p <- ggplot(data, aes(x = reorder(gene_symbol, p_value), y = p_value, color = Threshold, text = paste("p-value:", p_value, "<br>Gene:", gene_symbol))) +
+        geom_point(size = 1.5) +
+        scale_color_manual(values = c("Significant" = "palegreen3", "Not Significant" = "indianred3")) +
+        labs(
+          title = paste("Gene Knockout Scores for Selected Phenotype:", input$selected_phenotype),
+          subtitle = paste("Showing genes with p-value <= ", input$mouse_threshold),
+          x = "Gene Symbol", 
+          y = "p-value for Gene Association"
+        ) +
+        theme_minimal() +
+        theme(
+          axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, size = 4, face = "bold"),
+          axis.title.x = element_text(size = 12, face = "bold"),
+          axis.title.y = element_text(size = 12, face = "bold"),
+          plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
+          plot.subtitle = element_text(size = 12, hjust = 0.5),
+          axis.text.y = element_text(size = 10)
+        ) +
+        geom_hline(yintercept = input$mouse_threshold, linetype = "dashed", color = "black")
+  
+      ggplotly(p, tooltip = "text")
+      })
   
   
   #Visualisation 3  
   analysis_data <- reactive({
     # Base query
-    query <- "SELECT gene_accession_id, parameter_id, ROUND(AVG(p_value), 6) AS avg_p_value 
-            FROM Analyses 
-            WHERE 1=1"
+    query <- "
+      SELECT 
+        gene_accession_id,
+        parameter_id,
+        ROUND(AVG(p_value), 6) AS avg_rounded_pvalue
+      FROM Analyses
+      WHERE p_value IS NOT NULL
+    "
     # Add filters for strain
     if (input$cluster_mouse_strain != "All") {
       query <- paste0(query, " AND mouse_strain = '", input$cluster_mouse_strain, "'")
@@ -381,8 +386,11 @@ server <- function(input, output, session) {
       query <- paste0(query, " AND mouse_life_stage = '", input$cluster_life_stage, "'")
     }
     # Final group by & order
-    query <- paste0(query, " GROUP BY gene_accession_id, parameter_id 
-                           ORDER BY avg_p_value ASC;")
+    query <- paste0(query, "
+      GROUP BY gene_accession_id, parameter_id
+      ORDER BY avg_rounded_pvalue ASC;
+    ")
+    
     # Execute the query
     df <- dbGetQuery(con, query)
     
@@ -391,8 +399,8 @@ server <- function(input, output, session) {
   
   # pca_matrix -> pivot to wide
   pca_matrix <- reactive({
-    df <- analysis_data()
     
+    df <- analysis_data()
     if (nrow(df) == 0) {
       return(NULL)
     }
@@ -401,7 +409,8 @@ server <- function(input, output, session) {
     wide_df <- df %>%
       tidyr::pivot_wider(
         names_from = parameter_id,
-        values_from = avg_p_value
+        values_from = avg_p_value,
+        values_fill = list(avg_p_value = 0) # fill missing with 0 
       )
     
     # Convert gene_accession_id into rownames, assuming 'gene_accession_id' is a column in df
@@ -410,7 +419,7 @@ server <- function(input, output, session) {
     # Remove the gene_accession_id column now that it’s the rowname
     wide_df <- wide_df[, !names(wide_df) %in% "gene_accession_id"]
     
-    wide_df
+    return(wide_df)
   })
   
   # Render the cluster plot
@@ -449,7 +458,7 @@ server <- function(input, output, session) {
     }
     
     # Scale the data
-    mat_scaled <- scale(data_wide)
+    #mat_scaled <- scale(data_wide)
     
     
     #Clustering
@@ -463,7 +472,7 @@ server <- function(input, output, session) {
       # Perform hierarchical clustering
       hc <- hclust(dist(mat_scaled), method = "ward.D")
       
-      # Convert hclust -> dendrogram -> apply "hang" to shorten tips
+      # 3. Convert hclust -> dendrogram -> apply "hang" to shorten tips
       #    "hang" sets how far tips hang below the rest of the dendrogram.
       #    0.1 or 0.2 often works well. Smaller => shorter vertical lines to labels.
       library(dendextend)  # install.packages("dendextend") if needed
@@ -489,7 +498,7 @@ server <- function(input, output, session) {
           color = branch_colors,  # Custom color for the branches
           size = 0.8  # Thicker branches for better visibility
         ) +
-        
+      
         geom_text(
           data = dend_data$labels %>%
             mutate(y = y - max(dend_data$segments$y) * 0.2),  # Shift labels further down
@@ -517,16 +526,18 @@ server <- function(input, output, session) {
           panel.grid.major = element_line(color = "grey90", size = 1),  # Light grid lines for better readability
           panel.grid.minor = element_blank()
         )
-      
+
     } else if (input$cluster_method == "PCA") {
       
       # Run PCA
-      pca <- prcomp(mat_scaled, scale. = FALSE)  # mat_scaled is already scaled
-      pca_data <- data.frame(pca$x[, 1:2])
-      pca_data$gene <- rownames(mat_scaled)
+      pca_result <- prcomp(data_wide, scale. = TRUE)
+      # Extract the top 2 PCs (for visualization)
+      pca_data <- as.data.frame(pca_result$x[, 1:2])
+      pca_data$gene <- rownames(data_wide)
       
       # K-means clustering 
-      km <- kmeans(mat_scaled, centers = input$num_clusters)
+      # Perform k-means clustering on PC1 and PC2
+      km <- kmeans(pca_data[, 1:2], centers = input$num_clusters)
       pca_data$cluster <- factor(km$cluster)
       
       # Set dynamic graph title
@@ -559,7 +570,7 @@ server <- function(input, output, session) {
           panel.grid.minor = element_blank()
         )
       ggplotly(p, tooltip = "text")
-      
+
       
     } else if (input$cluster_method == "UMAP") {
       # UMAP
@@ -607,4 +618,3 @@ server <- function(input, output, session) {
 }
 
 shinyApp(ui = ui, server = server)
-

@@ -1489,7 +1489,7 @@ con <- dbConnect(
   host = "localhost",
   port = 3306,
   user = "root",
-  password = "pw"  # Replace with your password
+  password = "Llama123@"  # Replace with your password
 )
 
 # Query the database
