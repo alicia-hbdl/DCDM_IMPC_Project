@@ -1,0 +1,1 @@
+Directory for running data analysis, cleaning, and collating steps on the HPC due to high computational requirements. These were used by Esta to generate the code. However, the data was eventually cleaned and collated locally by running the Quarto document by Alicia.
