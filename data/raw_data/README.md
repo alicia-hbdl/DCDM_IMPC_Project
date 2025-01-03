@@ -1,0 +1,1 @@
+Folder for storing the thousands of raw data files provided as the starting point. A CSV file, combining all these files into a single table based on common field names, was also created and added to this folder.
