@@ -112,7 +112,7 @@ server <- function(input, output, session) {
     host = "localhost",
     port = 3306,
     user = "root",
-    password = "Llama123@"
+    password = "KCL2024!"
   )
   
   onStop(function() {

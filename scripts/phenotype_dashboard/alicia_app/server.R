@@ -151,7 +151,6 @@ server <- function(input, output, session) {
       }
     })
     
-    if (!is.null(data) && nrow(data) > 0) {
       data <- data %>%
         filter(!is.na(parameter_name) & tolower(parameter_name) != "na") %>%
         group_by(parameter_id) %>%
@@ -159,7 +158,8 @@ server <- function(input, output, session) {
           parameter_name = str_to_title(first(parameter_name)),
           p_value = mean(p_value),
           Threshold = ifelse(any(p_value < input$genotype_threshold), "Significant", "Not Significant")
-        ) %>%
+        ) %>% 
+        ungroup() %>%
         arrange(p_value)
       
       if (input$genotype_plot_type == "Top 25 Phenotypes") {
@@ -167,17 +167,19 @@ server <- function(input, output, session) {
       }
       
       p <- ggplot(data, aes(
-        x = reorder(parameter_name, p_value),
-        y = -log2(p_value),
-        fill = Threshold,
+        x = reorder(parameter_name, p_value), 
+        y = -log2(p_value), 
+        fill = Threshold, 
         text = paste0(
-          "Parameter Name: ", parameter_name,
-          "<br>P-value: ", signif(p_value, digits = 3),
-          "<br>Threshold: ", Threshold
+          "Parameter Name: ", parameter_name, "<br>",
+          "P-value: ", signif(p_value, digits = 3), "<br>",
+          "Threshold: ", Threshold
         )
       )) +
-        geom_bar(stat = "identity", position = position_dodge(width = 2), show.legend = TRUE, width = 0.6) +
-        scale_fill_manual(values = c("Significant" = "palegreen3", "Not Significant" = "indianred3")) +
+        geom_bar(stat = "identity", width = 0.6,  # Set consistent bin width
+          show.legend = TRUE
+        ) +
+        scale_fill_manual(values = c("Significant" = "palegreen3", "Not Significant" = "indianred3")) + 
         labs(
           title = paste(input$genotype_plot_type, "for", input$genotype_mouse),
           x = "Knockout Mouse Phenotype",
@@ -185,15 +187,19 @@ server <- function(input, output, session) {
         ) +
         theme_minimal() +
         theme(
-          axis.text.x = element_text(angle = 45, hjust = 0, vjust=1, size = 10, face = "bold"),
-          axis.title = element_text(size = 12, face = "bold"),
+          axis.text.x = element_text(angle = 45, hjust = 0, vjust = 1, size = 10, face = "bold"),
+          axis.text.y = element_text(size = 10),
+          axis.title.x = element_text(size = 12, face = "bold"),  
+          axis.title.y = element_text(size = 12, face = "bold"),  
           plot.title = element_text(size = 15, face = "bold", hjust = 0.5)
         ) +
-        geom_hline(yintercept = -log2(input$genotype_threshold), linetype = "dashed", color = "black")
+        geom_hline(
+          yintercept = -log2(input$genotype_threshold), 
+          linetype = "dashed", 
+          color = "black"
+        )
       
       ggplotly(p, tooltip = "text")
-    } else {
-      NULL
-    }
-  })
+    } 
+  )
   }
